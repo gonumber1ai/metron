@@ -134,6 +134,36 @@ export async function GET(req: Request) {
     checks.whop = "SKIPPED — WHOP_API_KEY or WHOP_PRODUCT_ID not set";
   }
 
+  // Supabase: a real round trip. The key length alone proves nothing — the
+  // legacy service key is a 200+ char JWT while the newer sb_secret_ format is
+  // about 40, so a short value is either correct or completely wrong and only
+  // a query can tell the two apart.
+  if (has(process.env.NEXT_PUBLIC_SUPABASE_URL) && has(process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+    try {
+      const { db } = await import("@/lib/supabase/server");
+      const client = db();
+      if (!client) {
+        checks.supabase = "client not created";
+      } else {
+        const { error } = await client.from("payments").select("id").limit(1);
+        if (error) {
+          checks.supabase = `FAILED :: ${error.message}`.slice(0, 300);
+          checks.supabaseMeaning = /relation .* does not exist|schema cache/i.test(error.message)
+            ? "Connected, but the tables are missing. Run supabase/schema.sql in the SQL editor."
+            : /JWT|apikey|Invalid|denied|permission/i.test(error.message)
+              ? "Key rejected. Use the SERVICE ROLE key from Project Settings -> API, not the anon or publishable key."
+              : "unexpected — read the message above";
+        } else {
+          checks.supabase = "OK — connected and the payments table is readable";
+        }
+      }
+    } catch (e) {
+      checks.supabase = `threw :: ${(e as Error).message}`.slice(0, 300);
+    }
+  } else {
+    checks.supabase = "SKIPPED — url or service role key not set";
+  }
+
   // A passing /balance does NOT prove charging works: Fapshi applies IP
   // whitelisting only to transaction creation. Say so, so a green tick here is
   // not mistaken for a working rail.
