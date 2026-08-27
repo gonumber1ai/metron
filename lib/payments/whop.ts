@@ -16,18 +16,27 @@
  * cannot claim the 30-day for the price of the 10-day.
  *
  * ── ON THE SDK ───────────────────────────────────────────────────────────
- * @whop/api@0.0.51 (current published) exposes only
- * `payments.createCheckoutSession({ planId, ... })` — it requires a planId and
- * has no price field, so it cannot do dynamic pricing. The checkout
- * configurations API is newer and REST (note snake_case vs the SDK's camel),
- * so we call it directly and keep the SDK route as a fallback for anyone who
- * does have a priced plan.
+ * @whop/sdk, not @whop/api. The latter has no price field on its checkout
+ * session call and cannot do dynamic pricing at all, which is why an earlier
+ * attempt here reached for raw REST and guessed the path wrong.
+ *
+ * The call shape below is not guesswork — it matches a Whop integration that
+ * is live and taking money:
+ *
+ *   whop.checkoutConfigurations.create({
+ *     account_id,                       // top level, NOT inside plan
+ *     plan: { product_id, initial_price, plan_type: "one_time", currency },
+ *     metadata,
+ *   })
+ *
+ * Two things worth knowing. `account_id` sits at the top level and Whop
+ * resolves it from the API key when omitted. There is no `mode` field. And
+ * initial_price is decimal MAJOR units — that live integration passes 875 for
+ * $875, which settles the question our conversion had been assuming.
  */
 
+import { Whop, APIError } from "@whop/sdk";
 import type { Plan, Currency } from "./index";
-
-const REST =
-  process.env.WHOP_CHECKOUT_ENDPOINT ?? "https://api.whop.com/api/v5/company/checkout_configurations";
 
 export function isConfigured(): boolean {
   return Boolean(process.env.WHOP_API_KEY && process.env.WHOP_PRODUCT_ID);
@@ -74,52 +83,43 @@ export async function createCheckout(input: {
   currency: Currency;
   redirectUrl: string;
 }): Promise<WhopCheckout | null> {
-  const key = process.env.WHOP_API_KEY;
-  const companyId = process.env.WHOP_ACCOUNT_ID;
+  const apiKey = process.env.WHOP_API_KEY;
+  const accountId = process.env.WHOP_ACCOUNT_ID ?? process.env.WHOP_COMPANY_ID;
   const productId = process.env.WHOP_PRODUCT_ID;
 
-  if (key && companyId && productId) {
+  if (apiKey && productId) {
     try {
-      const res = await fetch(REST, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: {
-            company_id: companyId,
-            product_id: productId,
-            currency: input.currency.toLowerCase(),
-            plan_type: "one_time",
-            initial_price: toWhopPrice(input.amountMinor, input.currency),
-          },
-          redirect_url: input.redirectUrl,
-          metadata: { ref: input.ref, plan: input.plan },
-        }),
-        cache: "no-store",
+      const whop = new Whop({ apiKey });
+      const config = await whop.checkoutConfigurations.create({
+        // Whop resolves this from the key when omitted; state it when known.
+        ...(accountId ? { account_id: accountId } : {}),
+        plan: {
+          product_id: productId,
+          initial_price: toWhopPrice(input.amountMinor, input.currency),
+          plan_type: "one_time",
+          currency: input.currency.toLowerCase(),
+        },
+        // Rides on the configuration, so the webhook can match this payment to
+        // a device exactly instead of guessing from an email address.
+        metadata: { ref: input.ref, plan: input.plan },
       });
 
-      if (res.ok) {
-        const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-        const data = (json.data ?? json) as Record<string, unknown>;
-        const id = (data.id as string) ?? undefined; // ch_xxxxxxxx
-        const url =
-          (data.purchase_url as string) ??
-          (data.checkout_url as string) ??
-          (id ? `https://whop.com/checkout/${id}` : undefined);
-        if (url) return { url, sessionId: id };
-      } else {
-        console.error("[whop] checkout config failed", res.status, await res.text());
+      const id = config.id ?? "";
+      if (id) {
+        return { url: `https://whop.com/checkout/${id}`, sessionId: id };
       }
+      console.error("[whop] checkout configuration returned no id");
     } catch (err) {
-      console.error("[whop] checkout config threw", err);
+      const status = err instanceof APIError ? err.status : undefined;
+      console.error("[whop] checkoutConfigurations.create failed", status, err);
     }
   }
 
-  // Fallback: a priced plan, if one exists. Loses dynamic pricing but sells.
+  // Fallback: a pre-priced plan, if one exists. Loses dynamic pricing but sells.
   const planId = process.env.WHOP_PLAN_ID;
   if (planId) {
-    const sep = "?";
     return {
-      url: `https://whop.com/checkout/${planId}${sep}metadata[ref]=${encodeURIComponent(input.ref)}`,
+      url: `https://whop.com/checkout/${planId}?metadata[ref]=${encodeURIComponent(input.ref)}`,
     };
   }
   return null;

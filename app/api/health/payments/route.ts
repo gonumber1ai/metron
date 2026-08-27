@@ -39,9 +39,6 @@ export async function GET(req: Request) {
     WHOP_ACCOUNT_ID: process.env.WHOP_ACCOUNT_ID ?? "MISSING",
     WHOP_PRODUCT_ID: process.env.WHOP_PRODUCT_ID ?? "MISSING",
     WHOP_WEBHOOK_SECRET: shape(process.env.WHOP_WEBHOOK_SECRET),
-    WHOP_CHECKOUT_ENDPOINT:
-      process.env.WHOP_CHECKOUT_ENDPOINT ??
-      "https://api.whop.com/api/v5/company/checkout_configurations (default)",
     WHOP_PRICE_IN_MINOR_UNITS: process.env.WHOP_PRICE_IN_MINOR_UNITS ?? "unset (sends dollars)",
     ENTITLEMENT_SECRET: shape(process.env.ENTITLEMENT_SECRET),
     RESEND_API_KEY: shape(process.env.RESEND_API_KEY),
@@ -103,52 +100,38 @@ export async function GET(req: Request) {
     checks.fapshi = "SKIPPED — credentials not set";
   }
 
-  // Whop: probe the endpoint we ACTUALLY use, not a guessed one. A 401 against
-  // some unrelated path proves nothing — it may just mean that path is wrong.
-  // Creating a checkout configuration moves no money; it is only a config.
-  if (has(process.env.WHOP_API_KEY)) {
-    const endpoint =
-      process.env.WHOP_CHECKOUT_ENDPOINT ??
-      "https://api.whop.com/api/v5/company/checkout_configurations";
+  // Whop: exercise the SAME SDK call production uses. Creating a checkout
+  // configuration moves no money — it is only a config.
+  if (has(process.env.WHOP_API_KEY) && has(process.env.WHOP_PRODUCT_ID)) {
     try {
-      const r = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
-          "Content-Type": "application/json",
+      const { Whop, APIError } = await import("@whop/sdk");
+      const whop = new Whop({ apiKey: process.env.WHOP_API_KEY! });
+      const cfg = await whop.checkoutConfigurations.create({
+        ...(process.env.WHOP_ACCOUNT_ID ? { account_id: process.env.WHOP_ACCOUNT_ID } : {}),
+        plan: {
+          product_id: process.env.WHOP_PRODUCT_ID!,
+          initial_price: 1,
+          plan_type: "one_time",
+          currency: "usd",
         },
-        body: JSON.stringify({
-          plan: {
-            company_id: process.env.WHOP_ACCOUNT_ID,
-            product_id: process.env.WHOP_PRODUCT_ID,
-            currency: "usd",
-            plan_type: "one_time",
-            initial_price: 1,
-          },
-          metadata: { probe: "health" },
-        }),
-        cache: "no-store",
+        metadata: { probe: "health" },
       });
-      const bodyText = (await r.text()).slice(0, 400);
-      checks.whop =
-        r.ok
-          ? "OK — checkout configuration created"
-          : `${r.status} at ${endpoint} :: ${bodyText}`;
-      checks.whopMeaning =
-        r.ok
-          ? "the card rail should work"
-          : r.status === 404
-            ? "WRONG ENDPOINT. The path has moved. Get the correct one from Whop's docs and set WHOP_CHECKOUT_ENDPOINT — no redeploy of code needed, just the env var."
-            : r.status === 401 || r.status === 403
-              ? "KEY REJECTED. Create the key under the SAME company as WHOP_ACCOUNT_ID, and make sure it is a server/secret API key rather than a public or app key."
-              : r.status === 422 || r.status === 400
-                ? "Key accepted but the payload was refused — read the body above; usually product_id or currency."
-                : "unexpected";
+      checks.whop = cfg?.id ? `OK — created ${cfg.id}` : "created, but no id returned";
+      checks.whopMeaning = cfg?.id ? "the card rail should work" : "unexpected response shape";
     } catch (e) {
-      checks.whop = `unreachable: ${(e as Error).message}`;
+      const status = (e as { status?: number })?.status;
+      checks.whop = `FAILED ${status ?? ""} :: ${(e as Error).message}`.slice(0, 400);
+      checks.whopMeaning =
+        status === 401 || status === 403
+          ? "KEY REJECTED. It must be a server API key on the SAME company as WHOP_ACCOUNT_ID, with scopes: checkout_configuration:create, plan:create, access_pass:create, access_pass:update, checkout_configuration:basic:read."
+          : status === 404
+            ? "Product not found on this account — check WHOP_PRODUCT_ID belongs to WHOP_ACCOUNT_ID."
+            : status === 422 || status === 400
+              ? "Key accepted, payload refused — usually product_id or currency."
+              : "unexpected";
     }
   } else {
-    checks.whop = "SKIPPED — WHOP_API_KEY not set";
+    checks.whop = "SKIPPED — WHOP_API_KEY or WHOP_PRODUCT_ID not set";
   }
 
   // A passing /balance does NOT prove charging works: Fapshi applies IP

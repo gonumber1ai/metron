@@ -11,11 +11,18 @@ import { Logo } from "@/components/Logo";
 
 type Status = "idle" | "working" | "fallback" | "sent";
 
-export function OfferClient({ locale }: { locale: string }) {
+export function OfferClient({
+  locale,
+  geoCountry,
+}: {
+  locale: string;
+  /** resolved server-side from the edge geo header — trusted over the browser */
+  geoCountry?: string | null;
+}) {
   const t = getDict(locale);
   const m = getMarketing(locale);
 
-  const [country, setCountry] = useState("default");
+  const [country, setCountry] = useState(geoCountry ?? "default");
   const [plan, setPlan] = useState<Plan>("test");
   const [status, setStatus] = useState<Status>("idle");
   const [contact, setContact] = useState("");
@@ -29,17 +36,19 @@ export function OfferClient({ locale }: { locale: string }) {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
       // ?country=CM forces a market. Useful for testing, and for a man on a
-      // VPN whose timezone lies about where he actually is.
+      // VPN whose IP lies about where he actually is.
       const forced = new URLSearchParams(window.location.search).get("country");
       if (forced) {
         setCountry(forced.toUpperCase());
         return;
       }
+      // The edge header already told us, and it is more reliable than this.
+      if (geoCountry) return;
       if (tz === "Africa/Douala") setCountry("CM");
     } catch {
       /* keep the default */
     }
-  }, [locale]);
+  }, [locale, geoCountry]);
 
   const prices = getPrices(country);
   const forPlan = prices.filter((p) => p.plan === plan);
