@@ -110,11 +110,11 @@ export function ResultClient({
         <main className="mx-auto max-w-2xl px-5">
           {/* ------------------------------------------- where you are now */}
           <section className="pt-10">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
               {t.result.secWhere}
             </p>
             <h1 className="mt-3 text-[2.15rem] md:text-[2.7rem]">{v.headline}</h1>
-            <p className="mt-3 text-[1.05rem] leading-relaxed text-jade-300">{v.gap}</p>
+            <p className="mt-3 text-[1.05rem] leading-relaxed text-mute">{v.gap}</p>
 
             <div className="mt-6">
               <GapGauge
@@ -153,7 +153,7 @@ export function ResultClient({
 
           {/* ------------------------------------------------ what to do now */}
           <section className="mt-10">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
               {t.result.secDo}
             </h2>
           </section>

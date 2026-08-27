@@ -8,6 +8,8 @@ import { LocaleSwitch } from "./LocaleSwitch";
 import { useMetron } from "./useMetron";
 import { latest, formatDuration } from "@/lib/store";
 import { totalDays } from "@/lib/content/protocol";
+import { LinkPending } from "./Pending";
+import { NotifyBell } from "./NotifyBell";
 import { Logo, LogoMark } from "./Logo";
 
 type Item = { href: string; label: string; icon: React.ReactNode };
@@ -98,13 +100,15 @@ export function AppShell({
               }`}
             >
               {it.icon}
-              {it.label}
+              <span className="flex-1">{it.label}</span>
+              <LinkPending className="h-4 w-4 text-jade" />
             </Link>
           ))}
         </nav>
 
-        <div className="px-1 pt-4">
+        <div className="flex items-center justify-between px-1 pt-4">
           <LocaleSwitch locale={locale} />
+          <NotifyBell locale={locale} />
         </div>
       </aside>
 
@@ -115,7 +119,7 @@ export function AppShell({
             shows where he is and what his number is, which is the only thing
             he actually wants to see on every screen. */}
         <header className="sticky top-0 z-20 border-b border-ink-700 bg-ink-900/95 backdrop-blur md:hidden">
-          <div className="flex items-center justify-between px-4 py-2.5">
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5">
             <span className="flex items-baseline gap-2">
               <span className="metric text-[15px] font-bold text-jade">
                 {t.common.day} {state.day}
@@ -125,6 +129,7 @@ export function AppShell({
               </span>
             </span>
 
+            <span className="flex items-center gap-2">
             {current ? (
               <span className="flex items-baseline gap-1.5">
                 <span className="text-[11px] uppercase tracking-wide text-faint">
@@ -137,6 +142,8 @@ export function AppShell({
             ) : (
               <span className="text-jade"><LogoMark className="h-[17px] w-[17px]" /></span>
             )}
+              <NotifyBell locale={locale} className="-mr-1.5" />
+            </span>
           </div>
 
           {/* thin programme progress line */}
@@ -161,12 +168,15 @@ export function AppShell({
             key={it.href}
             href={it.href}
             aria-current={active(it.href) ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-medium transition-colors ${
+            className={`relative flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-medium transition-colors ${
               active(it.href) ? "text-jade" : "text-faint"
             }`}
           >
             {it.icon}
             {it.label}
+            <span className="absolute inset-x-0 top-1 grid place-items-center">
+              <LinkPending className="h-4 w-4 text-jade" />
+            </span>
           </Link>
         ))}
         <button
@@ -201,7 +211,8 @@ export function AppShell({
                   }`}
                 >
                   {it.icon}
-                  {it.label}
+                  <span className="flex-1">{it.label}</span>
+                  <LinkPending className="h-4 w-4 text-jade" />
                 </Link>
               ))}
             </nav>

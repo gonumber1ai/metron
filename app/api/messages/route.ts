@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verify, cookieName } from "@/lib/entitlement";
-import { postMessage, readThread } from "@/lib/supabase/server";
+import { postMessage, readThread, markReadByUser } from "@/lib/supabase/server";
 import { sendAdminAlert } from "@/lib/email/send";
 
 export const runtime = "nodejs";
@@ -11,7 +11,12 @@ export async function GET() {
   const jar = await cookies();
   const ent = verify(jar.get(cookieName)?.value);
   if (!ent) return NextResponse.json({ messages: [] }, { status: 401 });
-  return NextResponse.json({ messages: await readThread(ent.ref) });
+  const messages = await readThread(ent.ref);
+  // He is looking at them now, so the badge has done its job. Awaited rather
+  // than fired and forgotten: if it loses the race with his next page load the
+  // badge comes back, and a count that will not clear reads as broken.
+  await markReadByUser(ent.ref);
+  return NextResponse.json({ messages });
 }
 
 export async function POST(req: Request) {

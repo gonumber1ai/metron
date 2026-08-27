@@ -9,6 +9,7 @@ import { getMarketing, withPrices } from "@/lib/content/marketing";
 import { getPrices, type Plan, type Price } from "@/lib/payments";
 import { load, update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
+import { Spinner, useAction } from "@/components/Pending";
 
 type Status = "idle" | "working" | "fallback" | "sent";
 
@@ -64,7 +65,7 @@ export function OfferClient({
     sprint: priceOf("sprint"),
   });
 
-  async function sendLead(e: React.FormEvent) {
+  const [sending, sendLead] = useAction(async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await fetch("/api/lead", {
       method: "POST",
@@ -72,7 +73,7 @@ export function OfferClient({
       body: JSON.stringify({ contact, plan, ref, locale }),
     });
     if (res.ok) setStatus("sent");
-  }
+  });
 
   const includes = plan === "test" ? m.includes : m.sprintIncludes;
 
@@ -123,7 +124,7 @@ export function OfferClient({
                   }`}
                 >
                   <span
-                    className={`block text-[13px] font-bold ${on ? "text-jade" : "text-mute"}`}
+                    className={`block text-[13px] font-bold ${on ? "text-bone" : "text-mute"}`}
                   >
                     {p === "test" ? t.offer.testName : t.offer.sprintName}
                   </span>
@@ -227,8 +228,10 @@ export function OfferClient({
                 />
                 <button
                   type="submit"
-                  className="rounded-xl btn-go px-6 py-3 text-[15px] font-semibold"
+                  disabled={sending}
+                  className="flex items-center justify-center gap-2 rounded-xl btn-go px-6 py-3 text-[15px] font-semibold disabled:opacity-50"
                 >
+                  {sending && <Spinner />}
                   {t.messages.send}
                 </button>
               </form>

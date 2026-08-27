@@ -101,8 +101,9 @@ const days: ProtocolDay[] = [
     brief: [
       "Today you do nothing. No training.",
       "Tomorrow you get your number. That number decides everything, so tonight has to be clean.",
-      "No alcohol. No drugs. Eat properly. Sleep a full night. And do not come tonight — you need 2 clear days before you measure.",
-      "If you came in the last 2 days, push your measurement back by one day.",
+      "No alcohol. No drugs. Eat properly. Sleep a full night. And do not come tonight.",
+      "The clock runs from the last time you finished, not from today. You need 48 clear hours before you measure, and today only gives you 24 of them. So if you finished today or yesterday, take the baseline a day later than planned.",
+      "Nothing is lost by waiting. Day 1 is whenever your number is honest, and every day after it counts from there — there is no calendar here, only your days.",
       "One more job: watch your stomach today. Burning, gas, reflux, pain, no appetite. Note what you feel. It matters more than you think.",
     ],
     tasks: [
@@ -110,8 +111,8 @@ const days: ProtocolDay[] = [
       {
         id: "d0-abstain",
         kind: "foundation",
-        label: "No ejaculation — the 48-hour window starts now",
-        detail: "If you finished in the last 48 hours, push your baseline back by a day.",
+        label: "No ejaculation from now until you have measured",
+        detail: "The baseline needs 48 clear hours behind it. Today gives you 24, so if you finished today or yesterday, wait one more day before you measure.",
       },
       { id: "d0-meals", kind: "foundation", label: "Three real meals, water through the day" },
       { id: "d0-sleep", kind: "foundation", label: "A full night of sleep, at a fixed time" },
@@ -138,6 +139,7 @@ const days: ProtocolDay[] = [
       "Today you get your number.",
       "Do it normally. Do NOT try to last. Do not use any technique. A good number today only makes Day 12 look worse.",
       "Go to Measure. Tick the 4 checks. Hit START when you begin, STOP when you finish. The app keeps the number.",
+      "If you cannot tick all four honestly, do not measure today — come back tomorrow. A number taken in the wrong conditions is worse than no number, because Day 12 gets compared against it.",
       "Most men do this alone. That is fine and that is what we expect. Just make sure Day 12 is done the same way.",
       "Then start your kegels tonight — 3 sets of 10, twice. Squeeze 5 seconds, let go 5 seconds. Letting go matters more than squeezing.",
     ],

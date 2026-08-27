@@ -274,6 +274,51 @@ export async function sendCoachReply(opts: { to: string; locale: Locale }): Prom
 }
 
 /* ------------------------------------------------------------------ */
+/* Broadcast                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One message, sent to many.
+ *
+ * Unlike sendCoachReply this carries the actual text, because a broadcast is
+ * usually the kind of thing worth reading without logging in — a change to the
+ * programme, a reminder, an answer to a question many men have.
+ *
+ * That makes the subject line the sensitive part: it lands on a lock screen
+ * where somebody else may see it. The caller supplies it, and the admin screen
+ * warns about exactly this, but the fallback is deliberately blank of meaning.
+ */
+export async function sendBroadcast(opts: {
+  to: string;
+  locale: Locale;
+  subject: string;
+  body: string;
+}): Promise<boolean> {
+  const url = appUrl();
+  const paragraphs = opts.body
+    .split(/\n{2,}/)
+    .map((chunk) => p(chunk.replace(/\n/g, "<br>")))
+    .join("");
+
+  const html = wrap({
+    locale: opts.locale,
+    preheader: opts.subject,
+    appUrl: url,
+    showSupport: true,
+    body: [
+      h1(opts.subject),
+      paragraphs,
+      `<p style="margin:8px 0 8px;">${button(
+        opts.locale === "fr" ? "Ouvrir Metron" : "Open Metron",
+        `${url}/${opts.locale}/app`,
+      )}</p>`,
+    ].join(""),
+  });
+
+  return send({ to: opts.to, subject: opts.subject, html, text: opts.body });
+}
+
+/* ------------------------------------------------------------------ */
 /* Admin alert                                                         */
 /* ------------------------------------------------------------------ */
 

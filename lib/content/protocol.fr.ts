@@ -90,8 +90,9 @@ const days: ProtocolDay[] = [
     brief: [
       "Aujourd'hui vous ne faites rien. Pas d'entraînement.",
       "Demain vous prenez votre chiffre. Ce chiffre décide de tout, donc ce soir doit être propre.",
-      "Pas d'alcool. Pas de drogue. Mangez correctement. Dormez une nuit complète. Et ne jouissez pas ce soir — il vous faut 2 jours nets avant de mesurer.",
-      "Si vous avez joui dans les 2 derniers jours, reculez votre mesure d'un jour.",
+      "Pas d'alcool. Pas de drogue. Mangez correctement. Dormez une nuit complète. Et ne jouissez pas ce soir.",
+      "Le compte à rebours part de la dernière fois où vous avez joui, pas d'aujourd'hui. Il vous faut 48 heures nettes avant de mesurer, et aujourd'hui ne vous en donne que 24. Donc si vous avez joui aujourd'hui ou hier, prenez la mesure un jour plus tard que prévu.",
+      "Attendre ne vous coûte rien. Le Jour 1, c'est le jour où votre chiffre est honnête, et tous les jours suivants comptent à partir de là — il n'y a pas de calendrier ici, seulement vos jours.",
       "Autre chose : surveillez votre estomac aujourd'hui. Brûlures, gaz, reflux, douleurs, pas d'appétit. Notez ce que vous sentez. Ça compte plus que vous ne croyez.",
     ],
     tasks: [
@@ -99,8 +100,8 @@ const days: ProtocolDay[] = [
       {
         id: "d0-abstain",
         kind: "foundation",
-        label: "Pas d'éjaculation — la fenêtre de 48 h commence maintenant",
-        detail: "Si vous avez fini dans les 48 dernières heures, reculez la mesure d'un jour.",
+        label: "Pas d'éjaculation jusqu'à ce que vous ayez mesuré",
+        detail: "La mesure de départ a besoin de 48 heures nettes derrière elle. Aujourd'hui vous en donne 24, donc si vous avez fini aujourd'hui ou hier, attendez un jour de plus avant de mesurer.",
       },
       { id: "d0-meals", kind: "foundation", label: "Trois vrais repas, de l'eau toute la journée" },
       { id: "d0-sleep", kind: "foundation", label: "Une nuit complète, à heure fixe" },
@@ -129,6 +130,7 @@ const days: ProtocolDay[] = [
       "Aujourd'hui vous prenez votre chiffre.",
       "Faites normalement. N'essayez PAS de tenir. N'utilisez aucune technique. Un bon chiffre aujourd'hui ne fait que rendre le Jour 12 moins bon.",
       "Allez dans Mesurer. Cochez les 4 points. DÉMARRER quand vous commencez, STOP quand vous finissez. L'application garde le chiffre.",
+      "Si vous ne pouvez pas cocher les quatre honnêtement, ne mesurez pas aujourd'hui — revenez demain. Un chiffre pris dans les mauvaises conditions est pire que pas de chiffre, parce que le Jour 12 lui est comparé.",
       "La plupart des hommes le font seuls. C'est normal et c'est ce qu'on attend. Assurez-vous juste de faire le Jour 12 de la même façon.",
       "Puis commencez les kegels ce soir — 3 séries de 10, deux fois. Serrez 5 secondes, relâchez 5 secondes. Relâcher compte plus que serrer.",
     ],

@@ -159,7 +159,8 @@ export function QuizClient({ locale }: { locale: string }) {
           </header>
 
           <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-0 pt-8">
-            <p className="inline-flex self-start rounded-full bg-jade-050 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-jade">
+            <p className="inline-flex items-center gap-2 self-start rounded-full border border-ink-700 bg-ink-800 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-mute">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />
               {t.quiz.introKicker}
             </p>
             <h1 className="mt-4 text-[2.35rem] md:text-[2.9rem]">{t.quiz.introH}</h1>
@@ -276,7 +277,7 @@ export function QuizClient({ locale }: { locale: string }) {
             <p className="mt-2.5 text-[0.97rem] leading-relaxed text-mute">{q.help}</p>
           )}
           {q.kind === "multi" && (
-            <p className="mt-2.5 inline-flex self-start rounded-md bg-ink-800 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-jade">
+            <p className="mt-2.5 inline-flex self-start rounded-md bg-ink-800 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-mute">
               {t.quiz.selectAll}
             </p>
           )}

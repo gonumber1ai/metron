@@ -248,6 +248,9 @@ export async function postMessage(input: {
       body: input.body.slice(0, 4000),
       // A coach reply is read by definition; only his messages need chasing.
       read_by_admin: input.sender === "coach",
+      // And the mirror: his own message is not something he needs told about,
+      // but a coach message is, until he opens it.
+      read_by_user: input.sender === "user",
     });
     if (error) {
       console.error("[supabase] postMessage", error.message);
@@ -256,6 +259,138 @@ export async function postMessage(input: {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Who should receive a broadcast.
+ *
+ * Returns the ref and the contact, because a broadcast may go to the app, to
+ * email, or to both, and the two need different things. Rows with no usable
+ * contact still come back — they get the in-app copy, which is the whole point
+ * of having both channels.
+ */
+export async function audienceFor(
+  audience: "all" | "paid" | "leads" | "inactive",
+): Promise<{ ref: string; contact: string | null }[]> {
+  const client = db();
+  if (!client) return [];
+  try {
+    if (audience === "inactive") {
+      // Paid, but never opened the app. The row worth chasing, and the reason
+      // a broadcast tool is worth building at all.
+      const { data } = await client
+        .from("activity")
+        .select("ref, contact, last_seen")
+        .is("last_seen", null)
+        .limit(2000);
+      return (data ?? []).map((r) => ({
+        ref: String(r.ref),
+        contact: (r.contact as string | null) ?? null,
+      }));
+    }
+
+    let q = client.from("leads").select("ref, contact, stage").limit(5000);
+    if (audience === "paid") q = q.eq("stage", "paid");
+    if (audience === "leads") q = q.neq("stage", "paid");
+
+    const { data } = await q;
+    // One row per ref: a man who came back and filled the form twice should
+    // not get the same message twice.
+    const seen = new Map<string, string | null>();
+    for (const r of data ?? []) {
+      const ref = String(r.ref ?? "");
+      if (!ref) continue;
+      if (!seen.has(ref) || !seen.get(ref)) {
+        seen.set(ref, (r.contact as string | null) ?? null);
+      }
+    }
+    return [...seen.entries()].map(([ref, contact]) => ({ ref, contact }));
+  } catch {
+    return [];
+  }
+}
+
+/** Insert the same coach message into many threads in one round trip. */
+export async function postToMany(refs: string[], body: string): Promise<number> {
+  const client = db();
+  if (!client || refs.length === 0) return 0;
+  try {
+    const rows = refs.map((ref) => ({
+      ref,
+      sender: "coach" as const,
+      body: body.slice(0, 4000),
+      read_by_admin: true,
+      read_by_user: false,
+    }));
+    const { error } = await client.from("threads").insert(rows);
+    if (error) {
+      console.error("[supabase] postToMany", error.message);
+      return 0;
+    }
+    return rows.length;
+  } catch {
+    return 0;
+  }
+}
+
+/** Record what went out, so a send can be audited rather than reconstructed. */
+export async function recordBroadcast(input: {
+  audience: string;
+  subject: string | null;
+  body: string;
+  viaApp: boolean;
+  viaEmail: boolean;
+  recipients: number;
+  emailed: number;
+}): Promise<void> {
+  const client = db();
+  if (!client) return;
+  try {
+    await client.from("broadcasts").insert({
+      audience: input.audience,
+      subject: input.subject,
+      body: input.body.slice(0, 4000),
+      via_app: input.viaApp,
+      via_email: input.viaEmail,
+      recipients: input.recipients,
+      emailed: input.emailed,
+    });
+  } catch {
+    /* the send already happened; losing the audit row must not fail it */
+  }
+}
+
+/** How many coach messages he has not opened. Drives the badge in the header. */
+export async function unreadForUser(ref: string): Promise<number> {
+  const client = db();
+  if (!client) return 0;
+  try {
+    const { count } = await client
+      .from("threads")
+      .select("id", { count: "exact", head: true })
+      .eq("ref", ref)
+      .eq("sender", "coach")
+      .eq("read_by_user", false);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** He opened his messages; stop showing the badge. */
+export async function markReadByUser(ref: string): Promise<void> {
+  const client = db();
+  if (!client) return;
+  try {
+    await client
+      .from("threads")
+      .update({ read_by_user: true })
+      .eq("ref", ref)
+      .eq("sender", "coach")
+      .eq("read_by_user", false);
+  } catch {
+    /* a stale badge is not worth an error */
   }
 }
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Customers, type ActivityRow } from "./Customers";
+import { Broadcast } from "./Broadcast";
 
 export type Snapshot = {
   connected: boolean;
@@ -33,7 +34,7 @@ function money(n: number, currency: string): string {
     : `${n.toLocaleString("fr-FR")} FCFA`;
 }
 
-type Tab = "overview" | "customers" | "leads";
+type Tab = "overview" | "customers" | "leads" | "write";
 
 export function Dashboard({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("overview");
@@ -126,6 +127,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                 ["overview", "Overview"],
                 ["customers", `Customers${paid ? ` (${paid})` : ""}`],
                 ["leads", `Leads${snap.recent.length ? ` (${snap.recent.length})` : ""}`],
+                ["write", "Write to people"],
               ] as const
             ).map(([id, label]) => (
               <button
@@ -235,6 +237,9 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
 
           {/* ------------------------------------------------------ customers */}
           {tab === "customers" && <Customers rows={snap.activity} />}
+
+          {/* ---------------------------------------------------- broadcast */}
+          {tab === "write" && <Broadcast />}
 
           {/* ---------------------------------------------------------- leads */}
           {tab === "leads" && (
