@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrice, type Plan } from "@/lib/payments";
-import { directPay, isConfigured, PHONE_RE } from "@/lib/payments/fapshi";
+import { directPay, isConfigured, PHONE_RE, operatorOf } from "@/lib/payments/fapshi";
 
 export const runtime = "nodejs";
 
@@ -43,17 +43,24 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Fapshi treats `medium` as optional, but naming the network removes any
+    // ambiguity about which rail the prompt should be pushed down.
+    const op = operatorOf(phone);
     const { transId } = await directPay({
       amount: price.amountMinor, // XAF has no minor unit
       phone,
       externalId: ref,
       userId: ref,
+      medium: op === "orange" ? "orange money" : op === "mtn" ? "mobile money" : undefined,
       message: plan === "sprint" ? "Metron 30" : "Metron 10",
     });
     return NextResponse.json({ status: "ok", transId });
   } catch (err) {
-    console.error("[momo] direct-pay failed", err);
-    // Never leak provider internals to the client.
-    return NextResponse.json({ status: "failed" }, { status: 502 });
+    const reason = err instanceof Error ? err.message : "unknown";
+    console.error("[momo] direct-pay failed", reason);
+    // The provider's own wording is far more useful to a man staring at a
+    // failure than "something went wrong", and it exposes no credentials.
+    // If direct-pay is not enabled on the account this is where it says so.
+    return NextResponse.json({ status: "failed", reason }, { status: 502 });
   }
 }

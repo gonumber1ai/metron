@@ -49,6 +49,9 @@ const T = {
     opening: "Opening your programme…",
     secure: "Your statement shows METRON. Nothing else.",
     unavailable: "Payment is not connected yet. Message us and we will open your access.",
+    timeoutH: "We did not hear back",
+    timeoutP:
+      "The request was sent but no PIN came back, so nothing was charged. If you missed the prompt on your phone, just try again.",
   },
   fr: {
     momo: "Mobile Money",
@@ -70,10 +73,13 @@ const T = {
     secure: "Votre relevé affiche METRON. Rien d'autre.",
     unavailable:
       "Le paiement n'est pas encore branché. Écrivez-nous et on vous ouvre l'accès.",
+    timeoutH: "Pas de réponse",
+    timeoutP:
+      "La demande est partie mais aucun code n'est revenu, donc rien n'a été débité. Si vous avez raté la demande sur votre téléphone, réessayez.",
   },
 };
 
-type MomoState = "idle" | "charging" | "awaiting" | "paid" | "failed" | "unavailable";
+type MomoState = "idle" | "charging" | "awaiting" | "paid" | "failed" | "timeout" | "unavailable";
 
 /**
  * Embedded checkout, both rails.
@@ -231,7 +237,7 @@ function MomoPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, country, ref, phone: digits }),
       });
-      const data = (await res.json()) as { status?: string; transId?: string };
+      const data = (await res.json()) as { status?: string; transId?: string; reason?: string };
 
       if (data.status === "unavailable") {
         onUnavailable?.(true);
@@ -241,7 +247,10 @@ function MomoPanel({
         setErr(t.badPhone);
         return setState("idle");
       }
-      if (data.status !== "ok" || !data.transId) return setState("failed");
+      if (data.status !== "ok" || !data.transId) {
+        if (data.reason) setErr(data.reason);
+        return setState("failed");
+      }
 
       setState("awaiting");
       tries.current = 0;
@@ -283,7 +292,11 @@ function MomoPanel({
         tries.current += 1;
         window.setTimeout(() => poll(transId, ref), 3000);
       } else {
-        setState("failed");
+        // Two minutes with no approval is almost always an ignored prompt, not
+        // a refused payment. Saying "nothing was charged, try again" to a man
+        // who simply took too long sends him away thinking it is broken.
+        setErr(null);
+        setState("timeout");
       }
     } catch {
       if (!stop.current) setState("failed");
@@ -321,6 +334,22 @@ function MomoPanel({
     );
   }
 
+  if (state === "timeout") {
+    return (
+      <div className="rounded-2xl border border-amber/50 bg-amber-050 p-6 text-center">
+        <h3 className="text-[1.1rem] font-bold">{t.timeoutH}</h3>
+        <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">{t.timeoutP}</p>
+        <button
+          type="button"
+          onClick={() => setState("idle")}
+          className="mt-4 w-full rounded-2xl btn-go py-4 text-[1rem] font-bold"
+        >
+          {t.retry}
+        </button>
+      </div>
+    );
+  }
+
   if (state === "failed" || state === "unavailable") {
     return (
       <div className="rounded-2xl border border-amber/50 bg-amber-050 p-6 text-center">
@@ -330,6 +359,9 @@ function MomoPanel({
         <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">
           {state === "unavailable" ? t.unavailable : t.failedP}
         </p>
+        {state === "failed" && err && (
+          <p className="mt-2 text-[0.85rem] leading-snug text-faint">{err}</p>
+        )}
         {state === "failed" && (
           <button
             type="button"
@@ -410,7 +442,9 @@ function CardPanel({
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan, country, ref, locale }),
+          // Say which rail. Without this the server infers it from the
+          // country and a Cameroonian tapping "Card" lands on Mobile Money.
+          body: JSON.stringify({ plan, country, ref, locale, provider: "whop" }),
         });
         const data = (await res.json()) as { status?: string; sessionId?: string; url?: string };
         if (cancelled) return;

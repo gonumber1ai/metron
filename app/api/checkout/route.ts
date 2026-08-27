@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPrice, type Plan } from "@/lib/payments";
+import { getPrice, getPriceFor, type Plan, type ProviderId } from "@/lib/payments";
 import { initiatePay, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
 
@@ -14,7 +14,14 @@ export const runtime = "nodejs";
  * keeps collecting contacts rather than dead-ending on a broken button.
  */
 export async function POST(req: Request) {
-  let body: { plan?: Plan; country?: string; ref?: string; locale?: string };
+  let body: {
+    plan?: Plan;
+    country?: string;
+    ref?: string;
+    locale?: string;
+    /** which rail the buyer actually tapped — trusted over his country */
+    provider?: ProviderId;
+  };
   try {
     body = await req.json();
   } catch {
@@ -30,7 +37,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "error", message: "missing ref" }, { status: 400 });
   }
 
-  const price = getPrice(plan, country);
+  // The rail the buyer chose wins. Only fall back to the country's default
+  // when the client did not say — otherwise a man in Cameroon who taps "Card"
+  // gets sent to Mobile Money, which is exactly the bug this replaces.
+  const requested = body.provider === "whop" || body.provider === "fapshi" ? body.provider : null;
+  const price = (requested && getPriceFor(plan, requested, country)) || getPrice(plan, country);
+
+  if (requested && price.provider !== requested) {
+    return NextResponse.json({ status: "unavailable", provider: requested });
+  }
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
 

@@ -55,6 +55,20 @@ export function getPrice(plan: Plan, country = "default"): Price {
 }
 
 /**
+ * Price for an EXPLICITLY chosen rail.
+ *
+ * The offer page shows two tabs in a market that has both, so the rail is the
+ * buyer's choice and not something to infer from his country. Inferring it is
+ * how the Card tab ended up sending Cameroonian buyers to a Mobile Money
+ * checkout page: the client sent only the country, and the server picked the
+ * local rail because that is what the country implies.
+ */
+export function getPriceFor(plan: Plan, provider: ProviderId, country = "default"): Price | null {
+  const rows = getPrices(country);
+  return rows.find((r) => r.plan === plan && r.provider === provider) ?? null;
+}
+
+/**
  * Every price available for a market, so the offer page can show both rails.
  *
  * A market with its own book gets its local rail first and the card rail as the
