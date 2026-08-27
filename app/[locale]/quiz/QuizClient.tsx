@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getQuiz, scoreQuiz, type Answers } from "@/lib/content/quiz";
 import { getDict } from "@/lib/i18n";
@@ -14,6 +14,15 @@ export function QuizClient({ locale }: { locale: string }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [echo, setEcho] = useState<string[]>([]);
+
+  // Every question starts at the top. Without this a short answer list
+  // renders below the fold, because the page keeps the scroll position of
+  // the question before it — which on a long question looks like a blank
+  // screen and reads as broken.
+  const topRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [index, echo]);
 
   const q = questions[index];
   const picked = answers[q.id] ?? [];
@@ -109,7 +118,7 @@ export function QuizClient({ locale }: { locale: string }) {
           </div>
         </div>
 
-        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-8 pt-6">
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-0 pt-6 md:pb-8">
           <h1 className="text-[1.45rem] font-semibold leading-snug tracking-tight md:text-[1.7rem]">
             {q.q}
           </h1>
@@ -120,7 +129,7 @@ export function QuizClient({ locale }: { locale: string }) {
             </p>
           )}
 
-          <div className="mt-6 space-y-2.5">
+          <div ref={topRef} className="mt-6 space-y-2.5">
             {q.options.map((o) => {
               const on = picked.includes(o.id);
               return (
@@ -161,7 +170,7 @@ export function QuizClient({ locale }: { locale: string }) {
 
           {/* the answer reflected back */}
           {echo.length > 0 && (
-            <div className="mt-6 space-y-2.5">
+            <div ref={topRef} className="mt-6 space-y-2.5">
               {echo.map((line, i) => (
                 <div
                   key={i}
@@ -173,7 +182,10 @@ export function QuizClient({ locale }: { locale: string }) {
             </div>
           )}
 
-          <div className="mt-auto flex items-center gap-3 pt-8">
+          {/* Pinned on mobile. Continue must never require a scroll to find —
+              it is the only control that matters and the answer list is often
+              taller than the viewport. */}
+          <div className="sticky bottom-0 z-10 mt-auto flex items-center gap-3 border-t border-ink-700 bg-ink-900/95 px-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur md:static md:border-0 md:bg-transparent md:pt-8 md:backdrop-blur-none">
             {index > 0 && (
               <button
                 type="button"

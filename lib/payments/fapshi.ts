@@ -68,6 +68,7 @@ export async function initiatePay(input: {
   redirectUrl: string;
   externalId: string;
   userId?: string;
+  name?: string;
   email?: string;
   message?: string;
 }): Promise<InitiateResult> {
@@ -80,6 +81,7 @@ export async function initiatePay(input: {
   // Only send optional fields when we actually have them — Fapshi validates
   // format on these and rejects empty strings.
   if (input.userId) body.userId = input.userId;
+  if (input.name) body.name = input.name;
   if (input.email) body.email = input.email;
 
   const res = await fetch(`${BASE}/initiate-pay`, {

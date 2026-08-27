@@ -31,7 +31,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "unavailable" });
   }
 
-  let body: { plan?: Plan; country?: string; ref?: string; phone?: string; locale?: string };
+  let body: {
+    plan?: Plan;
+    country?: string;
+    ref?: string;
+    phone?: string;
+    locale?: string;
+    name?: string;
+    email?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -41,6 +49,11 @@ export async function POST(req: Request) {
   const plan: Plan = body.plan === "sprint" ? "sprint" : "test";
   const ref = (body.ref ?? "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 64);
   const phone = (body.phone ?? "").replace(/\D/g, "");
+  const name = (body.name ?? "").trim().slice(0, 80);
+  // Pre-filling these is not politeness. Fapshi's own checkout asks for all
+  // three, and the email is the only way a Mobile Money buyer ever receives
+  // his access code — without it he cannot get back in on a new device.
+  const email = (body.email ?? "").trim().slice(0, 120);
 
   if (!ref) {
     return NextResponse.json({ status: "error", message: "missing ref" }, { status: 400 });
@@ -69,6 +82,8 @@ export async function POST(req: Request) {
         phone,
         externalId: ref,
         userId: ref,
+        name: name || undefined,
+        email: email || undefined,
         medium: op === "orange" ? "orange money" : op === "mtn" ? "mobile money" : undefined,
         message,
       });
@@ -86,6 +101,8 @@ export async function POST(req: Request) {
       redirectUrl: `${origin}/${locale}/checkout/done?ref=${ref}`,
       externalId: ref,
       userId: ref,
+      name: name || undefined,
+      email: email || undefined,
       message,
     });
     return NextResponse.json({ status: "redirect", url: result.link, transId: result.transId });

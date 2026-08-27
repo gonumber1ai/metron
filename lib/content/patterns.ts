@@ -24,7 +24,7 @@ const EN: Record<PatternKey, PatternCopy> = {
     whyFailed: [
       {
         label: "Distraction",
-        body: "Thinking about football takes you out of your body. But you have to be IN your body to feel it coming. You buy thirty seconds and lose the skill.",
+        body: "Thinking about football takes you out of your own body. But everything you need to notice is happening inside it. You buy thirty seconds and give up something worth far more.",
       },
       {
         label: "Sprays and thick condoms",
@@ -51,15 +51,15 @@ const EN: Record<PatternKey, PatternCopy> = {
     whyFailed: [
       {
         label: "The exercise everyone recommends",
-        body: "You were doing half of it. The half that actually matters is not the one people describe — and if you are already tight down there, the half you were doing made it worse.",
+        body: "You were doing half of it. Nobody describes the other half, and that is the half that governs control — so men do it for months, feel nothing, and decide it does not work. It does. Not like that.",
       },
       {
         label: "Delay sprays",
         body: "They numb the skin. Your problem is a reflex firing too early, not skin that feels too much. Wrong target.",
       },
       {
-        label: "Stopping and starting occasionally",
-        body: "Doing it now and then does nothing. This is a skill. Three times a month builds nothing — it has to be most days, for a short block.",
+        label: "Trying to hold on in the moment",
+        body: "Deciding to try harder tonight is not a plan. This is a trained reflex, and reflexes answer to a schedule, not to good intentions in the moment. What was missing was never your willpower.",
       },
     ],
     bridge:
@@ -134,7 +134,7 @@ const FR: Record<PatternKey, PatternCopy> = {
     whyFailed: [
       {
         label: "La distraction",
-        body: "Penser au football vous sort de votre corps. Or il faut être DANS son corps pour sentir la fin arriver. Vous gagnez trente secondes et vous perdez la compétence.",
+        body: "Penser au football vous sort de votre propre corps. Or tout ce que vous devez remarquer s'y passe. Vous gagnez trente secondes et vous abandonnez bien plus.",
       },
       {
         label: "Sprays et préservatifs épais",
@@ -161,15 +161,15 @@ const FR: Record<PatternKey, PatternCopy> = {
     whyFailed: [
       {
         label: "L'exercice que tout le monde recommande",
-        body: "Vous n'en faisiez que la moitié. La moitié qui compte vraiment n'est pas celle qu'on décrit — et si vous êtes déjà crispé, celle que vous faisiez aggravait les choses.",
+        body: "Vous n'en faisiez que la moitié. Personne ne décrit l'autre moitié, et c'est elle qui gouverne le contrôle — alors les hommes s'y mettent pendant des mois, ne sentent rien, et concluent que ça ne marche pas. Ça marche. Pas comme ça.",
       },
       {
         label: "Les sprays retardants",
         body: "Ils anesthésient la peau. Votre problème est un réflexe qui part trop tôt, pas une peau qui sent trop. Mauvaise cible.",
       },
       {
-        label: "Le stop-and-go de temps en temps",
-        body: "De temps en temps, ça ne donne rien. C'est une compétence. Trois fois par mois ne construit rien — il faut presque tous les jours, sur une courte période.",
+        label: "Essayer de tenir sur le moment",
+        body: "Décider de faire un effort ce soir n'est pas un plan. C'est un réflexe entraîné, et un réflexe obéit à un programme, pas à la bonne volonté sur le moment. Ce qui manquait n'a jamais été votre volonté.",
       },
     ],
     bridge:

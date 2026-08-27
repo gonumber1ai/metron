@@ -33,6 +33,9 @@ const T = {
   en: {
     momo: "Mobile Money",
     card: "Card",
+    nameLabel: "Your name",
+    emailLabel: "Your email",
+    emailHelp: "Where your access code goes. Nothing else is sent, and the subject never says what it is about.",
     phoneLabel: "Your Mobile Money number",
     phoneHelp: "9 digits, starts with 6. MTN or Orange.",
     badPhone: "That is not a valid number. 9 digits, starting with 6.",
@@ -56,6 +59,9 @@ const T = {
   fr: {
     momo: "Mobile Money",
     card: "Carte",
+    nameLabel: "Votre nom",
+    emailLabel: "Votre email",
+    emailHelp: "C'est là qu'arrive votre code d'accès. Rien d'autre n'est envoyé, et l'objet n'indique jamais de quoi il s'agit.",
     phoneLabel: "Votre numéro Mobile Money",
     phoneHelp: "9 chiffres, commence par 6. MTN ou Orange.",
     badPhone: "Ce numéro n'est pas valide. 9 chiffres, commençant par 6.",
@@ -211,6 +217,8 @@ function MomoPanel({
   onUnavailable?: (dead: boolean) => void;
 }) {
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [state, setState] = useState<MomoState>("idle");
   const [err, setErr] = useState<string | null>(null);
   const tries = useRef(0);
@@ -219,7 +227,8 @@ function MomoPanel({
   useEffect(() => () => { stop.current = true; }, []);
 
   const digits = phone.replace(/\D/g, "").slice(0, 9);
-  const valid = PHONE_RE.test(digits);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+  const valid = PHONE_RE.test(digits) && name.trim().length >= 2 && emailOk;
   const op = operatorOf(digits);
 
   async function pay() {
@@ -235,7 +244,15 @@ function MomoPanel({
       const res = await fetch("/api/payments/momo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, country, ref, phone: digits, locale }),
+        body: JSON.stringify({
+          plan,
+          country,
+          ref,
+          phone: digits,
+          locale,
+          name: name.trim(),
+          email: email.trim(),
+        }),
       });
       const data = (await res.json()) as {
         status?: string;
@@ -390,6 +407,31 @@ function MomoPanel({
   return (
     <div className="rounded-2xl card p-5">
       <label className="block">
+        <span className="text-[0.9rem] font-semibold text-bone">{t.nameLabel}</span>
+        <input
+          type="text"
+          autoComplete="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+        />
+      </label>
+
+      <label className="mt-4 block">
+        <span className="text-[0.9rem] font-semibold text-bone">{t.emailLabel}</span>
+        <input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="off"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+        />
+        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">{t.emailHelp}</span>
+      </label>
+
+      <label className="mt-4 block">
         <span className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-[0.9rem] font-semibold text-bone">{t.phoneLabel}</span>
           <OperatorMarks detected={op} />
