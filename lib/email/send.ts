@@ -110,9 +110,22 @@ const PURCHASE = {
 export async function sendPurchaseConfirmation(opts: {
   to: string;
   locale: Locale;
+  /** his anonymous ref — the only way back in if he loses the device */
+  accessCode?: string;
 }): Promise<boolean> {
   const c = PURCHASE[opts.locale];
   const url = appUrl();
+  const codeBlock = opts.accessCode
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td style="border:1px solid #E4E1DA;border-radius:10px;padding:16px 18px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8A9298;margin-bottom:8px;">${opts.locale === "fr" ? "Votre code d'accès" : "Your access code"}</div>
+        <div style="font-size:18px;font-weight:700;color:#16191B;word-break:break-all;font-variant-numeric:tabular-nums;">${opts.accessCode}</div>
+        <div style="font-size:13px;line-height:1.6;color:#4A5257;margin-top:10px;">${
+          opts.locale === "fr"
+            ? "Gardez cet email. Ce code vous fait revenir dans votre programme si vous changez de téléphone ou effacez vos données."
+            : "Keep this email. That code gets you back into your programme if you change phone or clear your data."
+        }</div>
+      </td></tr></table>`
+    : "";
   const html = wrap({
     locale: opts.locale,
     preheader: c.preheader,
@@ -123,6 +136,7 @@ export async function sendPurchaseConfirmation(opts: {
       callout(c.call),
       p(c.p2),
       `<p style="margin:8px 0 24px;">${button(c.cta, `${url}/${opts.locale}/app`)}</p>`,
+      codeBlock,
       p(c.p3),
     ].join(""),
   });

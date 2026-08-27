@@ -194,7 +194,23 @@ export function DoneClient({ locale }: { locale: string }) {
             </div>
           ) : null}
 
-          {transId && (
+          {good && (
+            <div className="mt-7 rounded-2xl border border-ink-600 bg-ink-850 p-5 text-left">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-jade">
+                {fr ? "Votre code d'accès" : "Your access code"}
+              </p>
+              <p className="metric mt-2 select-all break-all text-[1.15rem] font-bold text-bone">
+                {load(locale).ref}
+              </p>
+              <p className="mt-2.5 text-[0.86rem] leading-relaxed text-mute">
+                {fr
+                  ? "Gardez-le. C'est ce qui vous fait revenir dans votre programme si vous changez de téléphone ou effacez vos données. Il est aussi dans votre email."
+                  : "Keep this. It is what gets you back into your programme if you change phone or clear your data. It is in your email too."}
+              </p>
+            </div>
+          )}
+
+          {transId && !good && (
             <p className="mt-6 text-[0.78rem] text-faint">
               {fr ? "Référence" : "Reference"}: <span className="metric">{transId}</span>
             </p>

@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getQuiz, scoreQuiz, type Answers, type QuizResult } from "@/lib/content/quiz";
+import { getQuiz, scoreQuiz, type Answers } from "@/lib/content/quiz";
 import { getDict } from "@/lib/i18n";
 import { update } from "@/lib/store";
-import { Gate } from "./Gate";
 
 export function QuizClient({ locale }: { locale: string }) {
   const t = getDict(locale);
@@ -15,27 +14,21 @@ export function QuizClient({ locale }: { locale: string }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [echo, setEcho] = useState<string[]>([]);
-  const [gate, setGate] = useState<QuizResult | null>(null);
 
   const q = questions[index];
   const picked = answers[q.id] ?? [];
   const total = questions.length;
-  const pct = gate ? 100 : Math.round((index / total) * 100);
+  const pct = Math.round((index / total) * 100);
 
   function advance(next: Answers) {
     if (index + 1 >= total) {
       const result = scoreQuiz(locale, next);
       update((s) => ({ ...s, locale, quiz: result }), locale);
-      setGate(result);
+      router.push(`/${locale}/result`);
       return;
     }
     setIndex(index + 1);
     setEcho([]);
-  }
-
-  // The lead is posted inside Gate; this just moves him on either way.
-  function finishGate(_contact: string | null) {
-    router.push(`/${locale}/result`);
   }
 
   /**
@@ -109,18 +102,13 @@ export function QuizClient({ locale }: { locale: string }) {
               {t.quiz.kicker}
             </span>
             <span className="text-[12px] tabular-nums text-mute">
-              {gate
-                ? t.result.kicker
-                : t.quiz.progress
-                    .replace("{n}", String(index + 1))
-                    .replace("{total}", String(total))}
+              {t.quiz.progress
+                .replace("{n}", String(index + 1))
+                .replace("{total}", String(total))}
             </span>
           </div>
         </div>
 
-        {gate ? (
-          <Gate locale={locale} quiz={gate} onDone={finishGate} />
-        ) : (
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-8 pt-6">
           <h1 className="text-[1.45rem] font-semibold leading-snug tracking-tight md:text-[1.7rem]">
             {q.q}
@@ -208,7 +196,6 @@ export function QuizClient({ locale }: { locale: string }) {
             </button>
           </div>
         </main>
-        )}
       </div>
     </>
   );

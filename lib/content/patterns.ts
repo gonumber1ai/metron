@@ -36,7 +36,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "You do not need a stronger product. You need ten days and fifteen minutes a day. If you are not lasting longer at the end, we refund you.",
+      "You do not need a stronger product. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
   },
 
   conditioned: {
@@ -63,17 +63,17 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "What your body learned, it can unlearn. Ten days, fifteen minutes a day. If you are not lasting longer at the end, we refund you.",
+      "What your body learned, it can unlearn. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
   },
 
   dependent: {
-    name: "You Need Something First",
+    name: "You Need Something To Perform",
     strap:
       "You are renting your performance. That is why it never sticks.",
     whatItMeans: [
-      "You are relying on something — a pill, a spray, a drink — to perform. That is the bottleneck, and it sits in front of everything else we could work on.",
-      "Not because these things are evil, but because of what they teach you. Every night that goes well with a pill is a night that proves to you that you need one. The belief is the trap, and the belief is what shortens you when the pill is not there.",
-      "There is a second problem specific to the products sold as natural. Health regulators around the world have repeatedly found undeclared pharmaceutical drugs — the same compounds as prescription pills — inside supplements marketed as herbal. You may already be taking the drug you thought you were avoiding, at an unknown dose, with no label.",
+      "You need a pill, a spray or a drink to feel safe. That is the first thing to fix, because it sits in front of everything else.",
+      "Here is the trap. Every good night with a pill teaches you that you need the pill. So the nights you do not have one, you are scared — and scared makes you finish faster.",
+      "You are not fixing anything. You are renting a result, and the rent never stops.",
     ],
     whyFailed: [
       {
@@ -90,7 +90,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Ten days without the pill. Fifteen minutes a day. If you are not lasting longer at the end, we refund you — and you will finally know where you actually stand.",
+      "Ten days without the pill. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
   },
 
   depleted: {
@@ -117,7 +117,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Fill the tank and the rest moves fast. Ten days, fifteen minutes a day. If you are not lasting longer at the end, we refund you.",
+      "Fill the tank and the rest moves fast. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
   },
 };
 
@@ -146,7 +146,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Vous n'avez pas besoin d'un produit plus fort. Vous avez besoin de dix jours et de quinze minutes par jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
+      "Vous n'avez pas besoin d'un produit plus fort. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
   },
 
   conditioned: {
@@ -173,7 +173,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Ce que votre corps a appris, il peut le désapprendre. Dix jours, quinze minutes par jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
+      "Ce que votre corps a appris, il peut le désapprendre. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
   },
 
   dependent: {
@@ -181,9 +181,9 @@ const FR: Record<PatternKey, PatternCopy> = {
     strap:
       "Vous louez votre performance. C'est pour ça que ça ne tient jamais.",
     whatItMeans: [
-      "Vous dépendez de quelque chose — comprimé, spray, alcool — pour assurer. C'est le goulot d'étranglement, et il se place avant tout le reste.",
-      "Non pas parce que ces produits seraient diaboliques, mais à cause de ce qu'ils vous enseignent. Chaque bonne soirée avec un comprimé est une soirée qui vous prouve qu'il vous en faut un. La croyance est le piège, et c'est elle qui vous raccourcit quand le comprimé n'est pas là.",
-      "Il y a un second problème, propre aux produits vendus comme naturels. Des autorités sanitaires du monde entier ont trouvé à plusieurs reprises des médicaments non déclarés — les mêmes molécules que les comprimés sur ordonnance — dans des compléments présentés comme à base de plantes. Vous prenez peut-être déjà la molécule que vous pensiez éviter, à dose inconnue, sans étiquette.",
+      "Vous avez besoin d'un comprimé, d'un spray ou d'un verre pour vous sentir en sécurité. C'est la première chose à régler, parce qu'elle bloque tout le reste.",
+      "Voici le piège. Chaque bonne nuit avec un comprimé vous apprend que vous avez besoin du comprimé. Donc les soirs où vous n'en avez pas, vous avez peur — et la peur vous fait finir plus vite.",
+      "Vous ne réglez rien. Vous louez un résultat, et le loyer ne s'arrête jamais.",
     ],
     whyFailed: [
       {
@@ -200,7 +200,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Dix jours sans comprimé. Quinze minutes par jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse — et vous saurez enfin où vous en êtes vraiment.",
+      "Dix jours sans comprimé. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
   },
 
   depleted: {
@@ -227,7 +227,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Remplissez le réservoir et le reste suit vite. Dix jours, quinze minutes par jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
+      "Remplissez le réservoir et le reste suit vite. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
   },
 };
 

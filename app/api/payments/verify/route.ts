@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const wPlan = whop.planFromMembership(m);
     const wEmail = typeof m?.metadata?.email === "string" ? m.metadata.email : undefined;
     if (wEmail && looksLikeEmail(wEmail)) {
-      void sendPurchaseConfirmation({ to: wEmail, locale: body.locale === "fr" ? "fr" : "en" });
+      void sendPurchaseConfirmation({ to: wEmail, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
     }
     const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan: wPlan });
     res.cookies.set(
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
   const plan = whop.planFromAmount(tx!.amount ?? 0, "XAF");
 
   if (tx!.email && looksLikeEmail(tx!.email)) {
-    void sendPurchaseConfirmation({ to: tx!.email, locale: body.locale === "fr" ? "fr" : "en" });
+    void sendPurchaseConfirmation({ to: tx!.email, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
   }
 
   const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan });

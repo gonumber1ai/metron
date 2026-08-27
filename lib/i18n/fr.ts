@@ -53,6 +53,15 @@ export const fr = {
     whyFailed: "Pourquoi ce que vous avez essayé n'a pas tenu",
     redFlagTitle: "À lire d'abord",
     offerLead: "Ne nous croyez pas sur parole",
+    adaptTitle: "Ça n'est pas figé",
+    adaptBody:
+      "Chaque semaine passée à {now} apprend à votre corps que {now} est la normale. Un réflexe se construit par répétition — et le vôtre se répète plusieurs fois par mois. Il devient plus automatique à chaque fois. Dans un an, il sera plus difficile à déloger que ce soir.",
+    proofTitle: "Des hommes qui l'ont fait",
+    emailTitle: "Vous voulez le recevoir ?",
+    emailBody: "On vous envoie votre résultat par email pour que vous puissiez y revenir. Rien d'autre, et rien qui indique de quoi il s'agit.",
+    emailPlaceholder: "Votre email",
+    emailSend: "Envoyer",
+    emailSent: "Envoyé.",
   },
 
   offer: {

@@ -195,6 +195,29 @@ export async function paymentStatus(transId: string): Promise<FapshiTransaction 
   return tx?.transId ? tx : null;
 }
 
+/**
+ * Every transaction ever made against a userId.
+ *
+ * This is what makes account recovery possible with no database. At checkout
+ * we send `userId = ref` — the anonymous handle stored on his device — so
+ * Fapshi itself is the record of who paid. Give it back the ref and it will
+ * tell us whether that person has a successful payment, which is the only
+ * question a login needs to answer.
+ */
+export async function transactionsByUser(userId: string): Promise<FapshiTransaction[]> {
+  if (!/^[a-zA-Z0-9]{1,100}$/.test(userId)) return [];
+  const res = await fetch(`${BASE}/transaction/${encodeURIComponent(userId)}`, {
+    method: "GET",
+    headers: headers(),
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = await res.json().catch(() => null);
+  if (!json) return [];
+  const rows = Array.isArray(json) ? json : [json];
+  return rows.filter((r): r is FapshiTransaction => Boolean(r && r.transId));
+}
+
 export function isPaid(tx: FapshiTransaction | null): boolean {
   return tx?.status === "SUCCESSFUL";
 }
