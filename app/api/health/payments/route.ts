@@ -35,6 +35,10 @@ export async function GET(req: Request) {
     FAPSHI_API_KEY: shape(process.env.FAPSHI_API_KEY),
     FAPSHI_BASE_URL: fapshiBase,
     FAPSHI_WEBHOOK_SECRET: shape(process.env.FAPSHI_WEBHOOK_SECRET),
+    FAPSHI_DIRECT_PAY:
+      process.env.FAPSHI_DIRECT_PAY === "1"
+        ? "on — charging the handset directly"
+        : "off — using the hosted checkout link (correct until Fapshi approve Direct Pay)",
     WHOP_API_KEY: shape(process.env.WHOP_API_KEY),
     WHOP_ACCOUNT_ID: process.env.WHOP_ACCOUNT_ID ?? "MISSING",
     WHOP_PRODUCT_ID: process.env.WHOP_PRODUCT_ID ?? "MISSING",

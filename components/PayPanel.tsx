@@ -235,9 +235,14 @@ function MomoPanel({
       const res = await fetch("/api/payments/momo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, country, ref, phone: digits }),
+        body: JSON.stringify({ plan, country, ref, phone: digits, locale }),
       });
-      const data = (await res.json()) as { status?: string; transId?: string; reason?: string };
+      const data = (await res.json()) as {
+        status?: string;
+        transId?: string;
+        reason?: string;
+        url?: string;
+      };
 
       if (data.status === "unavailable") {
         onUnavailable?.(true);
@@ -247,6 +252,13 @@ function MomoPanel({
         setErr(t.badPhone);
         return setState("idle");
       }
+      // Direct charging is not enabled on the account yet, so Fapshi handed
+      // back a hosted page instead. One redirect, and it takes money.
+      if (data.status === "redirect" && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+
       if (data.status !== "ok" || !data.transId) {
         if (data.reason) setErr(data.reason);
         return setState("failed");
