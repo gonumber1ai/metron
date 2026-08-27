@@ -109,7 +109,7 @@ export function QuizClient({ locale }: { locale: string }) {
               <Logo size="sm" />
               <Link
                 href={`/${locale}/login`}
-                className="text-[13px] font-medium text-mute underline underline-offset-4"
+                className="rounded-full border border-ink-600 bg-ink-800 px-4 py-2 text-[13px] font-bold text-bone transition-colors hover:border-jade hover:text-jade"
               >
                 {locale === "fr" ? "Se connecter" : "Log in"}
               </Link>
@@ -133,9 +133,6 @@ export function QuizClient({ locale }: { locale: string }) {
               </p>
               <p className="mt-2.5 text-[0.98rem] leading-relaxed text-bone">
                 {t.quiz.introHonestP}
-              </p>
-              <p className="mt-2.5 text-[0.98rem] font-semibold leading-relaxed text-bone">
-                {t.quiz.introHonestP2}
               </p>
             </div>
 

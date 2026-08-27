@@ -34,19 +34,15 @@ export const fr = {
 
   quiz: {
     kicker: "Bilan privé",
-    introKicker: "Bilan privé",
-    introH: "9 questions. Ensuite vous saurez ce qui cause réellement le vôtre.",
-    introP1:
-      "La plupart des hommes devinent depuis des années, et c'est pour ça que rien de ce qu'ils ont acheté n'a marché — on ne règle pas un problème qu'on n'a pas identifié.",
-    introP2:
-      "Ces réponses déterminent le plan que vous recevez. Il y a quatre causes différentes et elles demandent quatre approches différentes ; le plan est construit à partir de ce que vous dites ici.",
-    introHonestH: "Une chose avant de commencer",
-    introHonestP:
-      "Répondez honnêtement, même là où c'est gênant. Personne d'autre que nous ne lit ça, et rien ici n'est rattaché à votre nom — mettez le nom que vous voulez au paiement, on ne le vérifie jamais.",
-    introHonestP2:
-      "Mais les chiffres doivent être vrais. Arrondissez et vous obtenez un plan fait pour un homme qui n'existe pas, et il ne marchera pas sur vous. Il n'y a personne à impressionner ici.",
+    introKicker: "Privé · environ 60 secondes",
+    introH: "D'abord, quelques questions rapides",
+    introP1: "Pour vous donner un plan qui marche et améliore votre durée, on a besoin de savoir un peu où vous en êtes.",
+    introP2: "9 questions. Aucun nom requis — même pas un vrai. On ne partage jamais vos informations.",
+    introHonestH: "Soyez juste franc avec nous",
+    introHonestP: "Votre plan est construit à partir de ce que vous mettez ici. Des chiffres vrais vous donnent un plan qui vous va, comme pour les autres hommes qui l'ont fait.",
+    introHonestP2: "",
     introTime: "Environ 60 secondes",
-    introPrivate: "Aucun nom requis. Rien n'est partagé avec qui que ce soit.",
+    introPrivate: "Discret. Rien n'est partagé avec qui que ce soit.",
     introStart: "Commencer",
     title: "9 questions. Environ 60 secondes.",
     sub: "Aucun nom requis. Rien n'est partagé avec qui que ce soit.",

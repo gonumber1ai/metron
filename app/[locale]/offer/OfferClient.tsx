@@ -79,7 +79,7 @@ export function OfferClient({
               </Link>
               <Link
                 href={`/${locale}/login`}
-                className="text-[13px] font-medium text-mute underline underline-offset-4 hover:text-bone"
+                className="rounded-full border border-ink-600 bg-ink-800 px-4 py-2 text-[13px] font-bold text-bone transition-colors hover:border-jade hover:text-jade"
               >
                 {locale === "fr" ? "Se connecter" : "Log in"}
               </Link>
