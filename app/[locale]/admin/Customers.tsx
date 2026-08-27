@@ -69,28 +69,26 @@ export function Customers({ rows }: { rows: ActivityRow[] }) {
   }
 
   return (
-    <section className="mt-10">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
-        Customers
-      </h2>
-      <p className="mt-1 text-[0.86rem] text-faint">
-        Paid, and what they have actually done since. An empty “last seen” is a man who
-        paid and never came back — that is the one to message.
+    <section className="mt-6 rounded-2xl card p-5">
+      <h2 className="text-[0.95rem] font-bold text-bone">Customers</h2>
+      <p className="mt-0.5 mb-4 text-[12px] text-faint">
+        Everyone who paid, and what they have done since. Red means they have not opened
+        the app.
       </p>
 
-      <div className="mt-3 overflow-x-auto">
+      <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-left text-[0.88rem]">
           <thead>
             <tr className="text-[11px] uppercase tracking-wide text-faint">
-              <th className="py-2 pr-4 font-bold">Name</th>
-              <th className="py-2 pr-4 font-bold">Plan</th>
-              <th className="py-2 pr-4 font-bold">Day</th>
-              <th className="py-2 pr-4 font-bold">Sessions</th>
-              <th className="py-2 pr-4 font-bold">Markers</th>
-              <th className="py-2 pr-4 font-bold">Day 1</th>
-              <th className="py-2 pr-4 font-bold">Day 12</th>
-              <th className="py-2 pr-4 font-bold">Last seen</th>
-              <th className="py-2 font-bold">Thread</th>
+              <th className="pb-2 pr-4 font-bold">Name</th>
+              <th className="pb-2 pr-4 font-bold">Plan</th>
+              <th className="pb-2 pr-4 font-bold">Day</th>
+              <th className="pb-2 pr-4 font-bold">Sessions</th>
+              <th className="pb-2 pr-4 font-bold">Logs</th>
+              <th className="pb-2 pr-4 font-bold">Before</th>
+              <th className="pb-2 pr-4 font-bold">After</th>
+              <th className="pb-2 pr-4 font-bold">Last seen</th>
+              <th className="pb-2 font-bold">Message</th>
             </tr>
           </thead>
           <tbody>
@@ -135,7 +133,7 @@ export function Customers({ rows }: { rows: ActivityRow[] }) {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={9} className="py-3 text-[0.9rem] text-faint">
-                  No paying customers yet.
+                  No customers yet.
                 </td>
               </tr>
             )}
@@ -167,7 +165,7 @@ export function Customers({ rows }: { rows: ActivityRow[] }) {
             <div className="flex-1 space-y-2.5 overflow-y-auto px-5 py-4">
               {msgs.length === 0 && (
                 <p className="text-[0.9rem] text-faint">
-                  Nothing yet. You can open the conversation.
+                  No messages yet. You can start the conversation.
                 </p>
               )}
               {msgs.map((m, i) => (
