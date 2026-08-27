@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
+import { recordPayment } from "@/lib/supabase/server";
+import { planFromAmount } from "@/lib/payments/whop";
 
 export const runtime = "nodejs";
 
@@ -70,7 +72,16 @@ export async function POST(req: Request) {
   const tx = await paymentStatus(transId);
 
   if (isPaid(tx)) {
-    // TODO(supabase): upsert entitlement { ref: tx.externalId, plan, transId }
+    // The point of this write: if his browser died between paying and being
+    // redirected, this row is the only record that he paid. Recovery reads it.
+    await recordPayment({
+      ref: tx!.externalId || tx!.userId || transId,
+      provider: "fapshi",
+      providerTxn: transId,
+      plan: planFromAmount(tx!.amount ?? 0, "XAF"),
+      currency: "XAF",
+      amountMinor: tx!.amount ?? 0,
+    });
     console.log("[fapshi webhook] PAID", {
       transId,
       externalId: tx?.externalId,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendLeadAck, looksLikeEmail } from "@/lib/email/send";
+import { recordLead } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,9 @@ export async function POST(request: Request) {
   // Leads arrive as either an email or a phone number. Only the first can be
   // acknowledged here; phone leads are followed up on WhatsApp by hand.
   const contact = body.contact.trim();
+
+  void recordLead({ contact, ref: body.ref, plan: body.plan, locale: body.locale ?? "en" });
+
   if (looksLikeEmail(contact)) {
     // Deliberately not awaited-and-surfaced: a mail failure must never turn
     // into a failed capture. Losing the lead is worse than losing the email.

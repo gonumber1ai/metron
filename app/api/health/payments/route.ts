@@ -47,6 +47,8 @@ export async function GET(req: Request) {
     RESEND_API_KEY: shape(process.env.RESEND_API_KEY),
     EMAIL_FROM: process.env.EMAIL_FROM ?? "MISSING",
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "MISSING",
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "MISSING",
+    SUPABASE_SERVICE_ROLE_KEY: shape(process.env.SUPABASE_SERVICE_ROLE_KEY),
     METRON_DEV_UNLOCK: process.env.METRON_DEV_UNLOCK ?? "unset (correct for production)",
   };
 
@@ -58,6 +60,11 @@ export async function GET(req: Request) {
   }
   if (process.env.METRON_DEV_UNLOCK === "1") {
     warnings.push("METRON_DEV_UNLOCK is on — the paid programme is open to everyone. Remove it.");
+  }
+  if (!has(process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+    warnings.push(
+      "Supabase not connected. Payments still work, but a man whose browser dies before the redirect has no record and cannot get in without messaging you.",
+    );
   }
   if (!has(process.env.ENTITLEMENT_SECRET)) {
     warnings.push("ENTITLEMENT_SECRET missing — nobody can be granted access even after paying.");
@@ -96,22 +103,83 @@ export async function GET(req: Request) {
     checks.fapshi = "SKIPPED — credentials not set";
   }
 
-  // Whop: create nothing, just prove the key is accepted.
+  // Whop: probe the endpoint we ACTUALLY use, not a guessed one. A 401 against
+  // some unrelated path proves nothing — it may just mean that path is wrong.
+  // Creating a checkout configuration moves no money; it is only a config.
   if (has(process.env.WHOP_API_KEY)) {
+    const endpoint =
+      process.env.WHOP_CHECKOUT_ENDPOINT ??
+      "https://api.whop.com/api/v5/company/checkout_configurations";
     try {
-      const r = await fetch("https://api.whop.com/api/v2/me", {
-        headers: { Authorization: `Bearer ${process.env.WHOP_API_KEY}` },
+      const r = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan: {
+            company_id: process.env.WHOP_ACCOUNT_ID,
+            product_id: process.env.WHOP_PRODUCT_ID,
+            currency: "usd",
+            plan_type: "one_time",
+            initial_price: 1,
+          },
+          metadata: { probe: "health" },
+        }),
         cache: "no-store",
       });
+      const bodyText = (await r.text()).slice(0, 400);
       checks.whop =
-        r.status === 200
-          ? "OK — key accepted"
-          : `REJECTED (${r.status}) — check the key, and that it belongs to ${process.env.WHOP_ACCOUNT_ID ?? "your account"}`;
+        r.ok
+          ? "OK — checkout configuration created"
+          : `${r.status} at ${endpoint} :: ${bodyText}`;
+      checks.whopMeaning =
+        r.ok
+          ? "the card rail should work"
+          : r.status === 404
+            ? "WRONG ENDPOINT. The path has moved. Get the correct one from Whop's docs and set WHOP_CHECKOUT_ENDPOINT — no redeploy of code needed, just the env var."
+            : r.status === 401 || r.status === 403
+              ? "KEY REJECTED. Create the key under the SAME company as WHOP_ACCOUNT_ID, and make sure it is a server/secret API key rather than a public or app key."
+              : r.status === 422 || r.status === 400
+                ? "Key accepted but the payload was refused — read the body above; usually product_id or currency."
+                : "unexpected";
     } catch (e) {
       checks.whop = `unreachable: ${(e as Error).message}`;
     }
   } else {
     checks.whop = "SKIPPED — WHOP_API_KEY not set";
+  }
+
+  // A passing /balance does NOT prove charging works: Fapshi applies IP
+  // whitelisting only to transaction creation. Say so, so a green tick here is
+  // not mistaken for a working rail.
+  if (checks.fapshi?.startsWith("OK")) {
+    checks.fapshiCaveat =
+      "Credentials work. This does NOT prove charging works — Fapshi applies IP whitelisting to initiate-pay, direct-pay and payout only. Add ?probe=fapshi to create a real 100 XAF payment link and test that path. It charges nobody.";
+  }
+
+  // Opt-in deeper probe: creates a payment link at the 100 XAF minimum. No
+  // money moves unless somebody actually pays it, and nobody will.
+  if (new URL(req.url).searchParams.get("probe") === "fapshi" && checks.fapshi?.startsWith("OK")) {
+    try {
+      const r = await fetch(`${fapshiBase}/initiate-pay`, {
+        method: "POST",
+        headers: {
+          apiuser: process.env.FAPSHI_API_USER!,
+          apikey: process.env.FAPSHI_API_KEY!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: 100, externalId: "healthprobe", message: "Metron" }),
+        cache: "no-store",
+      });
+      const t = (await r.text()).slice(0, 300);
+      checks.fapshiCharge = r.ok
+        ? "OK — transaction creation works, so the IP is whitelisted"
+        : `${r.status} :: ${t} — if this is a 403 the server IP is not whitelisted`;
+    } catch (e) {
+      checks.fapshiCharge = `unreachable: ${(e as Error).message}`;
+    }
   }
 
   return NextResponse.json(

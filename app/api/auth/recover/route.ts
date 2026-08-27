@@ -8,6 +8,7 @@ import {
 import * as whop from "@/lib/payments/whop";
 import { planFromAmount } from "@/lib/payments/whop";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
+import { findPaidByRef } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,12 @@ export async function POST(req: Request) {
 
   const code = (body.code ?? "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
   if (code.length < 6) return NextResponse.json({ ok: false, reason: "short" }, { status: 400 });
+
+  // ---- 0: our own record ---------------------------------------------
+  // Faster than the providers, and it still answers for a customer whose
+  // transaction has aged out of a provider lookup window.
+  const known = await findPaidByRef(code);
+  if (known) return grant(code, known.plan, known.providerTxn);
 
   // ---- 1 & 2: Mobile Money -------------------------------------------
   if (isConfigured()) {

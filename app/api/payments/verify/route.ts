@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
 import { sendPurchaseConfirmation, looksLikeEmail } from "@/lib/email/send";
+import { recordPayment } from "@/lib/supabase/server";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
 
 export const runtime = "nodejs";
@@ -41,6 +42,15 @@ export async function POST(req: Request) {
     if (wEmail && looksLikeEmail(wEmail)) {
       void sendPurchaseConfirmation({ to: wEmail, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
     }
+    void recordPayment({
+      ref,
+      provider: "whop",
+      providerTxn: membershipId,
+      plan: wPlan,
+      currency: (m?.currency ?? "USD").toUpperCase(),
+      amountMinor: m?.amount ?? m?.receipt?.amount ?? 0,
+    });
+
     const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan: wPlan });
     res.cookies.set(
       cookieName,
@@ -80,6 +90,15 @@ export async function POST(req: Request) {
   if (tx!.email && looksLikeEmail(tx!.email)) {
     void sendPurchaseConfirmation({ to: tx!.email, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
   }
+
+  void recordPayment({
+    ref,
+    provider: "fapshi",
+    providerTxn: transId,
+    plan,
+    currency: "XAF",
+    amountMinor: tx!.amount ?? 0,
+  });
 
   const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan });
   res.cookies.set(

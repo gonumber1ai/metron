@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { membership, isValid, planFromMembership } from "@/lib/payments/whop";
+import { recordPayment } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -52,7 +53,14 @@ export async function POST(req: Request) {
   const m = await membership(membershipId);
 
   if (isValid(m)) {
-    // TODO(supabase): upsert entitlement { ref: m.metadata?.ref, plan, txId: membershipId }
+    await recordPayment({
+      ref: (typeof m?.metadata?.ref === "string" ? m.metadata.ref : "") || membershipId,
+      provider: "whop",
+      providerTxn: membershipId,
+      plan: planFromMembership(m),
+      currency: (m?.currency ?? "USD").toUpperCase(),
+      amountMinor: m?.amount ?? m?.receipt?.amount ?? 0,
+    });
     console.log("[whop webhook] VALID", {
       membershipId,
       plan: planFromMembership(m),

@@ -219,10 +219,8 @@ export function ResultClient({ locale }: { locale: string }) {
           </section>
 
           {/* -------------------------------------------------------- proof */}
+          {/* Proof renders its own heading — do not add one here or it prints twice. */}
           <section className="border-t border-ink-700 py-9">
-            <h2 className="text-[1.35rem] font-bold leading-snug tracking-tight">
-              {t.result.proofTitle}
-            </h2>
             <Proof locale={locale} tone="dark" />
           </section>
 

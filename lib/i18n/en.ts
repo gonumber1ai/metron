@@ -55,7 +55,6 @@ export const en = {
     adaptTitle: "It is not standing still",
     adaptBody:
       "Every week you spend at {now} teaches your body that {now} is normal. A reflex is built by repetition — and yours is being rehearsed, several times a month. It gets more automatic every time. A year from now it will be harder to shift than it is tonight.",
-    proofTitle: "Men who did this",
     emailTitle: "Want this sent to you?",
     emailBody: "We will email your result so you can come back to it. Nothing else, and nothing that says what it is about.",
     emailPlaceholder: "Your email",
