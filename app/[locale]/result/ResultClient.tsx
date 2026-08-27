@@ -138,11 +138,15 @@ export function ResultClient({
           </section>
 
           {/* ---------------------------------------------- cost of waiting */}
+          {/* Red, not copper. Copper is the colour used for things he has
+              already paid for that did not work — pills, sprays, a bad hour
+              after two drinks. This section is not one of those; it is what
+              doing nothing costs him from here, and it should stop him. */}
           <section className="mt-10">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-alert">
               {t.result.secCost}
             </h2>
-            <p className="mt-3 border-l-2 border-amber pl-4 text-[1.05rem] leading-[1.7] text-bone">
+            <p className="mt-3 border-l-[3px] border-alert pl-4 text-[1.05rem] leading-[1.7] text-bone">
               {v.urgency}
             </p>
           </section>

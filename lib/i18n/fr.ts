@@ -37,7 +37,7 @@ export const fr = {
     introKicker: "Privé · environ 60 secondes",
     introH: "D'abord, quelques questions rapides",
     introP1: "Pour vous donner un plan qui marche et améliore votre durée, on a besoin de savoir un peu où vous en êtes.",
-    introP2: "9 questions. Aucun nom requis — même pas un vrai. On ne partage jamais vos informations.",
+    introP2: "9 questions. Utilisez le nom que vous voulez — on vous garde anonyme pour que rien ici ne puisse remonter jusqu'à vous. Vos informations ne sont jamais partagées.",
     introHonestH: "Soyez juste franc avec nous",
     introHonestP: "Votre plan est construit à partir de ce que vous mettez ici. Des chiffres vrais vous donnent un plan qui vous va, comme pour les autres hommes qui l'ont fait.",
     introHonestP2: "",
@@ -101,7 +101,7 @@ export const fr = {
     card: "Carte bancaire",
     securePrivate: "Facturation discrète",
     descriptorNote:
-      "Votre relevé affiche METRON. Rien d'autre. Aucun nom réel n'est requis pour ouvrir un compte.",
+      "Votre relevé affiche METRON. Rien d'autre. Utilisez le nom que vous voulez — votre compte reste anonyme.",
     processing: "Ouverture du paiement sécurisé…",
     comingSoon: "Le paiement est en cours de connexion",
     comingSoonBody:
@@ -110,7 +110,7 @@ export const fr = {
 
   privacy: {
     title: "Personne n'est obligé de le savoir",
-    b1: "Pas de vrai nom. Un pseudo suffit.",
+    b1: "Utilisez le nom que vous voulez. On vous garde anonyme, rien n'est lié à vous.",
     b2: "Votre relevé affiche METRON — rien d'autre.",
     b3: "Les notifications disent « Votre séance est prête. » Jamais plus.",
     b4: "Verrouillez l'application avec un code PIN.",

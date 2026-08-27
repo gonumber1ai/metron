@@ -49,7 +49,9 @@
   --color-amber: #DE9A42;
   --color-amber-050: #2A1E11;
 
-  /* Errors only. Red appears nowhere else. */
+  /* Errors, and the one editorial use it earns: the cost of waiting on the
+     result page. Nowhere else — red stops meaning anything the moment it is
+     decoration. */
   --color-alert: #E5484D;
 
   /* -------------------------------------- editorial (light pages) */

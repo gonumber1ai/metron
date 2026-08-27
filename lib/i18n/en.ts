@@ -37,7 +37,7 @@ export const en = {
     introKicker: "Private · about 60 seconds",
     introH: "First, a few quick questions",
     introP1: "To get you a plan that works and improves your duration, we need to know a little about where you are right now.",
-    introP2: "9 questions. No name needed — not even a real one. We never share your details with anyone.",
+    introP2: "9 questions. Use any name you like — we keep you anonymous so nothing here can ever be traced back to you. Your details are never shared.",
     introHonestH: "Just be straight with us",
     introHonestP: "Your plan is built from what you put here. Real numbers get you a plan that fits, the way it has for other men who have done this.",
     introHonestP2: "",
@@ -99,7 +99,7 @@ export const en = {
     card: "Card",
     securePrivate: "Private billing",
     descriptorNote:
-      "Your statement shows METRON. Nothing else. No name is required to open an account.",
+      "Your statement shows METRON. Nothing else. Use any name you like — your account stays anonymous.",
     processing: "Opening secure checkout…",
     comingSoon: "Checkout is being connected",
     comingSoonBody:
@@ -108,7 +108,7 @@ export const en = {
 
   privacy: {
     title: "Nobody has to know",
-    b1: "No real name. A username is enough.",
+    b1: "Use any name you like. We keep you anonymous, so nothing is tied to you.",
     b2: "Your statement reads METRON — nothing else.",
     b3: "Notifications say \"Your session is ready.\" Never more.",
     b4: "Lock the app with a PIN.",
