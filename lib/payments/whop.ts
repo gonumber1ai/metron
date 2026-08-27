@@ -1,11 +1,9 @@
 /**
- * Whop — cards. Merchant of record.
+ * Whop — international cards, USD. Merchant of record.
  *
- * Priced in XAF like every other rail. XAF is zero-decimal, so the amount is
- * passed through untouched: 7500 means 7 500 francs. If Whop rejects XAF on
- * the first live card payment, that is the thing to check before anything
- * else — the failure is graceful (the offer page falls back to lead capture)
- * but it is silent.
+ * The site quotes francs everywhere. Whop settles in dollars, so this is the
+ * one surface a buyer sees a dollar figure on, and it is the figure he is
+ * actually charged: $15 and $125.
  *
  * SERVER ONLY. Reads the API key. Never import from a "use client" file.
  *
@@ -76,10 +74,10 @@ function toWhopPrice(amountMinor: number, currency: Currency): number {
  * sprint price, so a promo or an FX rounding difference cannot flip it.
  */
 export function planFromAmount(amountMinor: number, currency: Currency): Plan {
-  // Sits between the two real prices: 7 500 and 69 000 FCFA. Far enough from
-  // both that a promo or a rounding difference cannot flip a 10-day buyer into
-  // the 30-day programme or the reverse.
-  const threshold = currency === "XAF" ? 30_000 : 5_000;
+  // Sits between the two real prices on each rail: 7 500 vs 69 000 FCFA, and
+  // $15 vs $125. Far enough from both that a promo or an FX wobble cannot
+  // flip a 10-day buyer into the 30-day programme or the reverse.
+  const threshold = currency === "XAF" ? 30_000 : 5_000; // 30k FCFA | $50.00
   return amountMinor >= threshold ? "sprint" : "test";
 }
 

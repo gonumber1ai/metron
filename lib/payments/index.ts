@@ -3,7 +3,7 @@
  *
  * Two rails, one interface:
  *   Fapshi — MTN / Orange Mobile Money, XAF.
- *   Whop   — cards, acts as merchant of record.
+ *   Whop   — cards, USD, acts as merchant of record.
  *
  * Both are stubbed until credentials arrive. `createCheckout` returns
  * { status: "unavailable" } and the UI falls back to lead capture, so the
@@ -17,13 +17,13 @@
 const NBSP = " ";
 
 export type Plan = "test" | "sprint";
-export type Currency = "XAF";
+export type Currency = "XAF" | "USD";
 export type ProviderId = "fapshi" | "whop";
 
 export type Price = {
   plan: Plan;
   currency: Currency;
-  /** XAF is a zero-decimal currency: 7500 means 7 500 francs, not 75.00 */
+  /** minor units — 7500 XAF = 7 500 francs (zero-decimal), 1500 USD = $15.00 */
   amountMinor: number;
   provider: ProviderId;
   /** what the buyer sees */
@@ -31,30 +31,39 @@ export type Price = {
 };
 
 /**
- * Price book. Everything is priced in francs.
+ * Price book.
  *
- * There used to be a second, dollar-priced book for "everywhere else", and it
- * did real damage: any visitor the edge geo header could not place — which is
- * every request in local development and plenty in production — fell through
- * to it and was quoted $15 and $125. Worse, a Cameroonian buyer got BOTH
- * books, so the Card tab beside Mobile Money read dollars while the page above
- * it read francs.
+ * The site quotes francs. Whop settles in dollars, so the card rail — and only
+ * the card rail — carries a USD figure, which is what a card buyer actually
+ * gets charged. Mobile Money and every price in the copy are XAF.
  *
- * One currency, one set of numbers, both rails. Cameroon is the market; when
- * a second one is worth pricing separately it gets its own entry here and its
- * own numbers, chosen deliberately rather than inherited by accident.
+ * There used to be a second book keyed "default" that was dollars-only, and it
+ * did real damage. Any visitor the edge geo header could not place fell
+ * through to it and was quoted $15 and $125 for everything — that is every
+ * request in local development and plenty in production. On top of that a
+ * Cameroonian buyer got both books concatenated, so the offer page rendered
+ * two Card rows. One book now, holding both rails, with no market able to
+ * inherit dollar pricing by accident.
+ *
+ * Order matters: the Fapshi rows come first, because the offer page takes the
+ * first row for a plan when it needs a price to print in a sentence, and the
+ * sentence should say francs.
  */
 const TEST_XAF = 7500;
 const SPRINT_XAF = 69000;
+/** minor units: $15.00 and $125.00 */
+const TEST_USD = 1500;
+const SPRINT_USD = 12500;
 
-const FCFA = (n: number) => `${n.toLocaleString("fr-FR")}${NBSP}FCFA`;
+const NB = " "; // narrow no-break space, the French thousands separator
+const FCFA = (n: number) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NB)}${NBSP}FCFA`;
 
 export const priceBook: Record<string, Price[]> = {
   default: [
     { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF) },
     { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF) },
-    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "whop", display: FCFA(TEST_XAF) },
-    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "whop", display: FCFA(SPRINT_XAF) },
+    { plan: "test", currency: "USD", amountMinor: TEST_USD, provider: "whop", display: "$15" },
+    { plan: "sprint", currency: "USD", amountMinor: SPRINT_USD, provider: "whop", display: "$125" },
   ],
 };
 
