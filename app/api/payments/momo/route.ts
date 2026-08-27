@@ -1,31 +1,57 @@
 import { NextResponse } from "next/server";
 import { getPrice, type Plan } from "@/lib/payments";
-import { directPay, initiatePay, isConfigured, PHONE_RE, operatorOf } from "@/lib/payments/fapshi";
+import {
+  directPay,
+  initiatePay,
+  isConfigured,
+  PHONE_RE,
+  operatorOf,
+} from "@/lib/payments/fapshi";
 
 export const runtime = "nodejs";
 
 /**
  * Mobile Money charge.
  *
- * ── TWO PATHS, AND WHY ───────────────────────────────────────────────────
+ * ── IN-HOUSE FIRST ───────────────────────────────────────────────────────
  * direct-pay pushes a USSD prompt straight to the handset, so the buyer never
- * leaves our page. It is the better experience and it is NOT available by
- * default: Fapshi gate it behind an emailed application to support@fapshi.com
- * and approve it only for "absolutely necessary" use cases. Until that lands,
- * calling it returns "Forbidden request".
+ * leaves our page. That is the experience we want, so it is what we TRY first,
+ * every time, with no flag to remember to turn on.
  *
- * So unless FAPSHI_DIRECT_PAY=1 says otherwise, we go straight to initiate-pay
- * and hand back a hosted checkout link. That rail is confirmed working on this
- * account today. It costs one redirect and it takes money, which beats an
- * elegant form that cannot charge anybody.
+ * Fapshi gate direct-pay behind an emailed application and it answers
+ * "Forbidden request" until they approve the account. So if it refuses we fall
+ * straight through to initiate-pay, which is confirmed working here, and the
+ * buyer gets a hosted page instead. He still pays. He just takes one redirect
+ * to do it.
  *
- * If direct-pay IS enabled but fails anyway, we still fall through to the
- * hosted link rather than showing a failure — a live funnel should degrade,
- * not stop.
+ * ── WHY THE COOLDOWN ─────────────────────────────────────────────────────
+ * While the account is unapproved, every single purchase would otherwise
+ * burn a guaranteed-to-fail round trip before doing the thing that works.
+ * The first Forbidden parks direct-pay for an hour, so buyer number two goes
+ * straight to the rail that sells. After the hour it tries again by itself,
+ * which means the day Fapshi approve you it starts working with no deploy and
+ * nothing to switch on.
+ *
+ * FAPSHI_DIRECT_PAY=0 disables the attempt outright, if it ever needs to be.
  *
  * The amount always comes from the price book, never from the request body.
  * A client that sends {"amount": 1} gets charged the real price.
  */
+
+const COOLDOWN_MS = 60 * 60 * 1000;
+let directPayBlockedUntil = 0;
+let lastDirectPayError = "";
+
+function directPayAllowed(): boolean {
+  if (process.env.FAPSHI_DIRECT_PAY === "0") return false;
+  return Date.now() >= directPayBlockedUntil;
+}
+
+/** Fapshi says "Forbidden request" when the service is not approved for it. */
+function looksForbidden(message: string): boolean {
+  return /forbidden|not allowed|activate|403/i.test(message);
+}
+
 export async function POST(req: Request) {
   if (!isConfigured()) {
     return NextResponse.json({ status: "unavailable" });
@@ -50,9 +76,8 @@ export async function POST(req: Request) {
   const ref = (body.ref ?? "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 64);
   const phone = (body.phone ?? "").replace(/\D/g, "");
   const name = (body.name ?? "").trim().slice(0, 80);
-  // Pre-filling these is not politeness. Fapshi's own checkout asks for all
-  // three, and the email is the only way a Mobile Money buyer ever receives
-  // his access code — without it he cannot get back in on a new device.
+  // Not politeness: Fapshi's own checkout asks for all three, and the email is
+  // the only way a Mobile Money buyer ever receives his access code.
   const email = (body.email ?? "").trim().slice(0, 120);
 
   if (!ref) {
@@ -71,11 +96,12 @@ export async function POST(req: Request) {
   const locale = body.locale === "fr" ? "fr" : "en";
   const message = plan === "sprint" ? "Metron 30" : "Metron 10";
 
-  // ---- preferred path: charge the handset directly, no redirect ----------
-  if (process.env.FAPSHI_DIRECT_PAY === "1") {
+  /* ---------------------------------------------- 1. charge the handset */
+
+  if (directPayAllowed()) {
     try {
       // `medium` is optional for Fapshi, but naming the network removes any
-      // ambiguity about which rail the prompt goes down.
+      // ambiguity about which rail the prompt should go down.
       const op = operatorOf(phone);
       const { transId } = await directPay({
         amount: price.amountMinor, // XAF has no minor unit
@@ -87,14 +113,26 @@ export async function POST(req: Request) {
         medium: op === "orange" ? "orange money" : op === "mtn" ? "mobile money" : undefined,
         message,
       });
-      return NextResponse.json({ status: "ok", transId });
+      // Worked — clear any parking from a previous failure.
+      directPayBlockedUntil = 0;
+      lastDirectPayError = "";
+      return NextResponse.json({ status: "ok", transId, mode: "direct" });
     } catch (err) {
-      // Do not surface this. Fall through and sell.
-      console.error("[momo] direct-pay failed, falling back to hosted link:", err);
+      const reason = err instanceof Error ? err.message : "unknown";
+      lastDirectPayError = reason;
+      if (looksForbidden(reason)) {
+        directPayBlockedUntil = Date.now() + COOLDOWN_MS;
+        console.warn("[momo] direct-pay not approved on this account, parking for 1h:", reason);
+      } else {
+        console.error("[momo] direct-pay failed:", reason);
+      }
+      // Fall through. Never show this to the buyer — he is about to be sent
+      // somewhere that works.
     }
   }
 
-  // ---- fallback: hosted checkout. Confirmed working on this account. -----
+  /* ------------------------------------------- 2. hosted checkout page */
+
   try {
     const result = await initiatePay({
       amount: price.amountMinor,
@@ -105,7 +143,14 @@ export async function POST(req: Request) {
       email: email || undefined,
       message,
     });
-    return NextResponse.json({ status: "redirect", url: result.link, transId: result.transId });
+    return NextResponse.json({
+      status: "redirect",
+      url: result.link,
+      transId: result.transId,
+      mode: "hosted",
+      // Only useful to us, and it names why the in-house path was skipped.
+      directPayNote: lastDirectPayError || undefined,
+    });
   } catch (err) {
     const reason = err instanceof Error ? err.message : "unknown";
     console.error("[momo] initiate-pay failed", reason);

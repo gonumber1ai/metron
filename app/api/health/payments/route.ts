@@ -36,9 +36,9 @@ export async function GET(req: Request) {
     FAPSHI_BASE_URL: fapshiBase,
     FAPSHI_WEBHOOK_SECRET: shape(process.env.FAPSHI_WEBHOOK_SECRET),
     FAPSHI_DIRECT_PAY:
-      process.env.FAPSHI_DIRECT_PAY === "1"
-        ? "on — charging the handset directly"
-        : "off — using the hosted checkout link (correct until Fapshi approve Direct Pay)",
+      process.env.FAPSHI_DIRECT_PAY === "0"
+        ? "disabled by env"
+        : "attempted first on every charge, with automatic fallback to the hosted page",
     WHOP_API_KEY: shape(process.env.WHOP_API_KEY),
     WHOP_ACCOUNT_ID: process.env.WHOP_ACCOUNT_ID ?? "MISSING",
     WHOP_PRODUCT_ID: process.env.WHOP_PRODUCT_ID ?? "MISSING",
@@ -166,6 +166,37 @@ export async function GET(req: Request) {
     }
   } else {
     checks.supabase = "SKIPPED — url or service role key not set";
+  }
+
+  // ?probe=directpay answers the only question that matters about the
+  // in-house form: will Fapshi let this account push a USSD prompt? Uses a
+  // deliberately invalid number so nothing can ever be charged — an approved
+  // account rejects it on validation, an unapproved one rejects it on
+  // permission, and the two messages are completely different.
+  if (
+    new URL(req.url).searchParams.get("probe") === "directpay" &&
+    checks.fapshi?.startsWith("OK")
+  ) {
+    try {
+      const r = await fetch(`${fapshiBase}/direct-pay`, {
+        method: "POST",
+        headers: {
+          apiuser: process.env.FAPSHI_API_USER!,
+          apikey: process.env.FAPSHI_API_KEY!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: 100, phone: "600000000" }),
+        cache: "no-store",
+      });
+      const t = (await r.text()).slice(0, 300);
+      const forbidden = /forbidden|activate/i.test(t) || r.status === 403;
+      checks.fapshiDirectPay = `${r.status} :: ${t}`;
+      checks.fapshiDirectPayMeaning = forbidden
+        ? "NOT APPROVED. The in-house form will fall back to the hosted page. Send the application in content/fapshi-direct-pay-application.md."
+        : "APPROVED — this account can push USSD prompts, so the in-house form will work. (A validation complaint about the number is the expected reply here.)";
+    } catch (e) {
+      checks.fapshiDirectPay = `unreachable: ${(e as Error).message}`;
+    }
   }
 
   // A passing /balance does NOT prove charging works: Fapshi applies IP
