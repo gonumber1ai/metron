@@ -1,0 +1,212 @@
+export const fr = {
+  brand: "Metron",
+  tagline: "On ne corrige pas ce qu'on ne mesure pas.",
+
+  nav: {
+    today: "Aujourd'hui",
+    program: "Programme",
+    measure: "Mesurer",
+    progress: "Progrès",
+    lessons: "Leçons",
+    messages: "Privé",
+    settings: "Réglages",
+    menu: "Menu",
+    close: "Fermer",
+    signOut: "Se déconnecter",
+  },
+
+  cta: {
+    start: "Faire le bilan de 60 secondes",
+    continue: "Continuer",
+    back: "Retour",
+    next: "Suivant",
+    seeResult: "Voir mon résultat",
+    getTest: "Commencer le Reset de 10 jours",
+    upgrade: "Prendre le Sprint de 30 jours",
+    save: "Enregistrer",
+    saved: "Enregistré",
+    done: "Marquer comme fait",
+    undo: "Annuler",
+    readLesson: "Lire la leçon",
+    logIt: "Enregistrer",
+    openApp: "Ouvrir mon programme",
+  },
+
+  quiz: {
+    kicker: "Bilan privé",
+    title: "9 questions. Environ 60 secondes.",
+    sub: "Aucun nom requis. Rien n'est partagé avec qui que ce soit.",
+    progress: "Question {n} sur {total}",
+    selectAll: "Cochez tout ce qui s'applique",
+    required: "Choisissez une réponse pour continuer",
+    finishing: "Lecture de vos réponses…",
+  },
+
+  result: {
+    kicker: "Votre résultat",
+    yourType: "Votre profil",
+    theGap: "Votre écart",
+    gapUnit: "minutes",
+    gapExplain:
+      "Vous êtes à {now}. Vous visez {want}. Cet écart se travaille.",
+    whatNow: "Ce que cela signifie",
+    whyFailed: "Pourquoi ce que vous avez essayé n'a pas tenu",
+    redFlagTitle: "À lire d'abord",
+    offerLead: "Ne nous croyez pas sur parole",
+  },
+
+  offer: {
+    testName: "Le Reset de 10 jours",
+    sprintName: "Le Sprint Endurance de 30 jours",
+    testPitch:
+      "Mesurez-vous avant de commencer. Faites les 10 jours. Mesurez à nouveau à la fin. Si le chiffre n'a pas bougé, vous le saurez en 10 jours au lieu d'une année de plus à vous poser la question.",
+    includes: "Ce qui est inclus",
+    guarantee:
+      "Faites les 10 jours et les deux mesures. Si votre chiffre n'a pas bougé, écrivez-nous et nous vous remboursons.",
+    payWith: "Payer avec",
+    momo: "Mobile Money",
+    card: "Carte bancaire",
+    securePrivate: "Facturation discrète",
+    descriptorNote:
+      "Votre relevé affiche METRON. Rien d'autre. Aucun nom réel n'est requis pour ouvrir un compte.",
+    processing: "Ouverture du paiement sécurisé…",
+    comingSoon: "Le paiement est en cours de connexion",
+    comingSoonBody:
+      "Le paiement n'est pas encore actif. Laissez-nous un contact et nous ouvrirons votre compte dès que ce sera prêt.",
+  },
+
+  privacy: {
+    title: "Personne n'est obligé de le savoir",
+    b1: "Pas de vrai nom. Un pseudo suffit.",
+    b2: "Votre relevé affiche METRON — rien d'autre.",
+    b3: "Les notifications disent « Votre séance est prête. » Jamais plus.",
+    b4: "Verrouillez l'application avec un code PIN.",
+    b5: "Écrivez-nous depuis votre compte. Aucun WhatsApp nécessaire, sauf si vous le souhaitez.",
+    b6: "Supprimez votre compte et vos données à tout moment.",
+  },
+
+  app: {
+    greeting: "Jour {day}",
+    todayFocus: "Objectif du jour",
+    dailyRules: "Chaque jour, sans exception",
+    todayTasks: "Aujourd'hui",
+    session: "Séance d'entraînement",
+    noSession:
+      "Pas de séance aujourd'hui. Le repos fait partie du protocole.",
+    completed: "{done} sur {total} fait",
+    streak: "{n} jours d'affilée",
+    lockedTitle: "Pas encore",
+    lockedBody:
+      "Ce jour s'ouvre au Jour {day}. Terminez d'abord aujourd'hui.",
+    dayComplete: "Jour {day} terminé",
+    nextUp: "Ensuite",
+    gateIncomplete: "Terminez d'abord la liste du jour — il en reste {n}",
+    gateTooSoon: "Demain s'ouvre dans {n}h",
+    gateWhy:
+      "Les jours sont espacés de 18 heures exprès. Si vous les enchaînez, votre chiffre du Jour 12 ne veut rien dire, et le remboursement non plus.",
+    markerTooSoon: "Déjà enregistré aujourd'hui. Prochain dans {n}h.",
+  },
+
+  measure: {
+    title: "Mesure",
+    baseline: "Mesure de départ",
+    retest: "Nouvelle mesure",
+    notYet: "Pas encore enregistré",
+    minutes: "min",
+    seconds: "sec",
+    mode: "Comment l'avez-vous fait ?",
+    modeSolo: "Tout seul",
+    modePartner: "Avec une partenaire",
+    modeLocked:
+      "Le Jour 12 doit se faire de la même façon que le Jour 1. Sinon les deux chiffres ne veulent rien dire.",
+    conditions: "Vérifiez ces 4 points d'abord",
+    cond1: "2 jours depuis votre dernière fois",
+    cond2: "Pas d'alcool aujourd'hui",
+    cond3: "Pas de séance depuis hier",
+    cond4: "Vous chronométrez comme au Jour 1",
+    confirmAll: "Cochez les 4. Si un point cloche, faites-le demain.",
+    howTo: "Comment faire",
+    step1: "Appuyez sur DÉMARRER dès que vous commencez.",
+    step2: "Faites normalement. Ne vous retenez pas. N'utilisez aucune technique.",
+    step3: "Appuyez sur STOP dès que vous finissez.",
+    step4: "C'est votre chiffre. Ne notez rien — l'application le garde.",
+    whyNormal:
+      "N'essayez PAS de tenir. Un bon chiffre aujourd'hui rend le Jour 12 moins bon. Vous voulez le chiffre honnête.",
+    markers: "Indicateurs quotidiens",
+    erection: "Qualité de l'érection",
+    energy: "Énergie",
+    libido: "Libido",
+    stress: "Stress",
+    sleep: "Sommeil",
+    stomach: "Confort digestif",
+    control: "Contrôle de l'excitation",
+    scale: "1 = faible, 5 = excellent",
+    recordBaseline: "Enregistrer ma mesure de départ",
+    recordRetest: "Enregistrer ma nouvelle mesure",
+    change: "Écart",
+    improved: "Votre chiffre a bougé",
+    noChange: "Votre chiffre est resté stable",
+    down: "Votre chiffre a baissé",
+  },
+
+  progress: {
+    title: "Progrès",
+    theNumber: "Votre chiffre",
+    vsBaseline: "vs. départ",
+    markersTrend: "Votre ressenti au fil des jours",
+    noData: "Enregistrez votre mesure de départ pour lancer le graphique.",
+    shareTitle: "Partager votre résultat",
+    shareBody:
+      "Faites une capture d'écran et envoyez-la-nous si vous voulez qu'elle soit publiée. Nous ne publions jamais rien sans votre accord.",
+  },
+
+  lessons: {
+    title: "Leçons",
+    sub: "Lectures courtes. Une idée par leçon.",
+    minRead: "{n} min de lecture",
+    read: "Lire",
+    unread: "Nouveau",
+  },
+
+  messages: {
+    title: "Fil privé",
+    sub: "Vous et votre coach uniquement. Aucun nom requis.",
+    placeholder: "Écrivez votre message…",
+    send: "Envoyer",
+    empty: "Posez n'importe quelle question. Rien ici n'est partagé.",
+  },
+
+  settings: {
+    title: "Réglages",
+    language: "Langue",
+    pin: "Verrouillage par code PIN",
+    pinOn: "Exiger un code PIN pour ouvrir Metron",
+    notifications: "Formulation des notifications",
+    notifNeutral: "Neutre (recommandé)",
+    notifNeutralHelp:
+      "Chaque alerte affiche « Votre séance est prête. »",
+    account: "Compte",
+    deleteAccount: "Supprimer mon compte et toutes mes données",
+    deleteWarn: "Cette action est irréversible.",
+    region: "Région",
+    regionHelp:
+      "Adapte les exemples de repas à ce que vous pouvez réellement acheter.",
+  },
+
+  medical: {
+    title: "Ceci est un entraînement, pas un soin médical",
+    body:
+      "Metron est un programme d'éducation et d'entraînement. Il ne diagnostique ni ne traite aucune maladie. Consultez un médecin si le problème est apparu soudainement, si vous avez des douleurs, si vous avez aussi du mal à obtenir ou maintenir une érection, ou si cela a commencé après la prise d'un médicament.",
+    seeDoctor: "Consultez un médecin d'abord",
+  },
+
+  common: {
+    day: "Jour",
+    of: "sur",
+    minutes: "minutes",
+    yes: "Oui",
+    no: "Non",
+    optional: "Facultatif",
+    loading: "Chargement…",
+  },
+} as const;

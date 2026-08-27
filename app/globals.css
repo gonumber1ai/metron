@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/* ============================================================
+   METRON DESIGN SYSTEM
+   Dark = the app (opened at night, often beside a partner).
+   Light = the editorial/funnel pages (reads like an article).
+   ============================================================ */
+
+@theme {
+  /* Core surfaces (dark / app).
+     Deeper base than before, and each step up is a real step, so cards
+     actually read as raised instead of blending into the background. */
+  --color-ink-900: #080C0F;
+  --color-ink-850: #0C1216;
+  --color-ink-800: #11191E;
+  --color-ink-700: #182228;
+  --color-ink-600: #253239;
+  --color-ink-500: #3A4A52;
+
+  /* Text */
+  --color-bone: #F4F7F6;
+  --color-mute: #9FAEB3;
+  --color-faint: #67787E;
+
+  /* Accent — health, progress, "go" */
+  --color-jade-700: #0B7D5F;
+  --color-jade-600: #0E9B75;
+  --color-jade: #1CC79A;
+  --color-jade-300: #6FE0BE;
+  --color-jade-050: #0C2C25;
+
+  /* Data highlight / warnings — used sparingly */
+  --color-amber: #F0A93C;
+  --color-amber-050: #2E2214;
+
+  /* Errors only. Red appears nowhere else. */
+  --color-alert: #E5484D;
+
+  /* Editorial (light funnel pages) */
+  --color-paper: #FCFBF8;
+  --color-paper-2: #F2EFE8;
+  --color-graphite: #14181A;
+  --color-graphite-2: #4C555A;
+  --color-rule: #E0DACE;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ink-900);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.editorial {
+  background: var(--color-paper);
+  color: var(--color-graphite);
+}
+
+/* The measurement number is the hero of the whole product. */
+.metric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+}
+
+/* A raised surface: hairline highlight along the top edge, soft drop below.
+   This is what stops the dark UI reading as a flat sheet of grey. */
+.card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-ink-800) 100%, white 3%) 0%,
+    var(--color-ink-800) 60%
+  );
+  border: 1px solid var(--color-ink-600);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 8px 24px -12px rgb(0 0 0 / 0.6);
+}
+
+/* The primary action. It should look like the only thing worth pressing. */
+.btn-go {
+  background: linear-gradient(180deg, var(--color-jade) 0%, var(--color-jade-600) 100%);
+  color: #04140F;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 6px 20px -6px color-mix(in srgb, var(--color-jade) 55%, transparent);
+}
+.btn-go:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.15),
+    0 2px 8px -4px color-mix(in srgb, var(--color-jade) 40%, transparent);
+}
+
+.btn-stop {
+  background: linear-gradient(180deg, var(--color-amber) 0%, #D08A22 100%);
+  color: #1B1204;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 6px 20px -6px color-mix(in srgb, var(--color-amber) 50%, transparent);
+}
+.btn-stop:active {
+  transform: translateY(1px);
+}
+
+/* A soft glow behind a hero number so it reads as lit rather than printed. */
+.glow-jade {
+  position: relative;
+}
+.glow-jade::before {
+  content: "";
+  position: absolute;
+  inset: -40% -20%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-jade) 16%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-jade > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Large tap targets — budget Android, outdoors, one-handed at night */
+button,
+a[role="button"],
+.tap {
+  min-height: 44px;
+}
+
+::selection {
+  background: var(--color-jade);
+  color: #04120e;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-jade);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.no-bar::-webkit-scrollbar {
+  display: none;
+}
+.no-bar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
