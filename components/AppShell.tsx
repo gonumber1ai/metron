@@ -9,6 +9,7 @@ import { useMetron } from "./useMetron";
 import { latest, formatDuration } from "@/lib/store";
 import { totalDays } from "@/lib/content/protocol";
 import { LinkPending } from "./Pending";
+import { NavPendingProvider, NavPendingProbe } from "./NavOverlay";
 import { NotifyBell } from "./NotifyBell";
 import { Logo, LogoMark } from "./Logo";
 
@@ -37,6 +38,8 @@ const PATHS = {
   messages: "M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12Z",
   settings:
     "M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7.4-2.2a7.6 7.6 0 0 0 0-2.6l2-1.5-2-3.4-2.3 1a7.7 7.7 0 0 0-2.3-1.3L14.4 3H9.6l-.4 2.5a7.7 7.7 0 0 0-2.3 1.3l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 2.6l-2 1.5 2 3.4 2.3-1a7.7 7.7 0 0 0 2.3 1.3l.4 2.5h4.8l.4-2.5a7.7 7.7 0 0 0 2.3-1.3l2.3 1 2-3.4-2-1.5Z",
+  // a checklist — the rules are a standing list, not a lesson
+  rules: "M4 6h10M4 12h10M4 18h10M17.5 6.5l1.5 1.5 3-3M17.5 12.5l1.5 1.5 3-3",
   menu: "M4 7h16M4 12h16M4 17h16",
   close: "M6 6l12 12M18 6 6 18",
 };
@@ -67,6 +70,7 @@ export function AppShell({
   ];
 
   const secondary: Item[] = [
+    { href: `${base}/rules`, label: t.nav.rules, icon: <Icon d={PATHS.rules} /> },
     { href: `${base}/lessons`, label: t.nav.lessons, icon: <Icon d={PATHS.lessons} /> },
     { href: `${base}/messages`, label: t.nav.messages, icon: <Icon d={PATHS.messages} /> },
     { href: `${base}/settings`, label: t.nav.settings, icon: <Icon d={PATHS.settings} /> },
@@ -80,6 +84,7 @@ export function AppShell({
   }
 
   return (
+    <NavPendingProvider label={t.nav.opening}>
     <div className="min-h-screen md:flex">
       {/* ------------------------------------------------ desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-ink-700 bg-ink-800 p-4 md:flex">
@@ -102,6 +107,7 @@ export function AppShell({
               {it.icon}
               <span className="flex-1">{it.label}</span>
               <LinkPending className="h-4 w-4 text-jade" />
+              <NavPendingProbe />
             </Link>
           ))}
         </nav>
@@ -177,6 +183,7 @@ export function AppShell({
             <span className="absolute inset-x-0 top-1 grid place-items-center">
               <LinkPending className="h-4 w-4 text-jade" />
             </span>
+            <NavPendingProbe />
           </Link>
         ))}
         <button
@@ -212,7 +219,7 @@ export function AppShell({
                 >
                   {it.icon}
                   <span className="flex-1">{it.label}</span>
-                  <LinkPending className="h-4 w-4 text-jade" />
+                  <NavPendingProbe />
                 </Link>
               ))}
             </nav>
@@ -230,5 +237,6 @@ export function AppShell({
         </div>
       )}
     </div>
+    </NavPendingProvider>
   );
 }

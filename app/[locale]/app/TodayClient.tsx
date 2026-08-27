@@ -29,7 +29,17 @@ function cycleCount(spec: string): number {
 export function TodayClient({ locale }: { locale: string }) {
   const t = getDict(locale);
   const { state, mutate, ready } = useMetron(locale);
-  const [rulesOpen, setRulesOpen] = useState(false);
+  // Open for his first three days, collapsed after that. These rules run from
+  // Day 0 to the end and they are the part most men skip, so a new man should
+  // meet them without having to press anything; a man on Day 9 already knows
+  // them and wants his session, not a wall of food advice.
+  //
+  // Derived rather than seeded into useState: state arrives from localStorage
+  // in an effect, so on the first render every man looks like Day 0, and a
+  // useState initialiser would latch that open for all of them. Null means "he
+  // has not touched it, use the default".
+  const [rulesToggled, setRulesToggled] = useState<boolean | null>(null);
+  const rulesOpen = rulesToggled ?? (ready && state.day <= 2);
 
   const protocol = getProtocol(locale);
   const day = getDay(locale, state.day) ?? protocol.days[0];
@@ -304,7 +314,7 @@ export function TodayClient({ locale }: { locale: string }) {
       <section className="mt-8 rounded-2xl card">
         <button
           type="button"
-          onClick={() => setRulesOpen(!rulesOpen)}
+          onClick={() => setRulesToggled(!rulesOpen)}
           aria-expanded={rulesOpen}
           className="flex w-full items-center justify-between px-5 py-4 text-left"
         >
@@ -334,6 +344,12 @@ export function TodayClient({ locale }: { locale: string }) {
                 </li>
               ))}
             </ul>
+            <Link
+              href={`/${locale}/app/rules`}
+              className="mt-5 inline-flex text-[0.9rem] font-bold text-jade hover:underline"
+            >
+              {t.nav.rules} →
+            </Link>
           </div>
         )}
       </section>
