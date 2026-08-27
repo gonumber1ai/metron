@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
-import { sendPurchaseConfirmation, looksLikeEmail } from "@/lib/email/send";
+import { sendPurchaseConfirmation, sendAdminAlert, looksLikeEmail } from "@/lib/email/send";
 import { recordPayment, recordIntake } from "@/lib/supabase/server";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
 
@@ -52,6 +52,18 @@ export async function POST(req: Request) {
       amountMinor: m?.amount ?? m?.receipt?.amount ?? 0,
     });
 
+    void sendAdminAlert({
+      subject: `Sale — ${wPlan === "sprint" ? "30-day" : "10-day"} (card)`,
+      lines: [
+        `plan        ${wPlan}`,
+        `rail        whop (card)`,
+        `amount      ${m?.amount ?? "?"} ${(m?.currency ?? "USD").toUpperCase()}`,
+        `email       ${wEmail ?? "(none)"}`,
+        `access code ${ref}`,
+        `membership  ${membershipId}`,
+      ],
+    });
+
     const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan: wPlan });
     res.cookies.set(
       cookieName,
@@ -100,6 +112,19 @@ export async function POST(req: Request) {
     plan,
     currency: "XAF",
     amountMinor: tx!.amount ?? 0,
+  });
+
+  void sendAdminAlert({
+    subject: `Sale — ${plan === "sprint" ? "30-day" : "10-day"} (Mobile Money)`,
+    lines: [
+      `plan        ${plan}`,
+      `rail        fapshi (Mobile Money)`,
+      `amount      ${tx!.amount ?? "?"} XAF`,
+      `payer       ${tx!.payerName ?? "(none)"}`,
+      `email       ${tx!.email ?? "(none)"}`,
+      `access code ${ref}`,
+      `transaction ${transId}`,
+    ],
   });
 
   const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan });

@@ -69,12 +69,12 @@ const EN: Marketing = {
 
 
   offerIntro: {
-    h: "The full programme costs 175,000 FCFA. Do not pay that today.",
+    h: "The full programme costs 69,000 FCFA. Do not pay that today.",
     p: [
       "You do not know yet whether this works on you, and we have not earned it.",
       "So do 10 days first, for 7,500 FCFA. Less than a meal out.",
       "If you are not lasting longer at the end of it, tell us and we send your money back. You will have lost nothing but ten days, and you will know for certain instead of wondering for another year.",
-      "If it does work, the 7,500 comes off the 175,000.",
+      "If it does work, the 7,500 comes off the 69,000.",
     ],
   },
 
@@ -174,12 +174,12 @@ const FR: Marketing = {
 
 
   offerIntro: {
-    h: "Le programme complet coûte 175 000 FCFA. Ne payez pas ça aujourd'hui.",
+    h: "Le programme complet coûte 69 000 FCFA. Ne payez pas ça aujourd'hui.",
     p: [
       "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité.",
       "Alors faites 10 jours d'abord, pour 7 500 FCFA. Moins cher qu'un repas dehors.",
       "Si vous ne durez pas plus longtemps à la fin, dites-le-nous et on vous renvoie votre argent. Vous n'aurez rien perdu que dix jours, et vous saurez avec certitude au lieu de vous demander encore un an.",
-      "Et si ça marche, les 7 500 sont déduits des 175 000.",
+      "Et si ça marche, les 7 500 sont déduits des 69 000.",
     ],
   },
 

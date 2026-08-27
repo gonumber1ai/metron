@@ -47,6 +47,7 @@ export async function GET(req: Request) {
     ENTITLEMENT_SECRET: shape(process.env.ENTITLEMENT_SECRET),
     RESEND_API_KEY: shape(process.env.RESEND_API_KEY),
     EMAIL_FROM: process.env.EMAIL_FROM ?? "MISSING",
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL ?? "MISSING — no sale notifications",
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "MISSING",
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "MISSING",
     SUPABASE_SERVICE_ROLE_KEY: shape(process.env.SUPABASE_SERVICE_ROLE_KEY),

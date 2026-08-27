@@ -183,6 +183,31 @@ export async function sendLeadAck(opts: { to: string; locale: Locale }): Promise
   return send({ to: opts.to, subject: c.subject, html, text: toText(html) });
 }
 
+/* ------------------------------------------------------------------ */
+/* Admin alert                                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Tell the owner a sale happened.
+ *
+ * Deliberately plain text and deliberately detailed: the point is to be able to
+ * read it on a phone lock screen and know whether to do anything. It carries
+ * the access code because the single most common support request will be a man
+ * who cannot get back in, and the answer is already in this email.
+ */
+export async function sendAdminAlert(input: {
+  subject: string;
+  lines: string[];
+}): Promise<boolean> {
+  const to = process.env.ADMIN_EMAIL;
+  if (!to) return false;
+  const body = input.lines.join("\n");
+  const html = `<pre style="font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;">${body
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")}</pre>`;
+  return send({ to, subject: input.subject, html, text: body });
+}
+
 /** Only send to something that looks like an email — leads may be phone numbers. */
 export function looksLikeEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());

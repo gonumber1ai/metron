@@ -234,5 +234,5 @@ vagueness now just makes him feel cheated.
 | Day 12 | Retest day | Same conditions, same mode, don't change the method |
 | Day 13 | **The upgrade** | His own two numbers, then the 30-day with the 7,500 credited |
 
-Day 13 is the one that matters. Pitch against his own graph, credit the trial toward the 175,000,
+Day 13 is the one that matters. Pitch against his own graph, credit the trial toward the 69,000,
 and give the credit a 72-hour window so he decides while he's still in it.

@@ -50,7 +50,7 @@ export function isConfigured(): boolean {
  * is conventionally a DECIMAL MAJOR unit (15.00 means fifteen dollars).
  *
  * Get this backwards and you either charge $1,500 for a $15 product or 15
- * cents for a $350 one. Neither is survivable.
+ * cents for a $125 one. Neither is survivable.
  *
  * Default assumes major units. If a live test shows the wrong amount on the
  * Whop checkout page, flip WHOP_PRICE_IN_MINOR_UNITS=1 and it sends cents.
@@ -70,7 +70,10 @@ function toWhopPrice(amountMinor: number, currency: Currency): number {
  * sprint price, so a promo or an FX rounding difference cannot flip it.
  */
 export function planFromAmount(amountMinor: number, currency: Currency): Plan {
-  const threshold = currency === "XAF" ? 100_000 : 10_000; // 100k FCFA | $100.00
+  // Sits between the two real prices on each rail: 7,500 vs 69,000 FCFA, and
+  // $15 vs $125. Far enough from both that a promo or an FX wobble cannot
+  // flip a 10-day buyer into the 30-day programme or the reverse.
+  const threshold = currency === "XAF" ? 30_000 : 5_000; // 30k FCFA | $50.00
   return amountMinor >= threshold ? "sprint" : "test";
 }
 

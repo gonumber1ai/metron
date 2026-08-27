@@ -38,14 +38,14 @@ export const priceBook: Record<string, Price[]> = {
     {
       plan: "sprint",
       currency: "XAF",
-      amountMinor: 175000,
+      amountMinor: 69000,
       provider: "fapshi",
-      display: "175 000 FCFA",
+      display: "69 000 FCFA",
     },
   ],
   default: [
     { plan: "test", currency: "USD", amountMinor: 1500, provider: "whop", display: "$15" },
-    { plan: "sprint", currency: "USD", amountMinor: 35000, provider: "whop", display: "$350" },
+    { plan: "sprint", currency: "USD", amountMinor: 12500, provider: "whop", display: "$125" },
   ],
 };
 
@@ -71,8 +71,8 @@ function xafOverride(): number | null {
 
 function applyOverride(p: Price): Price {
   const o = xafOverride();
-  // Only the 10-day. The 175,000 anchor has to stay real or the offer page
-  // reads "the full programme costs 175,000 FCFA" directly above a 500 FCFA
+  // Only the 10-day. The 69,000 anchor has to stay real or the offer page
+  // reads "the full programme costs 69,000 FCFA" directly above a 500 FCFA
   // price for that same programme.
   if (o === null || p.currency !== "XAF" || p.plan !== "test") return p;
   return { ...p, amountMinor: o, display: `${o.toLocaleString("fr-FR")} FCFA` };

@@ -31,7 +31,7 @@ tested Direct Pay in **sandbox**. Point `FAPSHI_BASE_URL` at
 > METRON is a paid men's health programme delivered entirely in the browser.
 > A visitor completes a short private assessment, receives a personalised
 > result, and can then buy a 10-day programme for 7,500 FCFA or a 30-day
-> programme for 175,000 FCFA. Payment unlocks a day-by-day plan inside the
+> programme for 69,000 FCFA. Payment unlocks a day-by-day plan inside the
 > web app. There is no physical product and no recurring billing — each
 > purchase is a single one-time charge.
 >
