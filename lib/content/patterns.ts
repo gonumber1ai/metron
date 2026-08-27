@@ -17,9 +17,9 @@ const EN: Record<PatternKey, PatternCopy> = {
     strap:
       "Your body can already do this. Your head gets in the way.",
     whatItMeans: [
-      "You last meaningfully longer on your own than you do with a partner. That single fact rules out most of what gets sold to men like you — there is nothing wrong with your equipment, and a numbing spray is treating a problem you do not have.",
-      "What happens instead is a loop. You start monitoring yourself. Monitoring raises arousal and tightens everything up. The higher arousal brings the finish closer, which confirms the fear, which makes you monitor harder next time.",
-      "Every round of that loop makes the pattern more automatic. That is why it has been getting worse rather than better.",
+      "You last much longer on your own than with a partner. That one fact rules out most of what gets sold to men like you. Your body works.",
+      "It is a loop. You watch yourself. Watching makes you more aroused. More aroused ends it sooner. That proves the fear right, so next time you watch harder.",
+      "Every round makes it more automatic. That is why it keeps getting worse instead of better.",
     ],
     whyFailed: [
       {
@@ -36,7 +36,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "You do not need a stronger product. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
+      "You do not need a stronger product. Follow the plan the app lays out for you, day by day. If you are not lasting longer at the end of it, we refund you.",
   },
 
   conditioned: {
@@ -44,9 +44,9 @@ const EN: Record<PatternKey, PatternCopy> = {
     strap:
       "Your body learned to finish fast. It can learn the opposite.",
     whatItMeans: [
-      "You finish at roughly the same point whether you are alone or with a partner. That points away from nerves and toward conditioning — your body has learned a fast route from arousal to finish, and it now takes that route automatically.",
-      "Most men train this accidentally. Years of rushing, of finishing quickly and quietly, of high-intensity stimulation — the nervous system is very good at learning whatever you practise, and you have been practising speed.",
-      "The good news is that a learned response is the most changeable kind there is. You are not fighting your anatomy. You are overwriting a habit.",
+      "Alone or with a partner, you finish at about the same point. That is not nerves. That is a trained reflex.",
+      "Years of rushing taught your body a fast route from aroused to finished. It got good at it, the way it gets good at anything you repeat.",
+      "What was trained can be retrained. That is the whole job.",
     ],
     whyFailed: [
       {
@@ -63,7 +63,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "What your body learned, it can unlearn. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
+      "What your body learned, it can unlearn. Follow the plan the app lays out for you, day by day. If you are not lasting longer at the end of it, we refund you.",
   },
 
   dependent: {
@@ -90,7 +90,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Ten days without the pill. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
+      "Ten days without the pill. Follow the plan the app lays out for you, day by day. If you are not lasting longer at the end of it, we refund you.",
   },
 
   depleted: {
@@ -98,9 +98,9 @@ const EN: Record<PatternKey, PatternCopy> = {
     strap:
       "You are trying to fix this on an empty tank.",
     whatItMeans: [
-      "Your answers point at the physical base rather than the technique — poor sleep, little movement, ongoing stomach trouble, or all three.",
-      "This matters more than most men think. Sleep drives testosterone, erection quality and how reactive your nervous system is. Persistent gastric trouble drags on sleep, appetite and energy at the same time. Sitting all day reduces the circulation the whole system depends on.",
-      "Train ejaculatory control on top of that base and you get a fraction of the result. Fix the base first and some of the problem resolves without any technique at all.",
+      "Your answers point at your body, not your technique. Bad sleep, little movement, a stomach that is not right.",
+      "You are asking for control at eleven at night from a system that ran out at six.",
+      "This is the fastest one to fix, and nobody sells it to you because it is not exciting.",
     ],
     whyFailed: [
       {
@@ -117,7 +117,7 @@ const EN: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Fill the tank and the rest moves fast. Follow the plan the app lays out for you, day by day. If your duration has not improved at the end of it, we refund you.",
+      "Fill the tank and the rest moves fast. Follow the plan the app lays out for you, day by day. If you are not lasting longer at the end of it, we refund you.",
   },
 };
 
@@ -127,9 +127,9 @@ const FR: Record<PatternKey, PatternCopy> = {
     strap:
       "Votre corps en est déjà capable. C'est la tête qui bloque.",
     whatItMeans: [
-      "Vous durez nettement plus longtemps seul qu'avec une partenaire. Ce seul fait écarte la majorité de ce qu'on vend aux hommes comme vous : votre corps fonctionne, et un spray anesthésiant traite un problème que vous n'avez pas.",
-      "Ce qui se passe, c'est une boucle. Vous commencez à vous surveiller. Cette surveillance augmente l'excitation et crispe tout. L'excitation plus haute rapproche la fin, ce qui confirme la peur, ce qui vous fait surveiller encore plus la fois suivante.",
-      "Chaque tour de cette boucle rend le schéma plus automatique. C'est pour cela que la situation empire au lieu de s'améliorer.",
+      "Vous durez bien plus longtemps seul qu'avec une partenaire. Ce seul fait écarte la majorité de ce qu'on vend aux hommes comme vous. Votre corps fonctionne.",
+      "C'est une boucle. Vous vous surveillez. La surveillance vous excite davantage. Plus excité, ça finit plus tôt. Ça donne raison à la peur, alors la fois d'après vous surveillez encore plus.",
+      "Chaque tour rend le schéma plus automatique. C'est pour ça que ça empire au lieu de s'améliorer.",
     ],
     whyFailed: [
       {
@@ -146,7 +146,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Vous n'avez pas besoin d'un produit plus fort. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
+      "Vous n'avez pas besoin d'un produit plus fort. Suivez le plan que l'application vous donne, jour après jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
   },
 
   conditioned: {
@@ -154,9 +154,9 @@ const FR: Record<PatternKey, PatternCopy> = {
     strap:
       "Votre corps a appris à finir vite. Il peut apprendre l'inverse.",
     whatItMeans: [
-      "Vous finissez à peu près au même moment, seul ou accompagné. Cela oriente non pas vers le stress mais vers le conditionnement : votre corps a appris un chemin rapide entre l'excitation et la fin, et il l'emprunte désormais tout seul.",
-      "La plupart des hommes s'entraînent à cela sans le vouloir. Des années à se dépêcher, à finir vite et discrètement, avec une stimulation très intense — le système nerveux apprend très bien ce qu'on répète, et vous avez répété la vitesse.",
-      "La bonne nouvelle : une réponse apprise est ce qu'il y a de plus modifiable. Vous ne luttez pas contre votre anatomie. Vous réécrivez une habitude.",
+      "Seul ou avec une partenaire, vous finissez à peu près au même moment. Ce n'est pas le stress. C'est un réflexe entraîné.",
+      "Des années à se dépêcher ont appris à votre corps un chemin rapide entre l'excitation et la fin. Il est devenu bon à ça, comme il devient bon à tout ce qu'on répète.",
+      "Ce qui a été appris peut être réappris. C'est tout le travail.",
     ],
     whyFailed: [
       {
@@ -173,7 +173,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Ce que votre corps a appris, il peut le désapprendre. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
+      "Ce que votre corps a appris, il peut le désapprendre. Suivez le plan que l'application vous donne, jour après jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
   },
 
   dependent: {
@@ -200,7 +200,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Dix jours sans comprimé. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
+      "Dix jours sans comprimé. Suivez le plan que l'application vous donne, jour après jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
   },
 
   depleted: {
@@ -208,9 +208,9 @@ const FR: Record<PatternKey, PatternCopy> = {
     strap:
       "Vous essayez de régler ça avec le réservoir vide.",
     whatItMeans: [
-      "Vos réponses pointent vers la base physique plutôt que vers la technique — mauvais sommeil, peu de mouvement, troubles digestifs persistants, ou les trois.",
-      "Cela compte plus que la plupart des hommes ne le pensent. Le sommeil gouverne la testostérone, la qualité de l'érection et la réactivité de votre système nerveux. Des troubles gastriques persistants pèsent en même temps sur le sommeil, l'appétit et l'énergie. Rester assis toute la journée réduit la circulation dont tout le système dépend.",
-      "Entraîner le contrôle éjaculatoire sur cette base-là ne donne qu'une fraction du résultat. Réparez la base d'abord et une partie du problème se règle sans aucune technique.",
+      "Vos réponses pointent vers votre corps, pas vers votre technique. Mauvais sommeil, peu de mouvement, un estomac qui ne va pas.",
+      "Vous demandez du contrôle à onze heures du soir à un système qui était à sec à six heures.",
+      "C'est le plus rapide à réparer, et personne ne vous le vend parce que ce n'est pas excitant.",
     ],
     whyFailed: [
       {
@@ -227,7 +227,7 @@ const FR: Record<PatternKey, PatternCopy> = {
       },
     ],
     bridge:
-      "Remplissez le réservoir et le reste suit vite. Suivez le plan que l'application vous donne, jour après jour. Si votre durée ne s'est pas améliorée à la fin, on vous rembourse.",
+      "Remplissez le réservoir et le reste suit vite. Suivez le plan que l'application vous donne, jour après jour. Si vous ne durez pas plus longtemps à la fin, on vous rembourse.",
   },
 };
 

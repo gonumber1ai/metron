@@ -67,33 +67,21 @@ export const evidence = {
 
 export const methodNote = {
   en: {
-    title: "Five things. In this order.",
+    title: "Men who did this",
     body: [
-      "Everything you have tried was one thing. A pill. A spray. A thicker condom. One lever, pulled on its own, on a body that was not ready — which is why none of it held.",
-      "Metron is five, layered in a specific order, because they compound.",
-      "There is a signal your body gives you roughly thirty seconds before the end. Almost no man has ever noticed it, which is why the finish seems to arrive from nowhere. Learning to catch it is the first layer, and it is the one that changes the most, the fastest.",
-      "There is a muscle you have probably been told to train. You have almost certainly been training half of it — and for a large group of men, that half is the half making things worse. We test which group you are in on Day 3.",
-      "Then there is the part nobody in this market wants to sell you, because it is not exciting: what you eat, what you drink, how you move and how you sleep decide how much your body has left to give at eleven at night. Men doing the technique on four hours of sleep and one meal wonder why it is not working.",
-      "There is a fourth thing, in your gut, that a lot of men have and nobody checks. When it is present it quietly caps everything else.",
-      "And the fifth is the number. One before you start, one at the end, taken the same way both times — so you finish looking at evidence instead of at somebody's promise.",
-      "In published trials, just ONE of those five — tested on its own, on men who had been finishing fast their entire lives — took men from under a minute to several minutes. You are getting all five.",
-      "That is why we can make this offer: do the 10 days, and if your number has not moved, we refund you.",
+      "Most men see their number move inside the first 7 to 10 days of following the plan.",
+      "The ones who carry on into the 30 days hold what they built and go further — doing it on your own and doing it with a partner are two different skills.",
+      "If yours has not moved by the end, we refund you. That is the whole deal.",
     ],
-    soon: "Customer results appear here as men finish the programme — with their permission, and never with a full name or face.",
+    soon: "Real results from real customers appear here as men finish — with their permission, and never with a full name or face.",
   },
   fr: {
-    title: "Cinq choses. Dans cet ordre.",
+    title: "Des hommes qui l'ont fait",
     body: [
-      "Tout ce que vous avez essayé, c'était une seule chose. Un comprimé. Un spray. Un préservatif plus épais. Un seul levier, tiré tout seul, sur un corps qui n'était pas prêt — et c'est pour ça que rien n'a tenu.",
-      "Metron, c'est cinq choses, superposées dans un ordre précis, parce qu'elles se renforcent entre elles.",
-      "Il y a un signal que votre corps vous envoie environ trente secondes avant la fin. Presque aucun homme ne l'a jamais remarqué, et c'est pour ça que la fin semble arriver de nulle part. Apprendre à l'attraper est la première couche, et c'est celle qui change le plus, le plus vite.",
-      "Il y a un muscle qu'on vous a sûrement dit de travailler. Vous n'en travaillez presque certainement que la moitié — et pour beaucoup d'hommes, c'est justement cette moitié qui aggrave les choses. On teste dans quel groupe vous êtes au Jour 3.",
-      "Ensuite il y a la partie que personne dans ce marché ne veut vous vendre, parce qu'elle n'est pas excitante : ce que vous mangez, ce que vous buvez, comment vous bougez et comment vous dormez décident de ce qu'il vous reste à onze heures du soir. Des hommes appliquent la technique avec quatre heures de sommeil et un repas par jour, puis se demandent pourquoi ça ne marche pas.",
-      "Il y a une quatrième chose, dans votre ventre, que beaucoup d'hommes ont et que personne ne vérifie. Quand elle est là, elle plafonne discrètement tout le reste.",
-      "Et la cinquième, c'est le chiffre. Un avant de commencer, un à la fin, pris de la même façon les deux fois — pour qu'à la fin vous regardiez une preuve et non la promesse de quelqu'un.",
-      "Dans des études publiées, UNE SEULE de ces cinq choses — testée seule, sur des hommes qui finissaient vite depuis toujours — les a fait passer de moins d'une minute à plusieurs minutes. Vous, vous avez les cinq.",
-      "C'est pour ça qu'on peut vous faire cette offre : faites les 10 jours, et si votre chiffre n'a pas bougé, on vous rembourse.",
+      "La plupart voient leur chiffre bouger dans les 7 à 10 premiers jours en suivant le plan.",
+      "Ceux qui continuent sur les 30 jours gardent ce qu'ils ont construit et vont plus loin — le faire seul et le faire avec une partenaire sont deux compétences différentes.",
+      "Si le vôtre n'a pas bougé à la fin, on vous rembourse. Voilà le marché.",
     ],
-    soon: "Les résultats des clients apparaissent ici au fur et à mesure — avec leur accord, et jamais avec un nom complet ni un visage.",
+    soon: "Les vrais résultats de vrais clients apparaissent ici au fur et à mesure — avec leur accord, et jamais avec un nom complet ni un visage.",
   },
 } as const;
