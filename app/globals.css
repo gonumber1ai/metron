@@ -2,48 +2,71 @@
 
 /* ============================================================
    METRON DESIGN SYSTEM
+
+   The room is dark and the instrument is lit. That is the whole
+   idea: a near-black ground that is never flat, one green that
+   means go, one copper that means cost, and nothing else.
+
    Dark = the app (opened at night, often beside a partner).
    Light = the editorial/funnel pages (reads like an article).
    ============================================================ */
 
 @theme {
-  /* Core surfaces (dark / app).
-     Deeper base than before, and each step up is a real step, so cards
-     actually read as raised instead of blending into the background. */
-  --color-ink-900: #080C0F;
-  --color-ink-850: #0C1216;
-  --color-ink-800: #11191E;
-  --color-ink-700: #182228;
-  --color-ink-600: #253239;
-  --color-ink-500: #3A4A52;
+  /* ---------------------------------------------------- surfaces
+     A green-black rather than a blue-black, so the ground is
+     related to the accent instead of arguing with it. Pure #000
+     is avoided on purpose: it reads as a void, and every cheap
+     app on the store is pure black. Each step is a real step, so
+     a card is visibly raised off the page. */
+  --color-ink-900: #070D0F; /* page */
+  --color-ink-850: #0A1215; /* sunken wells, inputs */
+  --color-ink-800: #101A1D; /* card */
+  --color-ink-700: #17252A; /* rules, inactive track */
+  --color-ink-600: #22333A; /* borders */
+  --color-ink-500: #3B5058; /* muted borders, radio rings */
 
-  /* Text */
-  --color-bone: #F4F7F6;
-  --color-mute: #9FAEB3;
-  --color-faint: #67787E;
+  /* ------------------------------------------------------- text
+     Off-white, never #FFF. Pure white on near-black vibrates on
+     a cheap LCD and is genuinely harder to read at night. */
+  --color-bone: #EEF4F2;
+  --color-mute: #A2B3B6;
+  --color-faint: #6B7F84;
 
-  /* Accent — health, progress, "go" */
-  --color-jade-700: #0B7D5F;
-  --color-jade-600: #0E9B75;
-  --color-jade: #1CC79A;
-  --color-jade-300: #6FE0BE;
-  --color-jade-050: #0C2C25;
+  /* ----------------------------------------------------- accent
+     Health, progress, "go". Deepened from the old neon jade —
+     the brighter version read as a crypto app, and this one holds
+     its own against white text without glowing. */
+  --color-jade-700: #0A6B52;
+  --color-jade-600: #0D8A68;
+  --color-jade: #16BE92;
+  --color-jade-300: #6BDCBB;
+  --color-jade-050: #0A2A23;
 
-  /* Data highlight / warnings — used sparingly */
-  --color-amber: #F0A93C;
-  --color-amber-050: #2E2214;
+  /* ------------------------------------------------------ copper
+     Cost, caution, the things he has already paid for that did
+     not work. Warmer and less saturated than the old amber, which
+     read like a highlighter pen. */
+  --color-amber: #DE9A42;
+  --color-amber-050: #2A1E11;
 
   /* Errors only. Red appears nowhere else. */
   --color-alert: #E5484D;
 
-  /* Editorial (light funnel pages) */
+  /* -------------------------------------- editorial (light pages) */
   --color-paper: #FCFBF8;
   --color-paper-2: #F2EFE8;
   --color-graphite: #14181A;
   --color-graphite-2: #4C555A;
   --color-rule: #E0DACE;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* ------------------------------------------------------- type */
+  /* The next/font variables are --font-archivo / --font-inter. Naming a theme
+     token after the same variable it reads makes it self-referential, and the
+     fallback stack after it is silently thrown away. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
 }
 
@@ -59,60 +82,139 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Ambient light.
+   A dark page painted one flat colour looks like a switched-off
+   screen. One very soft pool of green at the top, fixed so it does
+   not travel while he scrolls, is the difference between "dark
+   theme" and "lit room". It is behind everything and catches no
+   clicks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      80rem 40rem at 50% -12rem,
+      color-mix(in srgb, var(--color-jade) 13%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      60rem 40rem at 100% 100%,
+      color-mix(in srgb, var(--color-jade-700) 10%, transparent) 0%,
+      transparent 70%
+    );
+}
+/* The grid.
+   A hairline technical grid over the ground, masked so it is strongest at the
+   top and gone by the fold. This is the thing that separates Metron from every
+   other product in this category: they are all soft, illustrated and friendly,
+   and a man does not want friendly here, he wants something that looks like it
+   measures. Barely visible on purpose — you should feel it, not read it. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(70rem 45rem at 50% -4rem, #000 0%, transparent 72%);
+  mask-image: radial-gradient(70rem 45rem at 50% -4rem, #000 0%, transparent 72%);
+}
+body.editorial::after {
+  content: none;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
 body.editorial {
   background: var(--color-paper);
   color: var(--color-graphite);
 }
+body.editorial::before {
+  content: none;
+}
+
+/* ------------------------------------------------------------------
+   Headings carry the display face. Set once here rather than as a
+   class on every h1, so a heading added later cannot forget it.
+   ------------------------------------------------------------------ */
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+}
 
 /* The measurement number is the hero of the whole product. */
 .metric {
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.035em;
-  line-height: 0.9;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
 }
 
-/* A raised surface: hairline highlight along the top edge, soft drop below.
-   This is what stops the dark UI reading as a flat sheet of grey. */
+/* A raised surface: hairline highlight along the top edge, soft drop
+   below. This is what stops the dark UI reading as a flat sheet. */
 .card {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-ink-800) 100%, white 3%) 0%,
-    var(--color-ink-800) 60%
+    color-mix(in srgb, var(--color-ink-800) 100%, white 4%) 0%,
+    var(--color-ink-800) 62%
   );
   border: 1px solid var(--color-ink-600);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.04),
-    0 1px 2px rgb(0 0 0 / 0.4),
-    0 8px 24px -12px rgb(0 0 0 / 0.6);
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 1px 2px rgb(0 0 0 / 0.5),
+    0 10px 30px -14px rgb(0 0 0 / 0.7);
 }
 
-/* The primary action. It should look like the only thing worth pressing. */
+/* The primary action. It should look like the only thing worth
+   pressing on the screen. */
 .btn-go {
-  background: linear-gradient(180deg, var(--color-jade) 0%, var(--color-jade-600) 100%);
-  color: #04140F;
+  background: linear-gradient(180deg, var(--color-jade-300) 0%, var(--color-jade) 45%, var(--color-jade-600) 100%);
+  color: #032018;
+  letter-spacing: -0.011em;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 6px 20px -6px color-mix(in srgb, var(--color-jade) 55%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 8px 24px -8px color-mix(in srgb, var(--color-jade) 55%, transparent);
 }
 .btn-go:active {
   transform: translateY(1px);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.15),
-    0 2px 8px -4px color-mix(in srgb, var(--color-jade) 40%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 3px 10px -5px color-mix(in srgb, var(--color-jade) 45%, transparent);
 }
 
 .btn-stop {
-  background: linear-gradient(180deg, var(--color-amber) 0%, #D08A22 100%);
+  background: linear-gradient(180deg, var(--color-amber) 0%, #B87C2A 100%);
   color: #1B1204;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 6px 20px -6px color-mix(in srgb, var(--color-amber) 50%, transparent);
+    0 8px 24px -8px color-mix(in srgb, var(--color-amber) 45%, transparent);
 }
 .btn-stop:active {
   transform: translateY(1px);
 }
 
-/* A soft glow behind a hero number so it reads as lit rather than printed. */
+/* A soft glow behind a hero number so it reads as lit rather than
+   printed. */
 .glow-jade {
   position: relative;
 }

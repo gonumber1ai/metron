@@ -29,7 +29,7 @@ export function AdminLogin() {
   return (
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
-      <main className="grid min-h-screen place-items-center bg-ink-900 px-5">
+      <main className="grid min-h-screen place-items-center px-5">
         <form onSubmit={submit} className="w-full max-w-xs">
           <span className="mb-8 inline-flex">
             <Logo size="sm" />

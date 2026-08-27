@@ -2,8 +2,8 @@
  * Payment abstraction.
  *
  * Two rails, one interface:
- *   Fapshi — MTN / Orange Mobile Money, XAF, Cameroon.
- *   Whop   — international cards, USD, acts as merchant of record.
+ *   Fapshi — MTN / Orange Mobile Money, XAF.
+ *   Whop   — cards, acts as merchant of record.
  *
  * Both are stubbed until credentials arrive. `createCheckout` returns
  * { status: "unavailable" } and the UI falls back to lead capture, so the
@@ -13,14 +13,17 @@
  * PaymentProvider plus rows in the price book. Nothing else changes.
  */
 
+/** non-breaking space, so "7 500 FCFA" can never wrap into "7" / "500 FCFA" */
+const NBSP = " ";
+
 export type Plan = "test" | "sprint";
-export type Currency = "XAF" | "USD";
+export type Currency = "XAF";
 export type ProviderId = "fapshi" | "whop";
 
 export type Price = {
   plan: Plan;
   currency: Currency;
-  /** minor units — 7500 XAF = 7500, $15.00 = 1500 */
+  /** XAF is a zero-decimal currency: 7500 means 7 500 francs, not 75.00 */
   amountMinor: number;
   provider: ProviderId;
   /** what the buyer sees */
@@ -28,60 +31,36 @@ export type Price = {
 };
 
 /**
- * Price book, keyed by country. One row per market, per plan.
- * Purchasing power differs enormously between markets — never a single
- * global price. `default` catches everything not listed.
+ * Price book. Everything is priced in francs.
+ *
+ * There used to be a second, dollar-priced book for "everywhere else", and it
+ * did real damage: any visitor the edge geo header could not place — which is
+ * every request in local development and plenty in production — fell through
+ * to it and was quoted $15 and $125. Worse, a Cameroonian buyer got BOTH
+ * books, so the Card tab beside Mobile Money read dollars while the page above
+ * it read francs.
+ *
+ * One currency, one set of numbers, both rails. Cameroon is the market; when
+ * a second one is worth pricing separately it gets its own entry here and its
+ * own numbers, chosen deliberately rather than inherited by accident.
  */
+const TEST_XAF = 7500;
+const SPRINT_XAF = 69000;
+
+const FCFA = (n: number) => `${n.toLocaleString("fr-FR")}${NBSP}FCFA`;
+
 export const priceBook: Record<string, Price[]> = {
-  CM: [
-    { plan: "test", currency: "XAF", amountMinor: 7500, provider: "fapshi", display: "7 500 FCFA" },
-    {
-      plan: "sprint",
-      currency: "XAF",
-      amountMinor: 69000,
-      provider: "fapshi",
-      display: "69 000 FCFA",
-    },
-  ],
   default: [
-    { plan: "test", currency: "USD", amountMinor: 1500, provider: "whop", display: "$15" },
-    { plan: "sprint", currency: "USD", amountMinor: 12500, provider: "whop", display: "$125" },
+    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF) },
+    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF) },
+    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "whop", display: FCFA(TEST_XAF) },
+    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "whop", display: FCFA(SPRINT_XAF) },
   ],
 };
 
-/**
- * Live-test override for the Mobile Money price.
- *
- * Set NEXT_PUBLIC_PRICE_OVERRIDE_XAF=500 to charge 500 FCFA instead of the
- * real price, so a real MTN or Orange payment can be run end to end without
- * spending 7,500 each time. Fapshi's floor is 100 XAF.
- *
- * NEXT_PUBLIC_ on purpose: the browser renders the price and the server
- * charges it, and those two must never disagree. One variable moves both.
- *
- * ⚠ REMOVE IT AFTER TESTING. While it is set, real buyers pay it too. The
- * health check reports it in bold for exactly that reason.
- */
-function xafOverride(): number | null {
-  const raw = process.env.NEXT_PUBLIC_PRICE_OVERRIDE_XAF;
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) && n >= 100 ? Math.round(n) : null;
-}
-
-function applyOverride(p: Price): Price {
-  const o = xafOverride();
-  // Only the 10-day. The 69,000 anchor has to stay real or the offer page
-  // reads "the full programme costs 69,000 FCFA" directly above a 500 FCFA
-  // price for that same programme.
-  if (o === null || p.currency !== "XAF" || p.plan !== "test") return p;
-  return { ...p, amountMinor: o, display: `${o.toLocaleString("fr-FR")} FCFA` };
-}
-
 export function getPrice(plan: Plan, country = "default"): Price {
   const rows = priceBook[country] ?? priceBook.default;
-  const row = rows.find((r) => r.plan === plan) ?? priceBook.default.find((r) => r.plan === plan)!;
-  return applyOverride(row);
+  return rows.find((r) => r.plan === plan) ?? priceBook.default.find((r) => r.plan === plan)!;
 }
 
 /**
@@ -101,15 +80,12 @@ export function getPriceFor(plan: Plan, provider: ProviderId, country = "default
 /**
  * Every price available for a market, so the offer page can show both rails.
  *
- * A market with its own book gets its local rail first and the card rail as the
- * alternative. Everywhere else gets the card rail only — note the explicit
- * `country !== "default"` guard, without which the default book concatenates
- * with itself and the offer page renders the same Card row twice.
+ * A market with its own book replaces the default outright rather than being
+ * concatenated onto it. Concatenating is what used to put a dollar Card row
+ * underneath a franc Mobile Money row on the same page.
  */
 export function getPrices(country = "default"): Price[] {
-  const local = country === "default" ? undefined : priceBook[country];
-  if (!local) return priceBook.default.map(applyOverride);
-  return [...local, ...priceBook.default].map(applyOverride);
+  return priceBook[country] ?? priceBook.default;
 }
 
 export type CheckoutInput = {

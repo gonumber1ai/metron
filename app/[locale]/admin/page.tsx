@@ -17,7 +17,7 @@ export const metadata = { title: "Metron", robots: { index: false, follow: false
 export default async function AdminPage() {
   if (!isConfigured()) {
     return (
-      <main className="grid min-h-screen place-items-center bg-ink-900 px-5 text-center">
+      <main className="grid min-h-screen place-items-center px-5 text-center">
         <p className="max-w-sm text-[0.95rem] leading-relaxed text-mute">
           Set ADMIN_PASSWORD (12 characters or more) in the environment, then redeploy.
         </p>

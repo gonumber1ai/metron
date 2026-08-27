@@ -52,19 +52,12 @@ export async function GET(req: Request) {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "MISSING",
     SUPABASE_SERVICE_ROLE_KEY: shape(process.env.SUPABASE_SERVICE_ROLE_KEY),
     METRON_DEV_UNLOCK: process.env.METRON_DEV_UNLOCK ?? "unset (correct for production)",
-    NEXT_PUBLIC_PRICE_OVERRIDE_XAF:
-      process.env.NEXT_PUBLIC_PRICE_OVERRIDE_XAF ?? "unset (charging the real price)",
   };
 
   const warnings: string[] = [];
   if (fapshiBase.includes("sandbox")) {
     warnings.push(
       "FAPSHI_BASE_URL points at SANDBOX. Live payments will not work. Set https://live.fapshi.com and REDEPLOY.",
-    );
-  }
-  if (process.env.NEXT_PUBLIC_PRICE_OVERRIDE_XAF) {
-    warnings.push(
-      `PRICE OVERRIDE IS LIVE — every Mobile Money buyer is being charged ${process.env.NEXT_PUBLIC_PRICE_OVERRIDE_XAF} FCFA instead of the real price. Remove NEXT_PUBLIC_PRICE_OVERRIDE_XAF when you finish testing.`,
     );
   }
   if (process.env.METRON_DEV_UNLOCK === "1") {

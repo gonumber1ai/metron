@@ -10,6 +10,7 @@ import { getPrices } from "@/lib/payments";
 import { load } from "@/lib/store";
 import { track } from "@/lib/track";
 import { Logo } from "@/components/Logo";
+import { GapGauge } from "@/components/GapGauge";
 
 /**
  * The result page.
@@ -24,12 +25,19 @@ import { Logo } from "@/components/Logo";
  * it does not sit between him and his own answers; it is repeated in the
  * confirmation email and on Day 0.
  */
-export function ResultClient({ locale }: { locale: string }) {
+export function ResultClient({
+  locale,
+  geoCountry,
+}: {
+  locale: string;
+  /** resolved server-side from the edge geo header — trusted over the browser */
+  geoCountry?: string | null;
+}) {
   const t = getDict(locale);
   const m = getMarketing(locale);
   const fr = locale === "fr";
   const [quiz, setQuiz] = useState<QuizResult | null>(null);
-  const [country, setCountry] = useState("default");
+  const [country, setCountry] = useState(geoCountry ?? "default");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -39,7 +47,10 @@ export function ResultClient({ locale }: { locale: string }) {
     try {
       const forced = new URLSearchParams(window.location.search).get("country");
       if (forced) setCountry(forced.toUpperCase());
-      else if (Intl.DateTimeFormat().resolvedOptions().timeZone === "Africa/Douala") {
+      // The edge header already told us, and it beats any browser guess.
+      else if (geoCountry) {
+        /* keep it */
+      } else if (Intl.DateTimeFormat().resolvedOptions().timeZone === "Africa/Douala") {
         setCountry("CM");
       }
     } catch {
@@ -47,11 +58,11 @@ export function ResultClient({ locale }: { locale: string }) {
     }
     if (s.quiz) track("result_view", s.quiz.pattern, locale);
     setReady(true);
-  }, [locale]);
+  }, [locale, geoCountry]);
 
   if (!ready) {
     return (
-      <main className="grid min-h-screen place-items-center bg-ink-900 px-5">
+      <main className="grid min-h-screen place-items-center px-5">
         <p className="text-mute">{t.common.loading}</p>
       </main>
     );
@@ -59,7 +70,7 @@ export function ResultClient({ locale }: { locale: string }) {
 
   if (!quiz) {
     return (
-      <main className="grid min-h-screen place-items-center bg-ink-900 px-5 text-center">
+      <main className="grid min-h-screen place-items-center px-5 text-center">
         <div>
           <p className="text-mute">{t.quiz.title}</p>
           <Link
@@ -83,7 +94,7 @@ export function ResultClient({ locale }: { locale: string }) {
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
 
-      <div className="min-h-screen bg-ink-900 pb-28 md:pb-0">
+      <div className="min-h-screen pb-28 md:pb-0">
         <header className="border-b border-ink-700">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
@@ -102,10 +113,19 @@ export function ResultClient({ locale }: { locale: string }) {
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
               {t.result.secWhere}
             </p>
-            <h1 className="mt-3 text-[1.9rem] font-bold leading-tight tracking-tight md:text-[2.3rem]">
-              {v.headline}
-            </h1>
+            <h1 className="mt-3 text-[2.15rem] md:text-[2.7rem]">{v.headline}</h1>
             <p className="mt-3 text-[1.05rem] leading-relaxed text-jade-300">{v.gap}</p>
+
+            <div className="mt-6">
+              <GapGauge
+                now={quiz.now}
+                want={quiz.want}
+                labelNow={t.result.gaugeNow}
+                labelWant={t.result.gaugeWant}
+                unit={t.result.gaugeUnit}
+                gapLabel={t.result.gaugeGap}
+              />
+            </div>
           </section>
 
           {/* ------------------------------- everything he told us, answered */}

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="grid min-h-screen place-items-center bg-ink-900 px-5 text-center">
+    <main className="grid min-h-screen place-items-center px-5 text-center">
       <div>
         <p className="metric text-[3rem] font-semibold text-jade">404</p>
         <p className="mt-2 text-[1rem] text-mute">Nothing here.</p>

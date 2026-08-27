@@ -112,7 +112,7 @@ export function LoginClient({ locale }: { locale: string }) {
     return (
       <>
         <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
-        <main className="grid min-h-screen place-items-center bg-ink-900 px-5">
+        <main className="grid min-h-screen place-items-center px-5">
           <div className="w-full max-w-sm">
             <span className="mb-8 inline-flex">
               <Logo size="sm" />
@@ -164,7 +164,7 @@ export function LoginClient({ locale }: { locale: string }) {
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
 
-      <main className="grid min-h-screen place-items-center bg-ink-900 px-5">
+      <main className="grid min-h-screen place-items-center px-5">
         <div className="w-full max-w-sm">
           <span className="mb-8 inline-flex">
             <Logo size="sm" />

@@ -55,7 +55,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
 
-      <div className="min-h-screen bg-ink-900">
+      <div className="min-h-screen">
         <header className="sticky top-0 z-20 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
             <span className="flex items-center gap-3">

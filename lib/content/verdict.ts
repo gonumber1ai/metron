@@ -34,8 +34,8 @@ type Frag = { en: string; fr: string };
 
 const HOW_LONG: Record<string, Frag> = {
   u6m: {
-    en: "This started recently, which is the easiest kind to shift — and the kind most worth having a doctor rule out first.",
-    fr: "C'est récent, donc le plus facile à corriger — et le cas où il vaut le plus la peine de faire écarter une cause physique par un médecin.",
+    en: "This started recently, which is the easiest kind to shift.",
+    fr: "C'est récent, donc le plus facile à corriger.",
   },
   "6m2y": {
     en: "A year or two in, your body has learned it. Learned things come undone.",

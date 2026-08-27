@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getDict } from "@/lib/i18n";
 import { track } from "@/lib/track";
 import { PayPanel } from "@/components/PayPanel";
-import { getMarketing } from "@/lib/content/marketing";
+import { getMarketing, withPrices } from "@/lib/content/marketing";
 import { getPrices, type Plan, type Price } from "@/lib/payments";
 import { load, update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
@@ -21,7 +21,6 @@ export function OfferClient({
   geoCountry?: string | null;
 }) {
   const t = getDict(locale);
-  const m = getMarketing(locale);
 
   const [country, setCountry] = useState(geoCountry ?? "default");
   const [plan, setPlan] = useState<Plan>("test");
@@ -54,6 +53,16 @@ export function OfferClient({
 
   const prices = getPrices(country);
   const forPlan = prices.filter((p) => p.plan === plan);
+  // The toggle used to show two names and no money. A man choosing between two
+  // plans is choosing between two prices, and hiding them behind a tap is the
+  // one thing on this page guaranteed to cost a sale.
+  const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
+  // Copy and buttons read the same price book, so an English page in London
+  // quotes dollars rather than francs.
+  const m = withPrices(getMarketing(locale), {
+    test: priceOf("test"),
+    sprint: priceOf("sprint"),
+  });
 
   async function sendLead(e: React.FormEvent) {
     e.preventDefault();
@@ -71,7 +80,7 @@ export function OfferClient({
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
 
-      <div className="min-h-screen bg-ink-900">
+      <div className="min-h-screen">
         <header className="border-b border-ink-700">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
@@ -94,24 +103,36 @@ export function OfferClient({
           <div
             role="tablist"
             aria-label="Plan"
-            className="flex gap-1 rounded-full border border-ink-600 bg-ink-800 p-1"
+            className="grid grid-cols-2 gap-2"
           >
-            {(["test", "sprint"] as Plan[]).map((p) => (
-              <button
-                key={p}
-                role="tab"
-                aria-selected={plan === p}
-                onClick={() => {
-                  setPlan(p);
-                  setStatus("idle");
-                }}
-                className={`flex-1 rounded-full px-4 py-2.5 text-[13.5px] font-semibold transition-colors ${
-                  plan === p ? "bg-jade text-ink-900" : "text-mute hover:text-bone"
-                }`}
-              >
-                {p === "test" ? t.offer.testName : t.offer.sprintName}
-              </button>
-            ))}
+            {(["test", "sprint"] as Plan[]).map((p) => {
+              const on = plan === p;
+              return (
+                <button
+                  key={p}
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => {
+                    setPlan(p);
+                    setStatus("idle");
+                  }}
+                  className={`rounded-2xl border-2 px-4 py-3.5 text-left transition-colors ${
+                    on
+                      ? "border-jade bg-jade-050"
+                      : "border-ink-700 bg-ink-800 hover:border-ink-500"
+                  }`}
+                >
+                  <span
+                    className={`block text-[13px] font-bold ${on ? "text-jade" : "text-mute"}`}
+                  >
+                    {p === "test" ? t.offer.testName : t.offer.sprintName}
+                  </span>
+                  <span className="metric mt-1.5 block text-[1.15rem] font-bold text-bone">
+                    {priceOf(p)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           <section className="mt-6 rounded-2xl card p-6">
@@ -152,7 +173,17 @@ export function OfferClient({
             <ul className="mt-3 space-y-2.5">
               {includes.map((x) => (
                 <li key={x} className="flex gap-3 text-[0.95rem] leading-relaxed text-bone">
-                  <span aria-hidden className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full bg-jade" />
+                  <span aria-hidden className="mt-[3px] shrink-0 text-jade">
+                    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
+                      <path
+                        d="M4 10.5 8.2 14.5 16 5.8"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
                   {x}
                 </li>
               ))}

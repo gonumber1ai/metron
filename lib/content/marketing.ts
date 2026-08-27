@@ -69,17 +69,17 @@ const EN: Marketing = {
 
 
   offerIntro: {
-    h: "The full programme costs 69,000 FCFA. Do not pay that today.",
+    h: "The full programme costs {sprint}. Do not pay that today.",
     p: [
       "You do not know yet whether this works on you, and we have not earned it.",
-      "So do 10 days first, for 7,500 FCFA. Less than a meal out.",
+      "So do 10 days first, for {test}. Less than a meal out.",
       "If you are not lasting longer at the end of it, tell us and we send your money back. You will have lost nothing but ten days, and you will know for certain instead of wondering for another year.",
-      "If it does work, the 7,500 comes off the 69,000.",
+      "If it does work, the {test} comes off the {sprint}.",
     ],
   },
 
   sprintPitch:
-    "Most men who finish the 10 days go on to the 30-Day Sprint, because control on your own and control with a partner are two different skills. The second one is harder, and it is the one you actually want. Your 7,500 comes off the price if you upgrade within 72 hours.",
+    "Most men who finish the 10 days go on to the 30-Day Sprint, because control on your own and control with a partner are two different skills. The second one is harder, and it is the one you actually want. Your {test} comes off the price if you upgrade within 72 hours.",
 
   includes: [
     "15 minutes a day. Seven of the ten days. That is the whole time cost.",
@@ -174,17 +174,17 @@ const FR: Marketing = {
 
 
   offerIntro: {
-    h: "Le programme complet coûte 69 000 FCFA. Ne payez pas ça aujourd'hui.",
+    h: "Le programme complet coûte {sprint}. Ne payez pas ça aujourd'hui.",
     p: [
       "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité.",
-      "Alors faites 10 jours d'abord, pour 7 500 FCFA. Moins cher qu'un repas dehors.",
+      "Alors faites 10 jours d'abord, pour {test}. Moins cher qu'un repas dehors.",
       "Si vous ne durez pas plus longtemps à la fin, dites-le-nous et on vous renvoie votre argent. Vous n'aurez rien perdu que dix jours, et vous saurez avec certitude au lieu de vous demander encore un an.",
-      "Et si ça marche, les 7 500 sont déduits des 69 000.",
+      "Et si ça marche, les {test} sont déduits des {sprint}.",
     ],
   },
 
   sprintPitch:
-    "La plupart des hommes qui terminent les 10 jours passent au Sprint de 30 jours, parce que le contrôle tout seul et le contrôle avec une partenaire sont deux compétences différentes. La seconde est plus difficile, et c'est celle que vous voulez vraiment. Vos 7 500 sont déduits si vous passez à la suite dans les 72 heures.",
+    "La plupart des hommes qui terminent les 10 jours passent au Sprint de 30 jours, parce que le contrôle tout seul et le contrôle avec une partenaire sont deux compétences différentes. La seconde est plus difficile, et c'est celle que vous voulez vraiment. Vos {test} sont déduits si vous passez à la suite dans les 72 heures.",
 
   includes: [
     "15 minutes par jour. Sept jours sur dix. C'est tout le temps que ça prend.",
@@ -237,4 +237,27 @@ const FR: Marketing = {
 
 export function getMarketing(locale: Locale | string): Marketing {
   return locale === "fr" ? FR : EN;
+}
+
+/**
+ * The offer copy quotes both prices, and the prices differ by market: a man in
+ * Cameroon is quoted FCFA, a man anywhere else is quoted dollars. They used to
+ * be typed into the sentences, which meant the English page told a customer in
+ * London that the programme costs 69,000 FCFA while the button beside it said
+ * $125 — and every price change left four stale sentences behind.
+ *
+ * The strings now carry {test} and {sprint}, and this fills them from the same
+ * price book the buttons read.
+ */
+export function withPrices(
+  m: Marketing,
+  prices: { test: string; sprint: string },
+): Marketing {
+  const fill = (s: string) =>
+    s.split("{test}").join(prices.test).split("{sprint}").join(prices.sprint);
+  return {
+    ...m,
+    offerIntro: { h: fill(m.offerIntro.h), p: m.offerIntro.p.map(fill) },
+    sprintPitch: fill(m.sprintPitch),
+  };
 }

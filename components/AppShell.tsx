@@ -78,7 +78,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-ink-900 md:flex">
+    <div className="min-h-screen md:flex">
       {/* ------------------------------------------------ desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-ink-700 bg-ink-800 p-4 md:flex">
         <div className="px-2 py-3">
