@@ -52,6 +52,8 @@ const T = {
     opening: "Opening your programme…",
     secure: "Your statement shows METRON. Nothing else.",
     unavailable: "Payment is not connected yet. Message us and we will open your access.",
+    embeddedNote:
+      "Complete the payment above. This page will move on by itself the moment it clears — do not close it.",
     timeoutH: "We did not hear back",
     timeoutP:
       "The request was sent but no PIN came back, so nothing was charged. If you missed the prompt on your phone, just try again.",
@@ -79,13 +81,23 @@ const T = {
     secure: "Votre relevé affiche METRON. Rien d'autre.",
     unavailable:
       "Le paiement n'est pas encore branché. Écrivez-nous et on vous ouvre l'accès.",
+    embeddedNote:
+      "Terminez le paiement ci-dessus. Cette page continuera d'elle-même dès que c'est validé — ne la fermez pas.",
     timeoutH: "Pas de réponse",
     timeoutP:
       "La demande est partie mais aucun code n'est revenu, donc rien n'a été débité. Si vous avez raté la demande sur votre téléphone, réessayez.",
   },
 };
 
-type MomoState = "idle" | "charging" | "awaiting" | "paid" | "failed" | "timeout" | "unavailable";
+type MomoState =
+  | "idle"
+  | "charging"
+  | "awaiting" // direct-pay: prompt is on his handset
+  | "embedded" // hosted page, rendered inside ours
+  | "paid"
+  | "failed"
+  | "timeout"
+  | "unavailable";
 
 /**
  * Embedded checkout, both rails.
@@ -219,6 +231,10 @@ function MomoPanel({
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [frameUrl, setFrameUrl] = useState<string | null>(null);
+  // poll() is kicked off in the same tick as setFrameUrl, so reading the state
+  // there would see the previous render's null and pick the short timeout.
+  const hosted = useRef(false);
   const [state, setState] = useState<MomoState>("idle");
   const [err, setErr] = useState<string | null>(null);
   const tries = useRef(0);
@@ -269,10 +285,17 @@ function MomoPanel({
         setErr(t.badPhone);
         return setState("idle");
       }
-      // Direct charging is not enabled on the account yet, so Fapshi handed
-      // back a hosted page instead. One redirect, and it takes money.
-      if (data.status === "redirect" && data.url) {
-        window.location.href = data.url;
+      // Direct charging is not approved on this account yet, so Fapshi handed
+      // back a hosted page. We do NOT send him to it — Fapshi serve that page
+      // without X-Frame-Options or a frame-ancestors policy, so it renders
+      // inside ours. He stays on metron.life, and we poll the transaction in
+      // the background exactly as we would have for a direct charge.
+      if (data.status === "redirect" && data.url && data.transId) {
+        hosted.current = true;
+        setFrameUrl(data.url);
+        setState("embedded");
+        tries.current = 0;
+        poll(data.transId, ref);
         return;
       }
 
@@ -317,7 +340,10 @@ function MomoPanel({
 
       if (data.status === "FAILED" || data.status === "EXPIRED") return setState("failed");
 
-      if (tries.current < 40) {
+      // A hosted page is filled in by hand, so it deserves longer than a USSD
+      // prompt that only needs a PIN.
+      const limit = hosted.current ? 100 : 40;
+      if (tries.current < limit) {
         tries.current += 1;
         window.setTimeout(() => poll(transId, ref), 3000);
       } else {
@@ -350,6 +376,23 @@ function MomoPanel({
             )}
           </>
         )}
+      </div>
+    );
+  }
+
+  if (state === "embedded" && frameUrl) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-ink-600 bg-white">
+        <iframe
+          src={frameUrl}
+          title={t.momo}
+          className="h-[620px] w-full border-0"
+          // Their page needs forms and scripts; everything else stays off.
+          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"
+        />
+        <div className="bg-ink-900 px-4 py-3 text-center">
+          <p className="text-[0.86rem] text-faint">{t.embeddedNote}</p>
+        </div>
       </div>
     );
   }
