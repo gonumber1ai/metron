@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getQuiz, scoreQuiz, type Answers } from "@/lib/content/quiz";
 import { getDict } from "@/lib/i18n";
-import { update } from "@/lib/store";
+import { load, update } from "@/lib/store";
 import { track } from "@/lib/track";
 import { Logo } from "@/components/Logo";
 
@@ -45,6 +45,15 @@ export function QuizClient({ locale }: { locale: string }) {
       const result = scoreQuiz(locale, next);
       update((s) => ({ ...s, locale, quiz: result }), locale);
       track("quiz_complete", result.pattern, locale);
+      // Keep every completed assessment, not only the ones that turn into
+      // sales. The men who answer nine questions and then walk away are the
+      // clearest signal there is about what the offer is failing to do.
+      void fetch("/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: load(locale).ref, locale, quiz: result }),
+        keepalive: true,
+      }).catch(() => {});
       router.push(`/${locale}/result`);
       return;
     }

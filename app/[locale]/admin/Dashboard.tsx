@@ -1,4 +1,5 @@
 import { Logo } from "@/components/Logo";
+import { Customers, type ActivityRow } from "./Customers";
 
 export type Snapshot = {
   connected: boolean;
@@ -6,6 +7,7 @@ export type Snapshot = {
   dropoff: { reached_question: number; quit_here: number; reached: number }[];
   recent: Record<string, unknown>[];
   revenue: { currency: string; total: number; count: number }[];
+  activity: ActivityRow[];
 };
 
 const STEP_LABEL: Record<string, string> = {
@@ -167,6 +169,8 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
               </table>
             </div>
           </section>
+
+          <Customers rows={snap.activity} />
 
           {/* ------------------------------------------------------ people */}
           <section className="mt-10">

@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getDict } from "@/lib/i18n";
 import { useMetron } from "@/components/useMetron";
 
 export function MessagesClient({ locale }: { locale: string }) {
   const t = getDict(locale);
   const { state, mutate, ready } = useMetron(locale);
+  const [remote, setRemote] = useState<{ sender: string; body: string }[] | null>(null);
+
+  // The thread lives on the server so a reply written from admin actually
+  // arrives, and so it survives him switching device. Local state is the
+  // fallback for a man with no signal mid-session.
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/messages");
+        if (!r.ok) return;
+        const d = (await r.json()) as { messages?: { sender: string; body: string }[] };
+        if (!off) setRemote(d.messages ?? []);
+      } catch {
+        /* fall back to whatever is on the device */
+      }
+    })();
+    return () => {
+      off = true;
+    };
+  }, []);
   const [text, setText] = useState("");
 
   if (!ready) {
@@ -21,6 +42,14 @@ export function MessagesClient({ locale }: { locale: string }) {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
+    void fetch("/api/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    }).catch(() => {
+      /* it is already shown locally; a failed send is not silent for long */
+    });
+
     mutate((s) => ({
       ...s,
       messages: [
@@ -31,6 +60,12 @@ export function MessagesClient({ locale }: { locale: string }) {
     setText("");
   }
 
+  // Server thread when we have it, the device copy until then, so the page is
+  // never blank while the fetch is in flight.
+  const shown: { from: string; text: string }[] = remote
+    ? remote.map((m) => ({ from: m.sender === "coach" ? "coach" : "user", text: m.body }))
+    : state.messages.map((m) => ({ from: m.from, text: m.text }));
+
   return (
     <div className="mx-auto flex h-[calc(100vh-8.5rem)] max-w-2xl flex-col px-5 py-6 md:h-[calc(100vh-3rem)] md:py-10">
       <header>
@@ -39,14 +74,14 @@ export function MessagesClient({ locale }: { locale: string }) {
       </header>
 
       <div className="mt-6 flex-1 space-y-3 overflow-y-auto">
-        {state.messages.length === 0 ? (
+        {shown.length === 0 ? (
           <div className="grid h-full place-items-center rounded-2xl border border-dashed border-ink-600 px-6 text-center">
             <p className="text-[0.95rem] text-faint">{t.messages.empty}</p>
           </div>
         ) : (
-          state.messages.map((m) => (
+          shown.map((m, i) => (
             <div
-              key={m.id}
+              key={i}
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-[0.95rem] leading-relaxed ${
                 m.from === "user"
                   ? "ml-auto bg-jade text-ink-900"

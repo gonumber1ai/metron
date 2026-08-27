@@ -35,19 +35,22 @@ export default async function AdminPage() {
     dropoff: [],
     recent: [],
     revenue: [],
+    activity: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments] = await Promise.all([
+    const [funnel, dropoff, recent, payments, activity] = await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
       client.from("intake").select("*").limit(60),
       client.from("payments").select("currency, amount_minor, plan").eq("status", "paid"),
+      client.from("activity").select("*").limit(100),
     ]);
 
     snap.funnel = funnel.data ?? [];
     snap.dropoff = dropoff.data ?? [];
     snap.recent = recent.data ?? [];
+    snap.activity = activity.data ?? [];
 
     // Summed per currency: adding XAF to USD would produce a number that means
     // nothing, and a wrong revenue figure is worse than none.

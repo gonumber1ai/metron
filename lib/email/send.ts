@@ -229,6 +229,51 @@ export async function sendAccessCode(opts: {
 }
 
 /* ------------------------------------------------------------------ */
+/* Coach replied                                                       */
+/* ------------------------------------------------------------------ */
+
+const REPLY = {
+  en: {
+    subject: "You have a reply",
+    preheader: "It is waiting in your account.",
+    h: "We have replied",
+    p1: "There is an answer waiting in your private thread. Only you can see it.",
+    cta: "Open it",
+  },
+  fr: {
+    subject: "Vous avez une réponse",
+    preheader: "Elle vous attend dans votre compte.",
+    h: "Nous vous avons répondu",
+    p1: "Une réponse vous attend dans votre fil privé. Vous seul pouvez la voir.",
+    cta: "L'ouvrir",
+  },
+};
+
+/**
+ * Tell him a reply is waiting — never what it says.
+ *
+ * The answer stays behind his login. Putting it in the email would put an
+ * answer about his sex life on a lock screen, which is the one thing this
+ * product promises will never happen.
+ */
+export async function sendCoachReply(opts: { to: string; locale: Locale }): Promise<boolean> {
+  const c = REPLY[opts.locale];
+  const url = appUrl();
+  const html = wrap({
+    locale: opts.locale,
+    preheader: c.preheader,
+    appUrl: url,
+    showSupport: false,
+    body: [
+      h1(c.h),
+      p(c.p1),
+      `<p style="margin:8px 0 8px;">${button(c.cta, `${url}/${opts.locale}/app/messages`)}</p>`,
+    ].join(""),
+  });
+  return send({ to: opts.to, subject: c.subject, html, text: `${c.h}. ${c.p1}` });
+}
+
+/* ------------------------------------------------------------------ */
 /* Admin alert                                                         */
 /* ------------------------------------------------------------------ */
 

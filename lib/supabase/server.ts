@@ -189,6 +189,94 @@ export async function findRefByContact(contact: string): Promise<string | null> 
   }
 }
 
+/**
+ * Mirror a customer's progress.
+ *
+ * His device stays the source of truth — the app must keep working with no
+ * network — so this is a copy, not a dependency. What it buys: you can see
+ * whether anyone is actually doing the programme, a man who clears his browser
+ * does not lose his history, and the refund promise can be checked against
+ * something.
+ */
+export async function saveProgress(input: {
+  ref: string;
+  plan?: string;
+  day: number;
+  startedAt?: string;
+  measurements: unknown;
+  sessions: unknown;
+  markers: unknown;
+}): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  try {
+    const { error } = await client.from("progress").upsert(
+      {
+        ref: input.ref,
+        plan: input.plan ?? null,
+        day: input.day,
+        started_at: input.startedAt ?? null,
+        measurements: input.measurements ?? [],
+        sessions: input.sessions ?? [],
+        markers: input.markers ?? [],
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "ref" },
+    );
+    if (error) {
+      console.error("[supabase] saveProgress", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Post a message into a customer's thread. */
+export async function postMessage(input: {
+  ref: string;
+  sender: "user" | "coach";
+  body: string;
+}): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  try {
+    const { error } = await client.from("threads").insert({
+      ref: input.ref,
+      sender: input.sender,
+      body: input.body.slice(0, 4000),
+      // A coach reply is read by definition; only his messages need chasing.
+      read_by_admin: input.sender === "coach",
+    });
+    if (error) {
+      console.error("[supabase] postMessage", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function readThread(ref: string): Promise<
+  { sender: string; body: string; created_at: string }[]
+> {
+  const client = db();
+  if (!client) return [];
+  try {
+    const { data } = await client
+      .from("threads")
+      .select("sender, body, created_at")
+      .eq("ref", ref)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    return (data ?? []) as { sender: string; body: string; created_at: string }[];
+  } catch {
+    return [];
+  }
+}
+
 /** Capture a lead. Never throws — losing the lead is bad, breaking the page is worse. */
 export async function recordLead(input: {
   contact: string;

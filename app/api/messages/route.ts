@@ -1,0 +1,41 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verify, cookieName } from "@/lib/entitlement";
+import { postMessage, readThread } from "@/lib/supabase/server";
+import { sendAdminAlert } from "@/lib/email/send";
+
+export const runtime = "nodejs";
+
+/** His own thread. The ref comes from the cookie, never from the request. */
+export async function GET() {
+  const jar = await cookies();
+  const ent = verify(jar.get(cookieName)?.value);
+  if (!ent) return NextResponse.json({ messages: [] }, { status: 401 });
+  return NextResponse.json({ messages: await readThread(ent.ref) });
+}
+
+export async function POST(req: Request) {
+  const jar = await cookies();
+  const ent = verify(jar.get(cookieName)?.value);
+  if (!ent) return NextResponse.json({ ok: false }, { status: 401 });
+
+  let body: { text?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  const text = (body.text ?? "").trim();
+  if (!text) return NextResponse.json({ ok: false }, { status: 400 });
+
+  await postMessage({ ref: ent.ref, sender: "user", body: text });
+
+  // A paying customer asking a question is worth an interruption.
+  void sendAdminAlert({
+    subject: "Message from a customer",
+    lines: [`code  ${ent.ref}`, `plan  ${ent.plan}`, "", text.slice(0, 1500)],
+  });
+
+  return NextResponse.json({ ok: true });
+}
