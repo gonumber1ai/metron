@@ -54,6 +54,9 @@ export const fr = {
 
   result: {
     kicker: "Votre résultat",
+    secWhere: "Où vous en êtes",
+    secCost: "Ce que ça coûte d'attendre",
+    secDo: "Quoi faire maintenant",
     yourType: "Votre profil",
     theGap: "Votre écart",
     gapUnit: "minutes",

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getQuiz, scoreQuiz, type Answers } from "@/lib/content/quiz";
 import { getDict } from "@/lib/i18n";
 import { update } from "@/lib/store";
+import { track } from "@/lib/track";
 import { Logo } from "@/components/Logo";
 
 export function QuizClient({ locale }: { locale: string }) {
@@ -36,9 +37,14 @@ export function QuizClient({ locale }: { locale: string }) {
   const pct = Math.round((index / total) * 100);
 
   function advance(next: Answers) {
+    // The question NUMBER is the point of this: "18 of 35 quit on question 6"
+    // tells you what to fix, where a start/finish count only says something is.
+    track("quiz_answer", String(index), locale);
+
     if (index + 1 >= total) {
       const result = scoreQuiz(locale, next);
       update((s) => ({ ...s, locale, quiz: result }), locale);
+      track("quiz_complete", result.pattern, locale);
       router.push(`/${locale}/result`);
       return;
     }
@@ -148,7 +154,10 @@ export function QuizClient({ locale }: { locale: string }) {
             <div className="sticky bottom-0 z-10 mt-auto border-t border-ink-700 bg-ink-900/95 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur md:static md:border-0 md:bg-transparent md:pt-8 md:backdrop-blur-none">
               <button
                 type="button"
-                onClick={() => setStarted(true)}
+                onClick={() => {
+                  track("quiz_start", undefined, locale);
+                  setStarted(true);
+                }}
                 className="w-full rounded-full btn-go px-6 py-4 text-[15.5px] font-bold"
               >
                 {t.quiz.introStart}

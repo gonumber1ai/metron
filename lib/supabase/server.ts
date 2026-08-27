@@ -164,6 +164,31 @@ export async function recordIntake(input: {
   }
 }
 
+/**
+ * Find a man's access code from the email he gave at checkout.
+ *
+ * Only returns one for somebody who actually paid — this is a recovery path,
+ * not a way to discover whether an address is in the database.
+ */
+export async function findRefByContact(contact: string): Promise<string | null> {
+  const client = db();
+  if (!client) return null;
+  try {
+    const { data, error } = await client
+      .from("leads")
+      .select("ref")
+      .ilike("contact", contact.trim())
+      .eq("stage", "paid")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data?.ref) return null;
+    return data.ref as string;
+  } catch {
+    return null;
+  }
+}
+
 /** Capture a lead. Never throws — losing the lead is bad, breaking the page is worse. */
 export async function recordLead(input: {
   contact: string;

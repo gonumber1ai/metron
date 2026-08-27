@@ -8,6 +8,7 @@ import { buildVerdict } from "@/lib/content/verdict";
 import { getMarketing } from "@/lib/content/marketing";
 import { getPrices } from "@/lib/payments";
 import { load } from "@/lib/store";
+import { track } from "@/lib/track";
 import { Logo } from "@/components/Logo";
 
 /**
@@ -44,6 +45,7 @@ export function ResultClient({ locale }: { locale: string }) {
     } catch {
       /* keep the default */
     }
+    if (s.quiz) track("result_view", s.quiz.pattern, locale);
     setReady(true);
   }, [locale]);
 
@@ -95,10 +97,10 @@ export function ResultClient({ locale }: { locale: string }) {
         </header>
 
         <main className="mx-auto max-w-2xl px-5">
-          {/* ------------------------------------------------- his numbers */}
+          {/* ------------------------------------------- where you are now */}
           <section className="pt-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
-              {t.result.kicker}
+              {t.result.secWhere}
             </p>
             <h1 className="mt-3 text-[1.9rem] font-bold leading-tight tracking-tight md:text-[2.3rem]">
               {v.headline}
@@ -116,14 +118,23 @@ export function ResultClient({ locale }: { locale: string }) {
           </section>
 
           {/* ---------------------------------------------- cost of waiting */}
-          <section className="mt-8">
-            <p className="border-l-2 border-amber pl-4 text-[1.02rem] leading-[1.7] text-bone">
+          <section className="mt-10">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber">
+              {t.result.secCost}
+            </h2>
+            <p className="mt-3 border-l-2 border-amber pl-4 text-[1.05rem] leading-[1.7] text-bone">
               {v.urgency}
             </p>
           </section>
 
-          {/* ----------------------------------------------------- the offer */}
-          <section className="mt-9 rounded-2xl card p-6">
+          {/* ------------------------------------------------ what to do now */}
+          <section className="mt-10">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+              {t.result.secDo}
+            </h2>
+          </section>
+
+          <section className="mt-3 rounded-2xl card p-6">
             <p className="text-[1.05rem] font-bold leading-snug text-bone">{v.closeLead}</p>
 
             <p className="mt-4 rounded-xl border-l-2 border-jade bg-jade-050 px-4 py-3 text-[1.02rem] font-bold leading-relaxed text-bone">

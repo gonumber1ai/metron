@@ -22,6 +22,9 @@ export function LoginClient({ locale }: { locale: string }) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [state, setState] = useState<"idle" | "checking" | "bad">("idle");
+  const [lost, setLost] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
 
   const T = fr
     ? {
@@ -35,6 +38,12 @@ export function LoginClient({ locale }: { locale: string }) {
         no: "Pas encore inscrit ?",
         noLink: "Faire le bilan",
         why: "Pas de mot de passe : votre code suffit, et nous n'avons jamais eu besoin de votre nom.",
+        lostQ: "Vous avez perdu votre code ?",
+        lostH: "On vous le renvoie",
+        lostP: "Entrez l'email utilisé au paiement. Si un compte y correspond, le code part tout de suite.",
+        lostBtn: "Envoyer mon code",
+        lostSent: "Si cet email correspond à un compte, le code vient de partir. Vérifiez aussi les spams.",
+        backToCode: "J'ai mon code",
       }
     : {
         h: "Log back in",
@@ -47,6 +56,12 @@ export function LoginClient({ locale }: { locale: string }) {
         no: "Not signed up yet?",
         noLink: "Take the assessment",
         why: "No password: your code is enough, and we never needed your name.",
+        lostQ: "Lost your code?",
+        lostH: "We will send it again",
+        lostP: "Enter the email you paid with. If it matches an account, the code goes out straight away.",
+        lostBtn: "Send my code",
+        lostSent: "If that email matches an account, the code has just been sent. Check spam too.",
+        backToCode: "I have my code",
       };
 
   async function submit(e: React.FormEvent) {
@@ -77,6 +92,72 @@ export function LoginClient({ locale }: { locale: string }) {
     } catch {
       setState("bad");
     }
+  }
+
+  async function sendCode(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailSent(true);
+    try {
+      await fetch("/api/auth/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), locale }),
+      });
+    } catch {
+      /* the message is deliberately the same either way */
+    }
+  }
+
+  if (lost) {
+    return (
+      <>
+        <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
+        <main className="grid min-h-screen place-items-center bg-ink-900 px-5">
+          <div className="w-full max-w-sm">
+            <span className="mb-8 inline-flex">
+              <Logo size="sm" />
+            </span>
+            <h1 className="text-[1.7rem] font-bold leading-tight tracking-tight">{T.lostH}</h1>
+            <p className="mt-3 text-[0.98rem] leading-relaxed text-mute">{T.lostP}</p>
+
+            {emailSent ? (
+              <p className="mt-6 rounded-xl border-l-2 border-jade bg-jade-050 px-4 py-3.5 text-[0.95rem] leading-relaxed text-bone">
+                {T.lostSent}
+              </p>
+            ) : (
+              <form onSubmit={sendCode} className="mt-6">
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoCapitalize="off"
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="mt-3 w-full rounded-2xl btn-go py-4 text-[1rem] font-bold"
+                >
+                  {T.lostBtn}
+                </button>
+              </form>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setLost(false);
+                setEmailSent(false);
+              }}
+              className="mt-6 text-[0.9rem] text-jade underline underline-offset-4"
+            >
+              {T.backToCode}
+            </button>
+          </div>
+        </main>
+      </>
+    );
   }
 
   return (
@@ -119,7 +200,15 @@ export function LoginClient({ locale }: { locale: string }) {
             </button>
           </form>
 
-          <p className="mt-6 text-[0.88rem] leading-relaxed text-faint">
+          <button
+            type="button"
+            onClick={() => setLost(true)}
+            className="mt-6 w-full rounded-xl border border-ink-600 py-3 text-[0.92rem] font-bold text-bone"
+          >
+            {T.lostQ}
+          </button>
+
+          <p className="mt-4 text-[0.88rem] leading-relaxed text-faint">
             {T.help}{" "}
             <a
               href="https://wa.me/12089054119"

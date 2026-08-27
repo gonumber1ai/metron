@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getDict } from "@/lib/i18n";
+import { track } from "@/lib/track";
 import { PayPanel } from "@/components/PayPanel";
 import { getMarketing } from "@/lib/content/marketing";
 import { getPrices, type Plan, type Price } from "@/lib/payments";
@@ -48,7 +49,8 @@ export function OfferClient({
     } catch {
       /* keep the default */
     }
-  }, [locale, geoCountry]);
+    track("offer_view", plan, locale);
+  }, [locale, geoCountry, plan]);
 
   const prices = getPrices(country);
   const forPlan = prices.filter((p) => p.plan === plan);

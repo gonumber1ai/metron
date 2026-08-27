@@ -179,7 +179,7 @@ export function buildVerdict(
 
     urgency: fr
       ? `Et ça ne s'arrange pas tout seul. Chaque mois passé à ${now} apprend à votre corps que ${now} est la normale — et plus vous y restez, plus c'est difficile d'en sortir.`
-      : `And it does not sit still. Every month you spend at ${now} teaches your body that ${now} is normal — and the longer you stay there, the harder it gets to move.`,
+      : `And it does not sit still. Every month you spend at ${now} teaches your body that ${now} is normal — and the longer you stay there, the harder it gets to increase it.`,
 
     closeLead: fr
       ? `Notre programme de 30 jours coûte ${prices.sprint}. Ne le prenez pas maintenant. Commencez par le Reset de 10 jours à ${prices.test}.`

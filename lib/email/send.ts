@@ -184,6 +184,51 @@ export async function sendLeadAck(opts: { to: string; locale: Locale }): Promise
 }
 
 /* ------------------------------------------------------------------ */
+/* Access code, re-sent                                                */
+/* ------------------------------------------------------------------ */
+
+const CODE = {
+  en: {
+    subject: "Your access code",
+    preheader: "Here it is again.",
+    h: "Here is your code",
+    p1: "Enter this to open your programme on any device.",
+    cta: "Log in",
+    p2: "If you did not ask for this, ignore it — nothing has changed on your account.",
+  },
+  fr: {
+    subject: "Votre code d'accès",
+    preheader: "Le voici à nouveau.",
+    h: "Voici votre code",
+    p1: "Entrez-le pour ouvrir votre programme sur n'importe quel appareil.",
+    cta: "Se connecter",
+    p2: "Si vous n'avez rien demandé, ignorez ce message — rien n'a changé sur votre compte.",
+  },
+};
+
+export async function sendAccessCode(opts: {
+  to: string;
+  locale: Locale;
+  code: string;
+}): Promise<boolean> {
+  const c = CODE[opts.locale];
+  const url = appUrl();
+  const html = wrap({
+    locale: opts.locale,
+    preheader: c.preheader,
+    appUrl: url,
+    body: [
+      h1(c.h),
+      p(c.p1),
+      callout(opts.code),
+      `<p style="margin:8px 0 20px;">${button(c.cta, `${url}/${opts.locale}/login`)}</p>`,
+      p(c.p2),
+    ].join(""),
+  });
+  return send({ to: opts.to, subject: c.subject, html, text: `${c.h}: ${opts.code}` });
+}
+
+/* ------------------------------------------------------------------ */
 /* Admin alert                                                         */
 /* ------------------------------------------------------------------ */
 

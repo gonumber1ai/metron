@@ -54,6 +54,9 @@ export const en = {
 
   result: {
     kicker: "Your result",
+    secWhere: "Where you are now",
+    secCost: "The cost of waiting",
+    secDo: "What to do now",
     yourType: "Your pattern",
     theGap: "Your gap",
     gapUnit: "minutes",
