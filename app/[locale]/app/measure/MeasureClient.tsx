@@ -40,7 +40,11 @@ export function MeasureClient({ locale }: { locale: string }) {
   const fr = locale === "fr";
 
   const [open, setOpen] = useState(false);
-  const [conds, setConds] = useState([false, false, false, false]);
+  // The baseline sets the method; the retest matches it. They are different
+  // questions, so they are different lists — asking a man on Day 1 to confirm
+  // he has not trained yet, or that he timed it "the same way as Day 1", is
+  // how the checks came to read as pointless box-ticking.
+  const [conds, setConds] = useState<boolean[]>([]);
   const [mode, setMode] = useState<Mode>("solo");
   const [markers, setMarkers] = useState<Markers>(DEFAULT_MARKERS);
   const [savedMarkers, setSavedMarkers] = useState(false);
@@ -59,7 +63,14 @@ export function MeasureClient({ locale }: { locale: string }) {
 
   const targetDay = !b ? 1 : !r && state.day >= 12 ? 12 : !f && state.day >= 30 ? 30 : null;
   const lockedMode = b?.mode;
-  const allConds = conds.every(Boolean);
+  const isBaseline = targetDay === 1;
+  const condList = isBaseline
+    ? [t.measure.baseCond1, t.measure.baseCond2, t.measure.baseCond3]
+    : [t.measure.reCond1, t.measure.reCond2, t.measure.reCond3, t.measure.reCond4];
+  const condConfirm = isBaseline ? t.measure.baseConfirm : t.measure.reConfirm;
+  // every() on an empty array is true, which would let him through with none
+  // of them ticked on the first render.
+  const allConds = conds.length === condList.length && conds.every(Boolean);
 
   function record(seconds: number) {
     if (!targetDay) return;
@@ -71,7 +82,7 @@ export function MeasureClient({ locale }: { locale: string }) {
       ],
     }));
     setOpen(false);
-    setConds([false, false, false, false]);
+    setConds(condList.map(() => false));
   }
 
   function saveMarkers() {
@@ -182,22 +193,25 @@ export function MeasureClient({ locale }: { locale: string }) {
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-faint">
                   {t.measure.conditions}
                 </p>
-                <p className="mt-1.5 text-[0.88rem] text-faint">{t.measure.confirmAll}</p>
+                <p className="mt-2 text-[0.9rem] leading-relaxed text-mute">
+                  {t.measure.condsWhy}
+                </p>
+                <p className="mt-2 text-[0.85rem] text-faint">{condConfirm}</p>
 
-                <ul className="mt-3 space-y-2">
-                  {[t.measure.cond1, t.measure.cond2, t.measure.cond3, t.measure.cond4].map(
+                <ul className="mt-4 space-y-2">
+                  {condList.map(
                     (c, i) => (
                       <li key={c}>
                         <button
                           type="button"
                           onClick={() =>
                             setConds((prev) => {
-                              const next = [...prev];
+                              const next = condList.map((_, n) => prev[n] ?? false);
                               next[i] = !next[i];
                               return next;
                             })
                           }
-                          aria-pressed={conds[i]}
+                          aria-pressed={Boolean(conds[i])}
                           className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-colors ${
                             conds[i] ? "border-jade bg-jade-050" : "border-ink-600 bg-ink-900"
                           }`}
@@ -269,7 +283,7 @@ export function MeasureClient({ locale }: { locale: string }) {
                 <MeasureTimer locale={locale} onDone={record} />
               ) : (
                 <div className="rounded-2xl border border-dashed border-ink-600 p-6 text-center">
-                  <p className="text-[0.94rem] text-faint">{t.measure.confirmAll}</p>
+                  <p className="text-[0.94rem] text-faint">{condConfirm}</p>
                 </div>
               )}
 

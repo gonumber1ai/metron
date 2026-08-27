@@ -148,12 +148,24 @@ export const en = {
     modePartner: "With a partner",
     modeLocked:
       "Day 12 must be done the same way as Day 1. Otherwise the two numbers mean nothing.",
-    conditions: "Check these 4 things first",
-    cond1: "2 days since you last came",
-    cond2: "No alcohol today",
-    cond3: "No training session since yesterday",
-    cond4: "You'll time it the same way you did on Day 1",
-    confirmAll: "Tick all 4. If one is wrong, do it tomorrow instead.",
+    conditions: "Before you start",
+    // The checks used to be a bare list with no reason attached, and two of
+    // them were written for the retest and shown on the baseline as well —
+    // asking a man on Day 1 to confirm he has not trained yet, and to time it
+    // "the same way as Day 1". Both lists now say what they are for.
+    condsWhy:
+      "Your two numbers only mean something if both are taken the same way. This is how we make Day 1 and Day 12 a fair comparison — and it is what the refund is judged on.",
+    // Day 1 — nothing to match yet, so this list SETS the method.
+    baseCond1: "It has been 2 days since you last came",
+    baseCond2: "No alcohol today",
+    baseCond3: "You are doing it the normal way, with no technique",
+    baseConfirm: "All three have to be true. If one is not, measure tomorrow instead — nothing is lost.",
+    // Day 12 — this list MATCHES the method set on Day 1.
+    reCond1: "It has been 2 days since you last came",
+    reCond2: "No alcohol today",
+    reCond3: "No training session in the last 24 hours",
+    reCond4: "Same as Day 1 — same way of timing, same solo or partner",
+    reConfirm: "All four have to be true. If one is not, measure tomorrow instead — nothing is lost.",
     howTo: "How to do it",
     step1: "Hit START the moment you begin.",
     step2: "Do it normally. Don't hold back. Don't use the technique.",

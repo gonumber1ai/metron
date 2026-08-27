@@ -138,8 +138,8 @@ const days: ProtocolDay[] = [
       {
         id: "d1-conditions",
         kind: "measure",
-        label: "Confirmez les quatre conditions du test",
-        detail: "48 h sans éjaculation, pas d'alcool, pas de séance depuis 24 h, méthode reproductible.",
+        label: "Confirmez les trois conditions du test",
+        detail: "2 jours depuis votre dernière fois, pas d'alcool aujourd'hui, fait normalement sans aucune technique. C'est ce qui rend le Jour 12 comparable — l'application explique pourquoi sur l'écran Mesurer.",
       },
       { id: "d1-mode", kind: "measure", label: "Choisissez votre mode — seul ou avec une partenaire" },
       { id: "d1-measure", kind: "measure", label: "Prenez la mesure de départ et enregistrez-la" },
@@ -480,7 +480,7 @@ const days: ProtocolDay[] = [
       "Lisez la leçon après, quel que soit le résultat. Il y a 4 résultats possibles et 3 sont de bonnes nouvelles.",
     ],
     tasks: [
-      { id: "d12-conditions", kind: "measure", label: "Confirmez à nouveau les quatre conditions" },
+      { id: "d12-conditions", kind: "measure", label: "Confirmez les quatre conditions — comme au Jour 1" },
       { id: "d12-measure", kind: "measure", label: "Prenez la nouvelle mesure et enregistrez-la" },
       { id: "d12-compare", kind: "measure", label: "Comparez vos deux chiffres côte à côte" },
       { id: "d12-lesson", kind: "lesson", label: "Lire : Comment lire votre résultat" },

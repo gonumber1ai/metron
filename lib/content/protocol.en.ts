@@ -147,8 +147,8 @@ const days: ProtocolDay[] = [
       {
         id: "d1-conditions",
         kind: "measure",
-        label: "Confirm the four test conditions",
-        detail: "48h since ejaculating, no alcohol, no session in 24h, repeatable timing method.",
+        label: "Confirm the three test conditions",
+        detail: "2 days since you last came, no alcohol today, done the normal way with no technique. These are what make Day 12 comparable — the app explains why on the Measure screen.",
       },
       { id: "d1-mode", kind: "measure", label: "Choose your mode — solo or with a partner" },
       { id: "d1-measure", kind: "measure", label: "Take the baseline and record it" },
@@ -508,7 +508,7 @@ const days: ProtocolDay[] = [
       "Read the lesson after, whatever happened. There are 4 possible results and 3 of them are good news.",
     ],
     tasks: [
-      { id: "d12-conditions", kind: "measure", label: "Confirm the four test conditions again" },
+      { id: "d12-conditions", kind: "measure", label: "Confirm the four test conditions — same as Day 1" },
       { id: "d12-measure", kind: "measure", label: "Take the retest and record it" },
       { id: "d12-compare", kind: "measure", label: "Look at your two numbers side by side" },
       { id: "d12-lesson", kind: "lesson", label: "Read: How to read your result" },
