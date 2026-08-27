@@ -85,11 +85,15 @@ body {
 }
 
 /* Ambient light.
-   A dark page painted one flat colour looks like a switched-off
-   screen. One very soft pool of green at the top, fixed so it does
-   not travel while he scrolls, is the difference between "dark
-   theme" and "lit room". It is behind everything and catches no
-   clicks. */
+   A dark page painted one flat colour looks like a switched-off screen. Two
+   soft sources — one above the fold, one low and to the side — give it a
+   direction instead of a glow in the middle. Fixed, so they do not travel
+   while he scrolls. Behind everything, catching no clicks.
+
+   There is deliberately no pattern over this. A visible grid or dot field is
+   the house style of every AI SaaS template on the internet, and borrowing it
+   makes a paid product look like a weekend build. Restraint is the thing that
+   reads as expensive here. */
 body::before {
   content: "";
   position: fixed;
@@ -98,39 +102,16 @@ body::before {
   z-index: 0;
   background:
     radial-gradient(
-      80rem 40rem at 50% -12rem,
-      color-mix(in srgb, var(--color-jade) 13%, transparent) 0%,
-      transparent 65%
+      75rem 42rem at 50% -14rem,
+      color-mix(in srgb, var(--color-jade) 14%, transparent) 0%,
+      transparent 66%
     ),
     radial-gradient(
-      60rem 40rem at 100% 100%,
-      color-mix(in srgb, var(--color-jade-700) 10%, transparent) 0%,
+      55rem 38rem at 8% 108%,
+      color-mix(in srgb, var(--color-jade-700) 11%, transparent) 0%,
       transparent 70%
     );
 }
-/* The grid.
-   A hairline technical grid over the ground, masked so it is strongest at the
-   top and gone by the fold. This is the thing that separates Metron from every
-   other product in this category: they are all soft, illustrated and friendly,
-   and a man does not want friendly here, he wants something that looks like it
-   measures. Barely visible on purpose — you should feel it, not read it. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(70rem 45rem at 50% -4rem, #000 0%, transparent 72%);
-  mask-image: radial-gradient(70rem 45rem at 50% -4rem, #000 0%, transparent 72%);
-}
-body.editorial::after {
-  content: none;
-}
-
 body > * {
   position: relative;
   z-index: 1;
