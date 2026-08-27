@@ -34,6 +34,20 @@ export const en = {
 
   quiz: {
     kicker: "Private assessment",
+    introKicker: "Private assessment",
+    introH: "9 questions. Then you will know what is actually causing yours.",
+    introP1:
+      "Most men have been guessing for years, which is why nothing they bought ever worked — you cannot fix a problem you have not identified.",
+    introP2:
+      "These answers decide the plan you get. There are four different causes and they need four different approaches, so the plan is built from what you say here.",
+    introHonestH: "One thing before you start",
+    introHonestP:
+      "Answer honestly, even where it is uncomfortable. Nobody reads these but us, and nothing here is attached to your name — put down any name you like at checkout, we never check it.",
+    introHonestP2:
+      "But the numbers have to be real. Round up and you get a plan built for a man who does not exist, and it will not work on you. There is no reason to impress anyone here.",
+    introTime: "About 60 seconds",
+    introPrivate: "No name needed. Nothing is shared with anyone.",
+    introStart: "Start",
     title: "9 questions. About 60 seconds.",
     sub: "No name required. Nothing is shared with anyone.",
     progress: "Question {n} of {total}",

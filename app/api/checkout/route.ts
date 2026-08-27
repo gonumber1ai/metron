@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPrice, getPriceFor, type Plan, type ProviderId } from "@/lib/payments";
 import { initiatePay, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
+import { recordIntake } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
     locale?: string;
     /** which rail the buyer actually tapped — trusted over his country */
     provider?: ProviderId;
+    name?: string;
+    email?: string;
+    quiz?: unknown;
   };
   try {
     body = await req.json();
@@ -46,6 +50,17 @@ export async function POST(req: Request) {
   if (requested && price.provider !== requested) {
     return NextResponse.json({ status: "unavailable", provider: requested });
   }
+
+  void recordIntake({
+    ref,
+    name: body.name,
+    contact: body.email,
+    plan,
+    locale,
+    provider: body.provider ?? undefined,
+    stage: "checkout_started",
+    quiz: body.quiz,
+  });
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
 

@@ -7,6 +7,7 @@ import {
   PHONE_RE,
   operatorOf,
 } from "@/lib/payments/fapshi";
+import { recordIntake } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -65,6 +66,8 @@ export async function POST(req: Request) {
     locale?: string;
     name?: string;
     email?: string;
+    /** the scored assessment, so the admin view shows who this man is */
+    quiz?: unknown;
   };
   try {
     body = await req.json();
@@ -95,6 +98,21 @@ export async function POST(req: Request) {
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
   const locale = body.locale === "fr" ? "fr" : "en";
   const message = plan === "sprint" ? "Metron 30" : "Metron 10";
+
+  // Write what he told us BEFORE creating the payment. A man who fills the
+  // form and then abandons at the checkout page is the most valuable person on
+  // the site, and he only exists in the data if we save first.
+  void recordIntake({
+    ref,
+    name,
+    contact: email || undefined,
+    phone,
+    plan,
+    locale,
+    provider: "fapshi",
+    stage: "checkout_started",
+    quiz: body.quiz,
+  });
 
   /* ---------------------------------------------- 1. charge the handset */
 

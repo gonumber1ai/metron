@@ -110,6 +110,60 @@ export async function findPaidByRef(
   }
 }
 
+/**
+ * Record everything a man told us, at the moment he tried to pay.
+ *
+ * Keyed on `ref` so a device is one row that moves through stages rather than
+ * a new row per attempt — otherwise a man who retries a failed payment three
+ * times shows up in the admin view as four different people.
+ *
+ * Called before the payment is created, deliberately. The people worth chasing
+ * are the ones who typed their details and then abandoned at the checkout
+ * page, and they only exist in the data if we write before the money moves.
+ */
+export async function recordIntake(input: {
+  ref: string;
+  name?: string;
+  contact?: string;
+  phone?: string;
+  plan?: string;
+  locale: string;
+  provider?: string;
+  stage?: "lead" | "checkout_started" | "paid";
+  quiz?: unknown;
+}): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  try {
+    const row: Record<string, unknown> = {
+      ref: input.ref,
+      locale: input.locale,
+      stage: input.stage ?? "checkout_started",
+      updated_at: new Date().toISOString(),
+    };
+    // Only overwrite what we were actually given, so a later stage cannot
+    // blank a detail captured earlier.
+    if (input.name) row.name = input.name;
+    if (input.contact) row.contact = input.contact;
+    if (input.phone) row.phone = input.phone;
+    if (input.plan) row.plan = input.plan;
+    if (input.provider) row.provider = input.provider;
+    if (input.quiz) row.quiz = input.quiz;
+    // `contact` is NOT NULL in the base schema; fall back to whatever we have.
+    if (!row.contact) row.contact = input.phone ?? input.ref;
+
+    const { error } = await client.from("leads").upsert(row, { onConflict: "ref" });
+    if (error) {
+      console.error("[supabase] recordIntake", error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[supabase] recordIntake threw", err);
+    return false;
+  }
+}
+
 /** Capture a lead. Never throws — losing the lead is bad, breaking the page is worse. */
 export async function recordLead(input: {
   contact: string;

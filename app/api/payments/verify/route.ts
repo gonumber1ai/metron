@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
 import { sendPurchaseConfirmation, looksLikeEmail } from "@/lib/email/send";
-import { recordPayment } from "@/lib/supabase/server";
+import { recordPayment, recordIntake } from "@/lib/supabase/server";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
 
 export const runtime = "nodejs";
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
     if (wEmail && looksLikeEmail(wEmail)) {
       void sendPurchaseConfirmation({ to: wEmail, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
     }
+    void recordIntake({ ref, locale: body.locale ?? "en", plan: wPlan, stage: "paid", provider: "whop" });
     void recordPayment({
       ref,
       provider: "whop",
@@ -91,6 +92,7 @@ export async function POST(req: Request) {
     void sendPurchaseConfirmation({ to: tx!.email, locale: body.locale === "fr" ? "fr" : "en", accessCode: ref });
   }
 
+  void recordIntake({ ref, locale: body.locale ?? "en", plan, stage: "paid", provider: "fapshi" });
   void recordPayment({
     ref,
     provider: "fapshi",

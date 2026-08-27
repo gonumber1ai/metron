@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getQuiz, scoreQuiz, type Answers } from "@/lib/content/quiz";
 import { getDict } from "@/lib/i18n";
 import { update } from "@/lib/store";
+import { Logo } from "@/components/Logo";
 
 export function QuizClient({ locale }: { locale: string }) {
   const t = getDict(locale);
   const router = useRouter();
   const questions = useMemo(() => getQuiz(locale), [locale]);
 
+  // The ad lands here, so the first screen has to do a landing page's job in
+  // one viewport: say what this is, why the answers matter, and ask for
+  // honesty before he starts rather than after he has already rounded up.
+  const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [echo, setEcho] = useState<string[]>([]);
@@ -91,6 +97,70 @@ export function QuizClient({ locale }: { locale: string }) {
       return;
     }
     window.setTimeout(() => advance(next), 160);
+  }
+
+  if (!started) {
+    return (
+      <>
+        <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
+        <div className="flex min-h-screen flex-col bg-ink-900">
+          <header className="border-b border-ink-700">
+            <div className="mx-auto flex max-w-xl items-center justify-between px-5 py-4">
+              <Logo size="sm" />
+              <Link
+                href={`/${locale}/login`}
+                className="text-[13px] font-medium text-mute underline underline-offset-4"
+              >
+                {locale === "fr" ? "Se connecter" : "Log in"}
+              </Link>
+            </div>
+          </header>
+
+          <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-0 pt-8">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+              {t.quiz.introKicker}
+            </p>
+            <h1 className="mt-3 text-[1.75rem] font-bold leading-tight tracking-tight md:text-[2.1rem]">
+              {t.quiz.introH}
+            </h1>
+
+            <p className="mt-5 text-[1.02rem] leading-[1.7] text-mute">{t.quiz.introP1}</p>
+            <p className="mt-3 text-[1.02rem] leading-[1.7] text-mute">{t.quiz.introP2}</p>
+
+            <div className="mt-6 rounded-2xl border-l-2 border-amber bg-amber-050 p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber">
+                {t.quiz.introHonestH}
+              </p>
+              <p className="mt-2.5 text-[0.98rem] leading-relaxed text-bone">
+                {t.quiz.introHonestP}
+              </p>
+              <p className="mt-2.5 text-[0.98rem] font-semibold leading-relaxed text-bone">
+                {t.quiz.introHonestP2}
+              </p>
+            </div>
+
+            <ul className="mt-6 space-y-2">
+              {[t.quiz.introTime, t.quiz.introPrivate].map((line) => (
+                <li key={line} className="flex gap-3 text-[0.93rem] leading-snug text-faint">
+                  <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-jade" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+
+            <div className="sticky bottom-0 z-10 mt-auto border-t border-ink-700 bg-ink-900/95 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur md:static md:border-0 md:bg-transparent md:pt-8 md:backdrop-blur-none">
+              <button
+                type="button"
+                onClick={() => setStarted(true)}
+                className="w-full rounded-full btn-go px-6 py-4 text-[15.5px] font-bold"
+              >
+                {t.quiz.introStart}
+              </button>
+            </div>
+          </main>
+        </div>
+      </>
+    );
   }
 
   return (

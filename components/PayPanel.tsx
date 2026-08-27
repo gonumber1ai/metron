@@ -36,6 +36,8 @@ const T = {
     nameLabel: "Your name",
     emailLabel: "Your email",
     emailHelp: "Where your access code goes. Nothing else is sent, and the subject never says what it is about.",
+    trust:
+      "Use any name you like — we never check it and we never need your real one. Your statement shows METRON and nothing else. We do not sell or share anything, ever.",
     phoneLabel: "Your Mobile Money number",
     phoneHelp: "9 digits, starts with 6. MTN or Orange.",
     badPhone: "That is not a valid number. 9 digits, starting with 6.",
@@ -64,6 +66,8 @@ const T = {
     nameLabel: "Votre nom",
     emailLabel: "Votre email",
     emailHelp: "C'est là qu'arrive votre code d'accès. Rien d'autre n'est envoyé, et l'objet n'indique jamais de quoi il s'agit.",
+    trust:
+      "Mettez le nom que vous voulez — on ne le vérifie jamais et on n'a pas besoin du vrai. Votre relevé affiche METRON, rien d'autre. On ne vend et ne partage rien, jamais.",
     phoneLabel: "Votre numéro Mobile Money",
     phoneHelp: "9 chiffres, commence par 6. MTN ou Orange.",
     badPhone: "Ce numéro n'est pas valide. 9 chiffres, commençant par 6.",
@@ -268,6 +272,8 @@ function MomoPanel({
           locale,
           name: name.trim(),
           email: email.trim(),
+          // So the admin view shows who this man is, not just that someone paid.
+          quiz: load(locale).quiz,
         }),
       });
       const data = (await res.json()) as {
@@ -500,6 +506,10 @@ function MomoPanel({
         {err ?? t.phoneHelp}
       </p>
 
+      <p className="mt-4 rounded-xl border-l-2 border-jade bg-ink-900/50 px-3.5 py-3 text-[0.84rem] leading-relaxed text-mute">
+        {t.trust}
+      </p>
+
       <button
         type="button"
         onClick={pay}
@@ -541,7 +551,14 @@ function CardPanel({
           headers: { "Content-Type": "application/json" },
           // Say which rail. Without this the server infers it from the
           // country and a Cameroonian tapping "Card" lands on Mobile Money.
-          body: JSON.stringify({ plan, country, ref, locale, provider: "whop" }),
+          body: JSON.stringify({
+            plan,
+            country,
+            ref,
+            locale,
+            provider: "whop",
+            quiz: load(locale).quiz,
+          }),
         });
         const data = (await res.json()) as { status?: string; sessionId?: string; url?: string };
         if (cancelled) return;

@@ -73,9 +73,17 @@ export function OfferClient({
         <header className="border-b border-ink-700">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
-            <Link href={`/${locale}/result`} className="text-[13px] text-mute hover:text-bone">
-              {t.cta.back}
-            </Link>
+            <span className="flex items-center gap-4">
+              <Link href={`/${locale}/result`} className="text-[13px] text-mute hover:text-bone">
+                {t.cta.back}
+              </Link>
+              <Link
+                href={`/${locale}/login`}
+                className="text-[13px] font-medium text-mute underline underline-offset-4 hover:text-bone"
+              >
+                {locale === "fr" ? "Se connecter" : "Log in"}
+              </Link>
+            </span>
           </div>
         </header>
 

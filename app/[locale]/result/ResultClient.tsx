@@ -98,8 +98,14 @@ export function ResultClient({ locale }: { locale: string }) {
 
       <div className="min-h-screen bg-ink-900 pb-28 md:pb-0">
         <header className="border-b border-ink-700">
-          <div className="mx-auto max-w-2xl px-5 py-4">
+          <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
+            <Link
+              href={`/${locale}/login`}
+              className="text-[13px] font-medium text-mute underline underline-offset-4"
+            >
+              {locale === "fr" ? "Se connecter" : "Log in"}
+            </Link>
           </div>
         </header>
 
@@ -270,11 +276,6 @@ export function ResultClient({ locale }: { locale: string }) {
 
           <footer className="border-t border-ink-700 py-8">
             <p className="text-[12px] leading-relaxed text-faint">{m.disclaimer}</p>
-            <p className="mt-4 text-[12.5px] text-faint">
-              <Link href={`/${locale}/login`} className="underline underline-offset-4">
-                {fr ? "Déjà inscrit ? Se connecter" : "Already signed up? Log in"}
-              </Link>
-            </p>
           </footer>
         </main>
 
