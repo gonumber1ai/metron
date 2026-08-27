@@ -49,9 +49,39 @@ export const priceBook: Record<string, Price[]> = {
   ],
 };
 
+/**
+ * Live-test override for the Mobile Money price.
+ *
+ * Set NEXT_PUBLIC_PRICE_OVERRIDE_XAF=500 to charge 500 FCFA instead of the
+ * real price, so a real MTN or Orange payment can be run end to end without
+ * spending 7,500 each time. Fapshi's floor is 100 XAF.
+ *
+ * NEXT_PUBLIC_ on purpose: the browser renders the price and the server
+ * charges it, and those two must never disagree. One variable moves both.
+ *
+ * ⚠ REMOVE IT AFTER TESTING. While it is set, real buyers pay it too. The
+ * health check reports it in bold for exactly that reason.
+ */
+function xafOverride(): number | null {
+  const raw = process.env.NEXT_PUBLIC_PRICE_OVERRIDE_XAF;
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 100 ? Math.round(n) : null;
+}
+
+function applyOverride(p: Price): Price {
+  const o = xafOverride();
+  // Only the 10-day. The 175,000 anchor has to stay real or the offer page
+  // reads "the full programme costs 175,000 FCFA" directly above a 500 FCFA
+  // price for that same programme.
+  if (o === null || p.currency !== "XAF" || p.plan !== "test") return p;
+  return { ...p, amountMinor: o, display: `${o.toLocaleString("fr-FR")} FCFA` };
+}
+
 export function getPrice(plan: Plan, country = "default"): Price {
   const rows = priceBook[country] ?? priceBook.default;
-  return rows.find((r) => r.plan === plan) ?? priceBook.default.find((r) => r.plan === plan)!;
+  const row = rows.find((r) => r.plan === plan) ?? priceBook.default.find((r) => r.plan === plan)!;
+  return applyOverride(row);
 }
 
 /**
@@ -78,8 +108,8 @@ export function getPriceFor(plan: Plan, provider: ProviderId, country = "default
  */
 export function getPrices(country = "default"): Price[] {
   const local = country === "default" ? undefined : priceBook[country];
-  if (!local) return priceBook.default;
-  return [...local, ...priceBook.default];
+  if (!local) return priceBook.default.map(applyOverride);
+  return [...local, ...priceBook.default].map(applyOverride);
 }
 
 export type CheckoutInput = {
