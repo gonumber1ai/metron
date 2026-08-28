@@ -15,7 +15,14 @@
 -- was so nothing that already reads it changes meaning.
 -- ===========================================================================
 
-create or replace view public.activity as
+-- Dropped and recreated rather than "create or replace". Postgres will only
+-- let a replace ADD columns at the end of a view; these two land before
+-- `unread`, so it refuses with "cannot change name of view column". Nothing
+-- depends on this view — the server queries it by name — so dropping is safe
+-- and keeps the columns in a sensible order.
+drop view if exists public.activity;
+
+create view public.activity as
 select
   l.ref,
   l.name,
