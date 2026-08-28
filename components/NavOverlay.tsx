@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { LogoMark } from "./Logo";
+import { LogoBuilding } from "./LogoBuilding";
 
 /**
  * The screen tells him it heard the tap.
@@ -75,8 +75,11 @@ export function NavPendingProvider({
           className="fixed inset-0 z-50 grid place-items-center bg-ink-900/70 backdrop-blur-[2px]"
         >
           <span className="flex flex-col items-center gap-3">
-            <span className="animate-pulse text-jade">
-              <LogoMark className="h-11 w-11" />
+            {/* Same animation as the payment waits, so "the app is working"
+                looks like one thing everywhere rather than a pulse here and a
+                spinner there. */}
+            <span className="text-jade">
+              <LogoBuilding className="h-12 w-12" label={label} />
             </span>
             <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-mute">
               {label}

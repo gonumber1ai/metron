@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { load, update } from "@/lib/store";
 import type { Plan, Price } from "@/lib/payments";
 import { OperatorMarks } from "./OperatorMarks";
+import { LogoBuilding } from "./LogoBuilding";
 import { trackCheckoutStarted } from "./MetaPixel";
 
 // The embed is browser-only and pulls an iframe — never render it on the server.
@@ -13,7 +14,13 @@ const WhopCheckoutEmbed = dynamic(
   () => import("@whop/checkout/react").then((m) => m.WhopCheckoutEmbed),
   {
     ssr: false,
-    loading: () => <div className="h-[520px] animate-pulse rounded-2xl bg-ink-800" />,
+    loading: () => (
+      <div className="grid h-[520px] place-items-center rounded-2xl border border-ink-700 bg-ink-800">
+        <span className="text-jade">
+          <LogoBuilding className="h-14 w-14" />
+        </span>
+      </div>
+    ),
   },
 );
 
@@ -371,10 +378,9 @@ function MomoPanel({
   if (state === "awaiting" || state === "charging") {
     return (
       <div className="rounded-2xl border border-jade bg-jade-050 p-6 text-center">
-        <span
-          aria-hidden
-          className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-ink-500 border-t-jade"
-        />
+        <span className="mx-auto block w-fit text-jade">
+          <LogoBuilding className="h-14 w-14" label={t.charging} />
+        </span>
         <h3 className="mt-4 text-[1.15rem] font-bold">
           {state === "charging" ? t.charging : t.awaitingH}
         </h3>
