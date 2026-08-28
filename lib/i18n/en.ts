@@ -212,6 +212,7 @@ export const en = {
   },
 
   messages: {
+    sendFailed: "That did not reach us. Nothing was sent — check your connection and send it again.",
     title: "Private thread",
     sub: "Only you and your coach can see this. No name required.",
     placeholder: "Write your message…",

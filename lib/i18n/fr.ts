@@ -210,6 +210,7 @@ export const fr = {
   },
 
   messages: {
+    sendFailed: "Ce message ne nous est pas parvenu. Rien n'a été envoyé — vérifiez votre connexion et renvoyez-le.",
     title: "Fil privé",
     sub: "Vous et votre coach uniquement. Aucun nom requis.",
     placeholder: "Écrivez votre message…",

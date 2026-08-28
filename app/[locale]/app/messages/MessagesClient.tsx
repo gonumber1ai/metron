@@ -29,6 +29,7 @@ export function MessagesClient({ locale }: { locale: string }) {
     };
   }, []);
   const [text, setText] = useState("");
+  const [failed, setFailed] = useState(false);
 
   if (!ready) {
     return (
@@ -42,13 +43,21 @@ export function MessagesClient({ locale }: { locale: string }) {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
+    setFailed(false);
+    // A rejected request is NOT a thrown promise. This used to be a bare
+    // .catch(), which only fires on a network failure — so a 401 from an
+    // expired or missing entitlement resolved perfectly happily, the message
+    // was painted into his thread, and nothing was ever stored. He believed he
+    // had written to us. Nobody had.
     void fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    }).catch(() => {
-      /* it is already shown locally; a failed send is not silent for long */
-    });
+      body: JSON.stringify({ text: body }),
+    })
+      .then((r) => {
+        if (!r.ok) setFailed(true);
+      })
+      .catch(() => setFailed(true));
 
     mutate((s) => ({
       ...s,
@@ -72,6 +81,12 @@ export function MessagesClient({ locale }: { locale: string }) {
         <h1 className="text-[1.7rem] font-semibold tracking-tight">{t.messages.title}</h1>
         <p className="mt-1.5 text-[0.95rem] text-mute">{t.messages.sub}</p>
       </header>
+
+      {failed && (
+        <p className="mt-3 rounded-xl border border-alert/50 bg-alert/10 px-4 py-3 text-[0.9rem] leading-relaxed text-bone">
+          {t.messages.sendFailed}
+        </p>
+      )}
 
       <div className="mt-6 flex-1 space-y-3 overflow-y-auto">
         {shown.length === 0 ? (

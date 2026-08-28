@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { verifyAdmin, adminCookie, isConfigured } from "@/lib/admin";
-import { db } from "@/lib/supabase/server";
+import { db, allConversations } from "@/lib/supabase/server";
 import { AdminLogin } from "./AdminLogin";
 import { Dashboard, type Snapshot } from "./Dashboard";
 
@@ -36,6 +36,7 @@ export default async function AdminPage() {
     recent: [],
     revenue: [],
     activity: [],
+    conversations: [],
   };
 
   if (client) {
@@ -51,6 +52,10 @@ export default async function AdminPage() {
     snap.dropoff = dropoff.data ?? [];
     snap.recent = recent.data ?? [];
     snap.activity = activity.data ?? [];
+    // Not filtered by stage. The Customers tab reads the `activity` view,
+    // which is gated on stage = 'paid', so a message from anybody else was
+    // stored and then shown nowhere.
+    snap.conversations = await allConversations();
 
     // Summed per currency: adding XAF to USD would produce a number that means
     // nothing, and a wrong revenue figure is worse than none.

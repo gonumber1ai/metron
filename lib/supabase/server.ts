@@ -361,6 +361,66 @@ export async function recordBroadcast(input: {
   }
 }
 
+/**
+ * Every conversation, whether or not the man is a paid customer.
+ *
+ * The admin could only open a thread from the Customers tab, which reads the
+ * `activity` view — and that view is gated on stage = 'paid'. So a message
+ * from anyone whose payment had not reconciled, or who got into the app some
+ * other way, was stored correctly and displayed nowhere. It looked exactly
+ * like the message had never arrived.
+ *
+ * Grouped in JS rather than SQL because Supabase's REST layer has no DISTINCT
+ * ON, and the alternative is another view to keep in step with this one.
+ */
+export async function allConversations(): Promise<
+  {
+    ref: string;
+    last_body: string;
+    last_sender: string;
+    last_at: string;
+    unread: number;
+    total: number;
+  }[]
+> {
+  const client = db();
+  if (!client) return [];
+  try {
+    const { data } = await client
+      .from("threads")
+      .select("ref, sender, body, created_at, read_by_admin")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    const byRef = new Map<string, {
+      ref: string; last_body: string; last_sender: string; last_at: string;
+      unread: number; total: number;
+    }>();
+    for (const row of data ?? []) {
+      const ref = String(row.ref);
+      const existing = byRef.get(ref);
+      if (!existing) {
+        // Rows arrive newest first, so the first one seen for a ref is its
+        // latest message.
+        byRef.set(ref, {
+          ref,
+          last_body: String(row.body ?? ""),
+          last_sender: String(row.sender ?? ""),
+          last_at: String(row.created_at ?? ""),
+          unread: row.sender === "user" && !row.read_by_admin ? 1 : 0,
+          total: 1,
+        });
+      } else {
+        existing.total += 1;
+        if (row.sender === "user" && !row.read_by_admin) existing.unread += 1;
+      }
+    }
+    return [...byRef.values()].sort((a, b) => b.last_at.localeCompare(a.last_at));
+  } catch {
+    return [];
+  }
+}
+
 /** How many coach messages he has not opened. Drives the badge in the header. */
 export async function unreadForUser(ref: string): Promise<number> {
   const client = db();

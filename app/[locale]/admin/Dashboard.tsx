@@ -12,6 +12,15 @@ export type Snapshot = {
   recent: Record<string, unknown>[];
   revenue: { currency: string; total: number; count: number }[];
   activity: ActivityRow[];
+  /** every thread, paid or not — see allConversations() */
+  conversations: {
+    ref: string;
+    last_body: string;
+    last_sender: string;
+    last_at: string;
+    unread: number;
+    total: number;
+  }[];
 };
 
 const STEP_LABEL: Record<string, string> = {
@@ -44,7 +53,10 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
   const started = step("quiz_start");
   const finished = step("quiz_complete");
 
-  const unread = snap.activity.reduce((n, r) => n + Number(r.unread ?? 0), 0);
+  // From conversations, not from activity: activity only covers paid
+  // customers, so an unanswered message from anybody else never raised the
+  // count that is supposed to tell you something is waiting.
+  const unread = snap.conversations.reduce((n, c) => n + c.unread, 0);
   const inactive = snap.activity.filter((r) => !r.last_seen).length;
   const needsAttention = unread + inactive;
 
@@ -236,7 +248,9 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
           )}
 
           {/* ------------------------------------------------------ customers */}
-          {tab === "customers" && <Customers rows={snap.activity} />}
+          {tab === "customers" && (
+            <Customers rows={snap.activity} conversations={snap.conversations} />
+          )}
 
           {/* ---------------------------------------------------- broadcast */}
           {tab === "write" && <Broadcast />}

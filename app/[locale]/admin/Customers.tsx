@@ -29,7 +29,22 @@ function ago(iso: unknown): string {
  * who paid and never opened the app. He is the refund waiting to happen, and
  * one message from you is usually all it takes.
  */
-export function Customers({ rows }: { rows: ActivityRow[] }) {
+export type Conversation = {
+  ref: string;
+  last_body: string;
+  last_sender: string;
+  last_at: string;
+  unread: number;
+  total: number;
+};
+
+export function Customers({
+  rows,
+  conversations = [],
+}: {
+  rows: ActivityRow[];
+  conversations?: Conversation[];
+}) {
   const [open, setOpen] = useState<string | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -140,6 +155,52 @@ export function Customers({ rows }: { rows: ActivityRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* -------------------------------------------- everybody who wrote */}
+      {/* The table above is the `activity` view, gated on stage = 'paid'.
+          Anyone who wrote in without a reconciled payment had their message
+          stored and shown nowhere, which is indistinguishable from the message
+          never arriving. These are the threads that table cannot see. */}
+      {(() => {
+        const paid = new Set(rows.map((r) => String(r.ref ?? "")));
+        const others = conversations.filter((c) => !paid.has(c.ref));
+        if (others.length === 0) return null;
+        return (
+          <div className="mt-8 border-t border-ink-700 pt-5">
+            <h3 className="text-[0.9rem] font-bold text-bone">Not in the customer list</h3>
+            <p className="mt-0.5 mb-3 text-[12px] text-faint">
+              People who wrote in but have no reconciled payment. Worth reading — a
+              man whose payment did not land still thinks he bought it.
+            </p>
+            <ul className="space-y-2">
+              {others.map((c) => (
+                <li key={c.ref}>
+                  <button
+                    type="button"
+                    onClick={() => openThread(c.ref)}
+                    className="flex w-full items-start gap-3 rounded-xl border border-ink-700 bg-ink-800 px-4 py-3 text-left hover:border-ink-500"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="metric block text-[12px] font-bold text-mute">
+                        {c.ref}
+                      </span>
+                      <span className="mt-1 block truncate text-[0.9rem] text-bone">
+                        {c.last_sender === "coach" ? "You: " : ""}
+                        {c.last_body}
+                      </span>
+                    </span>
+                    {c.unread > 0 && (
+                      <span className="shrink-0 rounded-full bg-alert px-2 py-0.5 text-[10px] font-bold text-white">
+                        {c.unread}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
 
       {/* ------------------------------------------------------- thread */}
       {open && (
