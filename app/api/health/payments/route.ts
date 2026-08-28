@@ -66,6 +66,13 @@ export async function GET(req: Request) {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "MISSING",
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "MISSING",
     SUPABASE_SERVICE_ROLE_KEY: shape(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    // The two newest and fiddliest values. The token is ~200 chars and is
+    // pasted by hand, so the length is what tells you the copy was not clipped.
+    NEXT_PUBLIC_META_PIXEL_ID:
+      process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "MISSING (pixel is inert)",
+    META_CAPI_TOKEN: has(process.env.META_CAPI_TOKEN)
+      ? `${shape(process.env.META_CAPI_TOKEN)} — expect roughly 200+; much shorter means the paste was clipped`
+      : "MISSING (Purchase will not reach Meta)",
     METRON_DEV_UNLOCK: process.env.METRON_DEV_UNLOCK ?? "unset (correct for production)",
   };
 
