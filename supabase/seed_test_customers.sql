@@ -1,11 +1,18 @@
 -- ===========================================================================
 -- Metron — TEST DATA. Not a migration. Safe to run more than once.
 --
--- Six fake people — five customers and one who stopped at checkout — with
--- progress, messages to the coach, and replies. Between them they cover every
--- state the admin screen has: two unanswered questions, a man who paid and
--- never opened the app, a finished 10-day with a real jump, a man stalled on
--- Day 3, a French 30-day customer, and a lead who never paid.
+-- Thirteen fake people — twelve customers and one who stopped at checkout —
+-- with progress, messages to the coach, and replies.
+--
+-- Six on the 10-Day Reset, seven on the 30-Day Sprint (four French, three
+-- English). Between them they cover every state the admin screen has: four
+-- unanswered questions, a man who paid and never opened the app, men mid-
+-- programme, finished 10-day and 30-day results, and a lead who never paid.
+--
+-- The Sprint men are the top of the range: baselines of two to four minutes
+-- reaching ten, fifteen, and past twenty. Their Day 30 numbers only show in
+-- the admin once 006_activity_day30.sql has been run — without it the
+-- Customers table shows their Day 12, which is the half-time score.
 --
 -- ── READ THIS BEFORE RUNNING ──────────────────────────────────────────────
 -- This writes into the LIVE database, so these six will be counted in the
@@ -151,6 +158,157 @@ insert into public.events (ref, name, detail, locale, country, created_at) value
   ('TEST-KEVIN',  'paid',             'test',   'en', 'CM', now() - interval '3 days'),
   ('TEST-SAMUEL', 'checkout_started', 'test',   'en', 'CM', now() - interval '14 days'),
   ('TEST-SAMUEL', 'paid',             'test',   'en', 'CM', now() - interval '14 days');
+
+
+-- ===========================================================================
+-- SPRINT CUSTOMERS — the 30-day men, four French and three English.
+--
+-- These exist to test the top of the range: baselines around two to four
+-- minutes going to ten, fifteen, and in one case past twenty. Two are still
+-- mid-programme with an unanswered question each, so "Needs attention" is not
+-- empty once the earlier six are cleaned up.
+--
+-- Their Day 30 number only appears in the admin if 006_activity_day30.sql has
+-- been run. Without it the Customers table shows their Day 12, which is the
+-- half-time score.
+-- ===========================================================================
+
+insert into public.leads (ref, name, contact, phone, plan, locale, stage, provider, created_at, updated_at) values
+  ('TEST-FABRICE', 'Fabrice', 'test.fabrice@example.com', '677000200', 'sprint', 'fr', 'paid', 'fapshi', now() - interval '34 days', now() - interval '5 hours'),
+  ('TEST-SERGE', 'Serge', 'test.serge@example.com', '677000201', 'sprint', 'fr', 'paid', 'fapshi', now() - interval '34 days', now() - interval '5 hours'),
+  ('TEST-LANDRY', 'Landry', 'test.landry@example.com', '677000202', 'sprint', 'fr', 'paid', 'fapshi', now() - interval '20 days', now() - interval '5 hours'),
+  ('TEST-CEDRIC', 'Cédric', 'test.cedric@example.com', '677000203', 'sprint', 'fr', 'paid', 'whop', now() - interval '34 days', now() - interval '5 hours'),
+  ('TEST-TOBIAS', 'Tobias', 'test.tobias@example.com', '677000204', 'sprint', 'en', 'paid', 'fapshi', now() - interval '34 days', now() - interval '5 hours'),
+  ('TEST-NNAMDI', 'Nnamdi', 'test.nnamdi@example.com', '677000205', 'sprint', 'en', 'paid', 'fapshi', now() - interval '34 days', now() - interval '5 hours'),
+  ('TEST-FRANKLIN', 'Franklin', 'test.franklin@example.com', '677000206', 'sprint', 'en', 'paid', 'fapshi', now() - interval '20 days', now() - interval '5 hours');
+
+insert into public.payments (ref, provider, provider_txn, plan, currency, amount_minor, status, created_at) values
+  ('TEST-FABRICE', 'fapshi', 'TEST-TXN-FABRICE', 'sprint', 'XAF', 69000, 'paid', now() - interval '34 days'),
+  ('TEST-SERGE', 'fapshi', 'TEST-TXN-SERGE', 'sprint', 'XAF', 69000, 'paid', now() - interval '34 days'),
+  ('TEST-LANDRY', 'fapshi', 'TEST-TXN-LANDRY', 'sprint', 'XAF', 69000, 'paid', now() - interval '20 days'),
+  ('TEST-CEDRIC', 'whop', 'TEST-TXN-CEDRIC', 'sprint', 'USD', 12500, 'paid', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'fapshi', 'TEST-TXN-TOBIAS', 'sprint', 'XAF', 69000, 'paid', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'fapshi', 'TEST-TXN-NNAMDI', 'sprint', 'XAF', 69000, 'paid', now() - interval '34 days'),
+  ('TEST-FRANKLIN', 'fapshi', 'TEST-TXN-FRANKLIN', 'sprint', 'XAF', 69000, 'paid', now() - interval '20 days');
+
+insert into public.progress (ref, plan, day, started_at, measurements, sessions, markers, updated_at) values
+  ('TEST-FABRICE', 'sprint', 30, now() - interval '34 days',
+   '[{"day":1,"seconds":130,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":380,"mode":"partner","at":"2026-08-06T21:00:00Z"},{"day":30,"seconds":690,"mode":"partner","at":"2026-08-24T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24},{"day":26},{"day":28}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26},{"day":27},{"day":28},{"day":29},{"day":30}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-SERGE', 'sprint', 30, now() - interval '34 days',
+   '[{"day":1,"seconds":180,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":430,"mode":"partner","at":"2026-08-06T21:00:00Z"},{"day":30,"seconds":920,"mode":"partner","at":"2026-08-24T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24},{"day":26},{"day":28}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26},{"day":27},{"day":28},{"day":29},{"day":30}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-LANDRY', 'sprint', 26, now() - interval '20 days',
+   '[{"day":1,"seconds":105,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":620,"mode":"partner","at":"2026-08-06T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-CEDRIC', 'sprint', 30, now() - interval '34 days',
+   '[{"day":1,"seconds":255,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":700,"mode":"partner","at":"2026-08-06T21:00:00Z"},{"day":30,"seconds":1360,"mode":"partner","at":"2026-08-24T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24},{"day":26},{"day":28}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26},{"day":27},{"day":28},{"day":29},{"day":30}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-TOBIAS', 'sprint', 30, now() - interval '34 days',
+   '[{"day":1,"seconds":150,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":420,"mode":"partner","at":"2026-08-06T21:00:00Z"},{"day":30,"seconds":850,"mode":"partner","at":"2026-08-24T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24},{"day":26},{"day":28}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26},{"day":27},{"day":28},{"day":29},{"day":30}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-NNAMDI', 'sprint', 30, now() - interval '34 days',
+   '[{"day":1,"seconds":200,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":560,"mode":"partner","at":"2026-08-06T21:00:00Z"},{"day":30,"seconds":1125,"mode":"partner","at":"2026-08-24T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16},{"day":18},{"day":20},{"day":22},{"day":24},{"day":26},{"day":28}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18},{"day":19},{"day":20},{"day":21},{"day":22},{"day":23},{"day":24},{"day":25},{"day":26},{"day":27},{"day":28},{"day":29},{"day":30}]'::jsonb,
+   now() - interval '5 hours'),
+  ('TEST-FRANKLIN', 'sprint', 18, now() - interval '20 days',
+   '[{"day":1,"seconds":125,"mode":"solo","at":"2026-07-25T21:00:00Z"},{"day":12,"seconds":630,"mode":"partner","at":"2026-08-06T21:00:00Z"}]'::jsonb,
+   '[{"day":2},{"day":4},{"day":6},{"day":8},{"day":10},{"day":12},{"day":14},{"day":16}]'::jsonb,
+   '[{"day":1},{"day":2},{"day":3},{"day":4},{"day":5},{"day":6},{"day":7},{"day":8},{"day":9},{"day":10},{"day":11},{"day":12},{"day":13},{"day":14},{"day":15},{"day":16},{"day":17},{"day":18}]'::jsonb,
+   now() - interval '5 hours');
+
+insert into public.threads (ref, sender, body, read_by_admin, created_at) values
+  ('TEST-FABRICE', 'user',
+   'Jour 30 terminé. Je suis parti de 2 min 10 au Jour 1 et hier j''ai fait 11 min 30. Au Jour 12 j''étais déjà à 6 min 20, mais la deuxième moitié a changé autre chose : je ne panique plus quand ça monte.',
+   true, now() - interval '2 days'),
+  ('TEST-FABRICE', 'coach',
+   'C''est exactement ce que la deuxième moitié doit faire. Et soyons clairs sur une chose : ce résultat est le vôtre. Vous avez fait douze séances et vous n''avez pas sauté les mesures quand elles vous arrangeaient moins. On vous a donné l''ordre des choses — le travail, c''était vous.',
+   true, now() - interval '2 days' + interval '5 hours'),
+  ('TEST-SERGE', 'user',
+   'Bonsoir. Jour 30 : 15 min 20. Au départ 3 min. Ma femme m''a demandé ce que je prenais. Je lui ai dit que je ne prenais rien du tout.',
+   true, now() - interval '2 days'),
+  ('TEST-SERGE', 'coach',
+   'Vous ne preniez rien, et c''est toute la différence. Un comprimé aurait arrêté de marcher le jour où vous auriez arrêté d''en acheter. Ce que vous avez construit en trente jours reste, parce que c''est vous qui l''avez construit. Deux séances par semaine suffisent maintenant.',
+   true, now() - interval '2 days' + interval '5 hours'),
+  ('TEST-LANDRY', 'user',
+   'Jour 26. Ma mesure du Jour 12 était 10 min 20, contre 1 min 45 au départ. Il me reste quatre jours avant la dernière mesure. Est-ce que je continue les séances normalement jusque-là ?',
+   false, now() - interval '2 days'),
+  ('TEST-CEDRIC', 'user',
+   'Jour 30. 22 min 40. Je partais de 4 min 15. Honnêtement je ne pensais pas que c''était possible : j''avais déjà essayé des comprimés et des produits naturels avant, jamais rien n''a tenu.',
+   true, now() - interval '2 days'),
+  ('TEST-CEDRIC', 'coach',
+   'Les comprimés ne vous ont rien appris — c''est pour ça que rien n''a tenu. Là, c''est votre corps qui a appris, et ça ne se désapprend pas en une semaine. Vous avez fait le travail tous les jours pendant un mois : le résultat vous appartient.',
+   true, now() - interval '2 days' + interval '5 hours'),
+  ('TEST-TOBIAS', 'user',
+   'Day 30 done. Started at 2 minutes 30, last night was 14 minutes 10. Day 12 was 7 minutes so the second half was where most of it came.',
+   true, now() - interval '2 days'),
+  ('TEST-TOBIAS', 'coach',
+   'That is the normal shape of it, and it is worth saying plainly: that was you. Twelve sessions and you measured honestly both times, including the one where the number was not going to flatter you. We gave you the order to do things in. You did them.',
+   true, now() - interval '2 days' + interval '5 hours'),
+  ('TEST-NNAMDI', 'user',
+   'Finished the 30 days. 3 minutes 20 at the start, 18 minutes 45 last night. My day 12 was 9 minutes 20. I have not told anyone but I wanted to tell you.',
+   true, now() - interval '2 days'),
+  ('TEST-NNAMDI', 'coach',
+   'Tell whoever you want or nobody, that is yours. But do not give the programme the credit — you trained on days you did not feel like it and you logged your markers when nobody was checking. That is the whole reason the number moved.',
+   true, now() - interval '2 days' + interval '5 hours'),
+  ('TEST-FRANKLIN', 'user',
+   'Day 18. My day 12 came out at 10 minutes 30, up from 2 minutes 5. Quick question — I have started skipping the markers some nights because I feel like I already know the answer. Does that matter?',
+   false, now() - interval '2 days');
+
+insert into public.events (ref, name, detail, locale, country, created_at) values
+  ('TEST-FABRICE', 'quiz_start', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-FABRICE', 'quiz_complete', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-FABRICE', 'result_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-FABRICE', 'offer_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-FABRICE', 'checkout_started', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-FABRICE', 'paid', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'quiz_start', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'quiz_complete', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'result_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'offer_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'checkout_started', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-SERGE', 'paid', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-LANDRY', 'quiz_start', null, 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-LANDRY', 'quiz_complete', null, 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-LANDRY', 'result_view', null, 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-LANDRY', 'offer_view', null, 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-LANDRY', 'checkout_started', 'sprint', 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-LANDRY', 'paid', 'sprint', 'fr', 'CM', now() - interval '20 days'),
+  ('TEST-CEDRIC', 'quiz_start', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-CEDRIC', 'quiz_complete', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-CEDRIC', 'result_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-CEDRIC', 'offer_view', null, 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-CEDRIC', 'checkout_started', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-CEDRIC', 'paid', 'sprint', 'fr', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'quiz_start', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'quiz_complete', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'result_view', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'offer_view', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'checkout_started', 'sprint', 'en', 'CM', now() - interval '34 days'),
+  ('TEST-TOBIAS', 'paid', 'sprint', 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'quiz_start', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'quiz_complete', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'result_view', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'offer_view', null, 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'checkout_started', 'sprint', 'en', 'CM', now() - interval '34 days'),
+  ('TEST-NNAMDI', 'paid', 'sprint', 'en', 'CM', now() - interval '34 days'),
+  ('TEST-FRANKLIN', 'quiz_start', null, 'en', 'CM', now() - interval '20 days'),
+  ('TEST-FRANKLIN', 'quiz_complete', null, 'en', 'CM', now() - interval '20 days'),
+  ('TEST-FRANKLIN', 'result_view', null, 'en', 'CM', now() - interval '20 days'),
+  ('TEST-FRANKLIN', 'offer_view', null, 'en', 'CM', now() - interval '20 days'),
+  ('TEST-FRANKLIN', 'checkout_started', 'sprint', 'en', 'CM', now() - interval '20 days'),
+  ('TEST-FRANKLIN', 'paid', 'sprint', 'en', 'CM', now() - interval '20 days');
 
 commit;
 
