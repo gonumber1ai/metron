@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verifyAdmin, adminCookie } from "@/lib/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,15 +16,26 @@ export const dynamic = "force-dynamic";
  * set" and "the credentials work" are different problems with the same
  * symptom, and guessing between them wastes a day.
  *
- * Protect it once you are past launch: set HEALTH_TOKEN and call it with
- * ?t=<token>. Until then it is open, which is the right trade while payments
- * are down and you need an answer now.
+ * ── WHO CAN READ IT ───────────────────────────────────────────────────────
+ * Signed-in admin, or ?t=<HEALTH_TOKEN> for curl from a phone. It was open to
+ * everyone while payments were being debugged, which was the right trade then
+ * and the wrong one now: the response names the Whop account and product ids
+ * and the Supabase project URL in full. None of those is a secret on its own,
+ * but together they tell a stranger exactly what to go and probe.
+ *
+ * Nothing to remember by default — being logged into /admin is enough. Set
+ * HEALTH_TOKEN only if you want to curl it without a browser session.
  */
 export async function GET(req: Request) {
-  const gate = process.env.HEALTH_TOKEN;
-  if (gate) {
-    const t = new URL(req.url).searchParams.get("t");
-    if (t !== gate) return new NextResponse("Not found", { status: 404 });
+  const jar = await cookies();
+  const isAdmin = verifyAdmin(jar.get(adminCookie)?.value);
+  const token = process.env.HEALTH_TOKEN;
+  const withToken =
+    Boolean(token) && new URL(req.url).searchParams.get("t") === token;
+
+  if (!isAdmin && !withToken) {
+    // 404, not 403: it should not confirm to a stranger that this exists.
+    return new NextResponse("Not found", { status: 404 });
   }
 
   const has = (v?: string) => Boolean(v && v.trim().length > 0);
