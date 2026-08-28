@@ -29,12 +29,19 @@ export type CampaignRow = {
  */
 export function Ads({ rows }: { rows: CampaignRow[] }) {
   const [spend, setSpend] = useState<Record<string, string>>({});
+  // Tags in the URL are deliberately meaningless — a1, a2 — because the URL is
+  // crawled by Meta and visible to the man before he clicks, and "nopills" is
+  // a free extra signal in a category that is already scrutinised. The meaning
+  // lives here instead, where only you read it.
+  const [labels, setLabels] = useState<Record<string, string>>({});
 
   // Kept per-browser. A wrong number here changes nothing but this screen.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("metron.adspend");
       if (raw) setSpend(JSON.parse(raw) as Record<string, string>);
+      const rawL = window.localStorage.getItem("metron.adlabels");
+      if (rawL) setLabels(JSON.parse(rawL) as Record<string, string>);
     } catch {
       /* no saved spend is fine */
     }
@@ -47,6 +54,16 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
       window.localStorage.setItem("metron.adspend", JSON.stringify(next));
     } catch {
       /* private mode; the table still works, it just will not remember */
+    }
+  }
+
+  function labelFor(key: string, v: string) {
+    const next = { ...labels, [key]: v };
+    setLabels(next);
+    try {
+      window.localStorage.setItem("metron.adlabels", JSON.stringify(next));
+    } catch {
+      /* private mode; the tag still identifies the row */
     }
   }
 
@@ -89,7 +106,9 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
         {best ? (
           <>
             <p className="mt-2 text-[1.25rem] font-bold leading-snug text-bone">
-              {best.campaign === "(none)" ? "Untagged traffic" : best.campaign}{" "}
+              {best.campaign === "(none)"
+                ? "Untagged traffic"
+                : labels[`${best.campaign}::${best.locale}`] || best.campaign}{" "}
               <span className="text-faint">({best.locale.toUpperCase()})</span> is winning.
             </p>
             <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">
@@ -128,9 +147,11 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
       <section className="rounded-2xl card p-5">
         <h2 className="text-[0.95rem] font-bold text-bone">Every ad</h2>
         <p className="mt-0.5 mb-4 text-[12px] leading-relaxed text-faint">
-          Tag each link with <span className="metric">?c=</span> and the ad name — the tag is
-          remembered from his first visit right through to his payment. Clicks are people, not
-          taps: one man reloading four times counts once.
+          Tag each link with <span className="metric">?c=a1</span>, <span className="metric">a2</span> and
+          so on — keep the tag meaningless, because Meta crawls the URL and the man can see it.
+          Write what the ad actually says in the second column; that stays on this device. The tag
+          is remembered from his first visit right through to his payment, and clicks are people,
+          not taps — one man reloading four times counts once.
         </p>
 
         <div className="overflow-x-auto">
@@ -138,6 +159,7 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
             <thead>
               <tr className="text-[11px] uppercase tracking-wide text-faint">
                 <th className="pb-2 pr-4 font-bold">Ad</th>
+                <th className="pb-2 pr-4 font-bold">What it says</th>
                 <th className="pb-2 pr-4 font-bold">Lang</th>
                 <th className="pb-2 pr-4 font-bold">Clicked</th>
                 <th className="pb-2 pr-4 font-bold">Finished quiz</th>
@@ -160,6 +182,14 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
                       ) : (
                         r.campaign
                       )}
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      <input
+                        value={labels[keyOf(r)] ?? ""}
+                        onChange={(e) => labelFor(keyOf(r), e.target.value)}
+                        placeholder="name it"
+                        className="w-36 rounded-lg border border-ink-600 bg-ink-850 px-2 py-1 text-[0.85rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+                      />
                     </td>
                     <td className="py-2.5 pr-4 text-mute">{r.locale.toUpperCase()}</td>
                     <td className="metric py-2.5 pr-4 text-mute">{r.started}</td>
@@ -195,7 +225,7 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
               })}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-3 text-[0.9rem] text-faint">
+                  <td colSpan={8} className="py-3 text-[0.9rem] text-faint">
                     Nothing yet. Once someone clicks a tagged link they appear here.
                   </td>
                 </tr>
