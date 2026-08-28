@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
 import { recordPayment } from "@/lib/supabase/server";
+import { sendEvent as metaEvent } from "@/lib/meta";
 import { planFromAmount } from "@/lib/payments/whop";
 
 export const runtime = "nodejs";
@@ -82,6 +83,18 @@ export async function POST(req: Request) {
       currency: "XAF",
       amountMinor: tx!.amount ?? 0,
     });
+    // Purchase, from the one place that knows for certain money moved.
+    // Not awaited into the response path: Meta being slow or down must never
+    // make us return non-2xx and trigger a Fapshi retry storm.
+    void metaEvent({
+      event: "Purchase",
+      ref: tx!.externalId || tx!.userId || transId,
+      value: tx!.amount ?? 0,
+      currency: "XAF",
+      plan: planFromAmount(tx!.amount ?? 0, "XAF"),
+      eventId: `fapshi_${transId}`,
+    });
+
     console.log("[fapshi webhook] PAID", {
       transId,
       externalId: tx?.externalId,

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { load, update } from "@/lib/store";
 import type { Plan, Price } from "@/lib/payments";
 import { OperatorMarks } from "./OperatorMarks";
+import { trackCheckoutStarted } from "./MetaPixel";
 
 // The embed is browser-only and pulls an iframe — never render it on the server.
 const WhopCheckoutEmbed = dynamic(
@@ -258,6 +259,9 @@ function MomoPanel({
       return;
     }
     setState("charging");
+    // He has committed — this is the signal Meta optimises toward, and it is
+    // worth far more than a page view.
+    trackCheckoutStarted(plan);
     const ref = load(locale).ref;
 
     try {

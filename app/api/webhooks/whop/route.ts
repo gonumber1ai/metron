@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { membership, isValid, planFromMembership } from "@/lib/payments/whop";
 import { recordPayment } from "@/lib/supabase/server";
+import { sendEvent as metaEvent } from "@/lib/meta";
 
 export const runtime = "nodejs";
 
@@ -135,6 +136,18 @@ export async function POST(req: Request) {
       currency: (m?.currency ?? "USD").toUpperCase(),
       amountMinor: m?.amount ?? m?.receipt?.amount ?? 0,
     });
+    void metaEvent({
+      event: "Purchase",
+      ref: (typeof m?.metadata?.ref === "string" ? m.metadata.ref : "") || membershipId,
+      // Whop settles in dollars and its amount is in minor units; Meta wants
+      // major. XAF would not need this, which is exactly why it is done per
+      // rail rather than once in the helper.
+      value: (m?.amount ?? m?.receipt?.amount ?? 0) / 100,
+      currency: (m?.currency ?? "USD").toUpperCase(),
+      plan: planFromMembership(m),
+      eventId: `whop_${membershipId}`,
+    });
+
     console.log("[whop webhook] PAID", { type, membershipId, ref: m?.metadata?.ref });
   } else {
     console.log("[whop webhook] not valid", { type, membershipId, status: m?.status });

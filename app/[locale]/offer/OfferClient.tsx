@@ -9,6 +9,7 @@ import { getMarketing, withPrices } from "@/lib/content/marketing";
 import { getPrices, type Plan, type Price } from "@/lib/payments";
 import { load, update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
+import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
 
 type Status = "idle" | "working" | "fallback" | "sent";
@@ -80,6 +81,8 @@ export function OfferClient({
   return (
     <>
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
+      {/* Scoped here on purpose. The quiz and result pages never load it. */}
+      <MetaPixel event="ViewContent" />
 
       <div className="min-h-screen">
         <header className="border-b border-ink-700">
