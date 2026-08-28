@@ -24,7 +24,14 @@ const ALLOWED = new Set([
 ]);
 
 export async function POST(req: Request) {
-  let body: { ref?: string; name?: string; detail?: string; locale?: string; country?: string };
+  let body: {
+    ref?: string;
+    name?: string;
+    detail?: string;
+    locale?: string;
+    country?: string;
+    campaign?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -43,6 +50,10 @@ export async function POST(req: Request) {
       ref,
       name,
       detail: (body.detail ?? "").toString().slice(0, 40) || null,
+      // Free text from a URL, so it is filtered to what an ad tag can
+      // legitimately contain and capped. It ends up in a GROUP BY.
+      campaign:
+        (body.campaign ?? "").toString().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40) || null,
       locale: body.locale === "fr" ? "fr" : "en",
       country: (body.country ?? "").slice(0, 8) || null,
     });

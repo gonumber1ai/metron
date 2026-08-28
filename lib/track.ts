@@ -18,6 +18,7 @@ export function track(name: string, detail?: string, locale = "en"): void {
       detail,
       locale,
       country: s.country,
+      campaign: s.campaign,
     });
 
     if (typeof navigator !== "undefined" && navigator.sendBeacon) {

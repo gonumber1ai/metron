@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Customers, type ActivityRow } from "./Customers";
 import { Broadcast } from "./Broadcast";
+import { Ads, type CampaignRow } from "./Ads";
 
 export type Snapshot = {
   connected: boolean;
@@ -13,6 +14,7 @@ export type Snapshot = {
   revenue: { currency: string; total: number; count: number }[];
   activity: ActivityRow[];
   /** every thread, paid or not — see allConversations() */
+  campaigns: CampaignRow[];
   conversations: {
     ref: string;
     last_body: string;
@@ -43,7 +45,7 @@ function money(n: number, currency: string): string {
     : `${n.toLocaleString("fr-FR")} FCFA`;
 }
 
-type Tab = "overview" | "customers" | "leads" | "write";
+type Tab = "overview" | "ads" | "customers" | "leads" | "write";
 
 export function Dashboard({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("overview");
@@ -137,6 +139,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
             {(
               [
                 ["overview", "Overview"],
+                ["ads", "Ads"],
                 ["customers", `Customers${paid ? ` (${paid})` : ""}`],
                 ["leads", `Leads${snap.recent.length ? ` (${snap.recent.length})` : ""}`],
                 ["write", "Write to people"],
@@ -251,6 +254,9 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
           {tab === "customers" && (
             <Customers rows={snap.activity} conversations={snap.conversations} />
           )}
+
+          {/* ---------------------------------------------------------- ads */}
+          {tab === "ads" && <Ads rows={snap.campaigns} />}
 
           {/* ---------------------------------------------------- broadcast */}
           {tab === "write" && <Broadcast />}

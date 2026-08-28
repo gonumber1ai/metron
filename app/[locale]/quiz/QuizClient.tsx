@@ -31,6 +31,25 @@ export function QuizClient({ locale }: { locale: string }) {
   // renders below the fold, because the page keeps the scroll position of
   // the question before it — which on a long question looks like a blank
   // screen and reads as broken.
+  // Stamp the ad he arrived on, once, before anything else runs.
+  //
+  // First touch only. A man who clicks the French ad, leaves, and comes back
+  // through the English one three days later was won by the French ad —
+  // re-stamping him would hand the credit to whichever ad happened to be last,
+  // which is exactly backwards when you are deciding what to spend on.
+  useEffect(() => {
+    try {
+      const url = new URLSearchParams(window.location.search);
+      const tag = (url.get("c") ?? url.get("utm_campaign") ?? "")
+        .replace(/[^a-zA-Z0-9_-]/g, "")
+        .slice(0, 40);
+      if (!tag) return;
+      update((st) => (st.campaign ? st : { ...st, campaign: tag }), locale);
+    } catch {
+      /* a missing tag is not worth breaking the quiz over */
+    }
+  }, [locale]);
+
   const topRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });

@@ -66,6 +66,8 @@ export type State = {
   plan?: Plan;
   locale: string;
   country: string;
+  /** the ad he first arrived on. First touch only — never overwritten. */
+  campaign?: string;
   startedAt?: string;
   /** the day the user is currently on */
   day: number;

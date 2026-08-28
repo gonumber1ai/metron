@@ -36,22 +36,25 @@ export default async function AdminPage() {
     recent: [],
     revenue: [],
     activity: [],
+    campaigns: [],
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity] = await Promise.all([
+    const [funnel, dropoff, recent, payments, activity, campaigns] = await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
       client.from("intake").select("*").limit(60),
       client.from("payments").select("currency, amount_minor, plan").eq("status", "paid"),
       client.from("activity").select("*").limit(100),
+      client.from("funnel_by_campaign").select("*").limit(50),
     ]);
 
     snap.funnel = funnel.data ?? [];
     snap.dropoff = dropoff.data ?? [];
     snap.recent = recent.data ?? [];
     snap.activity = activity.data ?? [];
+    snap.campaigns = campaigns.data ?? [];
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.
