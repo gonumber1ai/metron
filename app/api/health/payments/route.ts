@@ -38,6 +38,8 @@ export async function GET(req: Request) {
     return new NextResponse("Not found", { status: 404 });
   }
 
+  const probe = new URL(req.url).searchParams.get("probe");
+
   const has = (v?: string) => Boolean(v && v.trim().length > 0);
   const shape = (v?: string) => (has(v) ? `set (${v!.trim().length} chars)` : "MISSING");
 
@@ -124,18 +126,43 @@ export async function GET(req: Request) {
     try {
       const { Whop, APIError } = await import("@whop/sdk");
       const whop = new Whop({ apiKey: process.env.WHOP_API_KEY! });
-      const cfg = await whop.checkoutConfigurations.create({
-        ...(process.env.WHOP_ACCOUNT_ID ? { account_id: process.env.WHOP_ACCOUNT_ID } : {}),
-        plan: {
-          product_id: process.env.WHOP_PRODUCT_ID!,
-          initial_price: 1,
-          plan_type: "one_time",
-          currency: "usd",
-        },
-        metadata: { probe: "health" },
-      });
-      checks.whop = cfg?.id ? `OK — created ${cfg.id}` : "created, but no id returned";
-      checks.whopMeaning = cfg?.id ? "the card rail should work" : "unexpected response shape";
+      // Read, do not write.
+      //
+      // This used to create a real checkout configuration on every call, so
+      // each health check littered the live Whop account with another $1
+      // config that nobody would ever use or clean up. Listing exercises the
+      // same things a create does — the key is valid, it is scoped to this
+      // account, the account id is right — and leaves nothing behind.
+      //
+      // ?probe=whop still does the real create, for the one case listing
+      // cannot answer: whether a checkout can actually be built from this
+      // product. That is a deliberate act, not something a status page does
+      // to you every time you look at it.
+      if (probe === "whop") {
+        const cfg = await whop.checkoutConfigurations.create({
+          ...(process.env.WHOP_ACCOUNT_ID ? { account_id: process.env.WHOP_ACCOUNT_ID } : {}),
+          plan: {
+            product_id: process.env.WHOP_PRODUCT_ID!,
+            initial_price: 1,
+            plan_type: "one_time",
+            currency: "usd",
+          },
+          metadata: { probe: "health" },
+        });
+        checks.whop = cfg?.id ? `OK — created ${cfg.id}` : "created, but no id returned";
+        checks.whopMeaning = cfg?.id
+          ? "a real checkout was built, so the card rail works end to end. This left a live configuration on the account."
+          : "unexpected response shape";
+      } else {
+        const page = await whop.checkoutConfigurations.list({
+          account_id: process.env.WHOP_ACCOUNT_ID!,
+        });
+        checks.whop = `OK — credentials accepted (${page.data?.length ?? 0} existing configuration${
+          (page.data?.length ?? 0) === 1 ? "" : "s"
+        } visible)`;
+        checks.whopMeaning =
+          "the key works and is scoped to this account. Add ?probe=whop to build a real checkout and prove the whole rail — it creates a live configuration.";
+      }
     } catch (e) {
       const status = (e as { status?: number })?.status;
       checks.whop = `FAILED ${status ?? ""} :: ${(e as Error).message}`.slice(0, 400);
@@ -188,7 +215,7 @@ export async function GET(req: Request) {
   // account rejects it on validation, an unapproved one rejects it on
   // permission, and the two messages are completely different.
   if (
-    new URL(req.url).searchParams.get("probe") === "directpay" &&
+    probe === "directpay" &&
     checks.fapshi?.startsWith("OK")
   ) {
     try {
@@ -223,7 +250,7 @@ export async function GET(req: Request) {
 
   // Opt-in deeper probe: creates a payment link at the 100 XAF minimum. No
   // money moves unless somebody actually pays it, and nobody will.
-  if (new URL(req.url).searchParams.get("probe") === "fapshi" && checks.fapshi?.startsWith("OK")) {
+  if (probe === "fapshi" && checks.fapshi?.startsWith("OK")) {
     try {
       const r = await fetch(`${fapshiBase}/initiate-pay`, {
         method: "POST",
