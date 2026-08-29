@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getDirect, withDirectPrices } from "@/lib/content/direct";
 import { getMarketing } from "@/lib/content/marketing";
 import { getPrices, type Plan } from "@/lib/payments";
@@ -10,6 +11,14 @@ import { update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { PhoneMock, MeasureFlow, Timeline } from "@/components/MeasureFlow";
+
+/* The two marketing renders, one pair per language. Imported statically so
+   next/image knows their dimensions and serves a sized WebP — the sources are
+   1.5 MB PNGs and this audience is on mobile data. */
+import stepsEn from "@/public/marketing/steps-en.png";
+import stepsFr from "@/public/marketing/steps-fr.png";
+import sameResultEn from "@/public/marketing/same-result-en.png";
+import sameResultFr from "@/public/marketing/same-result-fr.png";
 
 /**
  * The direct sales page. No quiz.
@@ -216,7 +225,18 @@ export function StartClient({
                 </p>
               ))}
             </div>
-            <p className="mt-7 max-w-2xl text-[1.35rem] font-bold leading-[1.4] text-bone md:text-[1.6rem]">
+            {/* The pattern, shown. Four readings weeks apart, all landing in
+                the same place — it makes the paragraph above checkable
+                against his own memory before the page asks him for anything. */}
+            <Image
+              src={fr ? sameResultFr : sameResultEn}
+              alt={c.sameResultAlt}
+              sizes="(min-width: 1024px) 900px, 100vw"
+              className="mt-9 h-auto w-full rounded-2xl border border-ink-700"
+              placeholder="blur"
+            />
+
+            <p className="mt-9 max-w-2xl text-[1.35rem] font-bold leading-[1.4] text-bone md:text-[1.6rem]">
               {c.problemPivot}
             </p>
           </section>
@@ -285,6 +305,18 @@ export function StartClient({
             <div className="mt-9">
               <MeasureFlow steps={c.frameworkSteps} />
             </div>
+
+            {/* The same three beats, running inside the actual product. The
+                cards above carry them as text because they stay legible at
+                375px; this carries them as screens, which is what answers
+                "what will I actually be looking at". */}
+            <Image
+              src={fr ? stepsFr : stepsEn}
+              alt={c.stepsAlt}
+              sizes="(min-width: 1024px) 900px, 100vw"
+              className="mt-6 h-auto w-full rounded-2xl border border-ink-700"
+              placeholder="blur"
+            />
           </section>
 
           {/* ── 6. THE TEN DAYS ──────────────────────────────────────────

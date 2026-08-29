@@ -157,6 +157,10 @@ export type DirectCopy = {
   /* footer */
   footerTag: string;
 
+  /* alt text for the two marketing images */
+  stepsAlt: string;
+  sameResultAlt: string;
+
   /* labels drawn inside the phone mock */
   ui: {
     today: string;
@@ -270,8 +274,28 @@ const EN: DirectCopy = {
     "These are from men who followed this programme before the app existed. Each timed himself the same way twice — day one, then again at the end — which is exactly the comparison you will make on yourself. Stated as a range because that is what the records support; an average would imply a precision nobody has.",
 
   testimonialsH: "In their words",
-  /* OWNER: real customers only. See the Testimonial type above. */
-  testimonials: [],
+  /* Real customers, sent to us on WhatsApp. Transcribed exactly, trimmed only
+     with an ellipsis where a message ran on. Nothing here was written by us.
+     Keep the originals — this is the part a refund dispute turns on. */
+  testimonials: [
+    {
+      quote:
+        "I finished the 10 day program and measured on the 12th day and I did 4:27 minutes exactly. And on day one I did 1:23 minutes. Have always been less than 2 minutes and it was stressing me out so got the 30 day plan already.",
+      who: "Metron customer · 10-Day Reset",
+      before: "1:23",
+      after: "4:27",
+    },
+    {
+      quote: "Under 3 minutes to over 7 minutes. Magic.",
+      who: "Metron customer · 30-Day Sprint",
+      before: "under 3:00",
+      after: "over 7:00",
+    },
+    {
+      quote: "Sent my results in the app already. Can only say thank you guys.",
+      who: "Metron customer · 10-Day Reset",
+    },
+  ],
 
   offerKicker: "Try Metron for 10 days",
   fullLabel: "Full programme",
@@ -336,6 +360,11 @@ const EN: DirectCopy = {
   finalMicro: "Private. No pills. No equipment. One payment.",
 
   footerTag: "Private training for lasting longer and better control.",
+
+  stepsAlt:
+    "Three Metron screens: measuring your starting time on day one, a training session on day four, and your day-twelve result beside your first number.",
+  sameResultAlt:
+    "Four timer readings taken weeks apart, all landing around the same two minutes.",
 
   ui: {
     today: "Today",
@@ -448,7 +477,19 @@ const FR: DirectCopy = {
     "Ces chiffres viennent d'hommes ayant suivi ce programme avant l'existence de l'application. Chacun s'est chronométré deux fois de la même façon — le premier jour, puis à la fin — exactement la comparaison que vous ferez sur vous-même. Donné en fourchette parce que c'est ce que les relevés permettent d'affirmer ; une moyenne laisserait croire à une précision que personne n'a.",
 
   testimonialsH: "Dans leurs mots",
-  testimonials: [],
+  /* Clients réels, messages WhatsApp. Transcrits tels quels, coupés seulement
+     par des points de suspension. Rien ici n'a été écrit par nous.
+     NE PAS traduire les avis anglais vers le français : un avis traduit est
+     un avis que le client n'a pas écrit. Chaque front montre les siens. */
+  testimonials: [
+    {
+      quote:
+        "Je suis passé de 2 à 4 minutes quand j'ai commencé le programme de 10 jours. Ensuite j'ai fait le programme de 30 jours, et ça fait environ 2 semaines que je l'ai terminé. Je tiens toujours plus de 9 minutes à chaque fois…",
+      who: "Client Metron · Reset 10 jours puis Sprint 30 jours",
+      before: "2:00",
+      after: "9:00+",
+    },
+  ],
 
   offerKicker: "Essayez Metron pendant 10 jours",
   fullLabel: "Programme complet",
@@ -513,6 +554,11 @@ const FR: DirectCopy = {
   finalMicro: "Privé. Sans pilules. Sans matériel. Un seul paiement.",
 
   footerTag: "Entraînement privé pour tenir plus longtemps et mieux se contrôler.",
+
+  stepsAlt:
+    "Trois écrans Metron : la mesure du temps initial au jour 1, une séance au jour 5, et le résultat du jour 12 à côté du premier chiffre.",
+  sameResultAlt:
+    "Quatre chronos relevés à des semaines d'intervalle, tous autour des mêmes deux minutes.",
 
   ui: {
     today: "Aujourd'hui",
