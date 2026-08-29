@@ -18,10 +18,10 @@
      is avoided on purpose: it reads as a void, and every cheap
      app on the store is pure black. Each step is a real step, so
      a card is visibly raised off the page. */
-  --color-ink-900: #070D0F; /* page */
-  --color-ink-850: #0A1215; /* sunken wells, inputs */
-  --color-ink-800: #101A1D; /* card */
-  --color-ink-700: #17252A; /* rules, inactive track */
+  --color-ink-900: #04080A; /* page */
+  --color-ink-850: #070D10; /* sunken wells, inputs */
+  --color-ink-800: #0C1518; /* card */
+  --color-ink-700: #142025; /* rules, inactive track */
   --color-ink-600: #22333A; /* borders */
   --color-ink-500: #3B5058; /* muted borders, radio rings */
 
@@ -36,11 +36,11 @@
      Health, progress, "go". Deepened from the old neon jade —
      the brighter version read as a crypto app, and this one holds
      its own against white text without glowing. */
-  --color-jade-700: #0A6B52;
-  --color-jade-600: #0D8A68;
-  --color-jade: #16BE92;
-  --color-jade-300: #6BDCBB;
-  --color-jade-050: #0A2A23;
+  --color-jade-700: #087553;
+  --color-jade-600: #0C9B70;
+  --color-jade: #19D492;
+  --color-jade-300: #74EEC4;
+  --color-jade-050: #072620;
 
   /* ------------------------------------------------------ copper
      Cost, caution, the things he has already paid for that did
