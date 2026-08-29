@@ -20,8 +20,12 @@ import { PhoneMock, MeasureFlow, Timeline } from "@/components/MeasureFlow";
  *
  * It used to say "listen to our explanation". It now says: here is the
  * problem, here is the product, here is how it works, here is the evidence,
- * try it for the price of a meal, and if your number does not move you get
- * your money back.
+ * try it for the price of a meal, and if he is not lasting longer he gets his
+ * money back.
+ *
+ * The refund condition is always "if you are not lasting longer", never "if
+ * your number has not moved". The number is how he checks it; lasting longer
+ * is what he came for.
  *
  * ── RULES THIS PAGE IS BUILT ON ───────────────────────────────────────────
  * • Desire before mechanics. The protocol is a rail placed after the

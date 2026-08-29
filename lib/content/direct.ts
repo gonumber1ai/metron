@@ -15,8 +15,14 @@
  *
  * It used to say "listen to our explanation". It should say: here is the
  * problem, here is the product, here is how it works, here is the evidence,
- * try it for the price of a meal, and if your number does not move you get
- * your money back.
+ * try it for the price of a meal, and if he is not lasting longer he gets his
+ * money back.
+ *
+ * ── THE PROMISE IS THE OUTCOME, NOT THE INSTRUMENT ────────────────────────
+ * The refund condition is "if you are not lasting longer", never "if your
+ * number has not moved". The number is how he checks it; lasting longer is
+ * what he came for. Selling the instrument instead of the outcome is the
+ * mistake this page keeps drifting back into.
  *
  * Desire before mechanics. Recognition, not misery — the problem section is
  * short on purpose. Making a man feel worse is not the same as making him
@@ -29,11 +35,16 @@
  * guarantee can be as loud as it is.
  *
  * ── ON CLAIMS ─────────────────────────────────────────────────────────────
- * The multiples come from men the owner coached through this protocol before
- * the app existed — real people, real before-and-after numbers, just not rows
- * in this database. They are stated as ranges rather than an average because
- * a range is what the data supports and an average would imply a precision
- * nobody has.
+ * The multiples come from men who followed this protocol before the app
+ * existed — real people, real before-and-after numbers, just not rows in this
+ * database. They were not coached: they followed the plan, which is exactly
+ * what a buyer does today. Never describe them as coached — nobody is coached
+ * here, and the word misdescribes the product as much as the data.
+ *
+ * They are stated as ranges rather than an average because a range is what
+ * the records support; an average would imply a precision nobody has. And
+ * they compare how long a man lasted on day one against how long he lasted at
+ * the end — not "starting time", which describes nothing.
  *
  * Keep whatever records back them up. This is the one claim on the page a
  * refund dispute or an ad review would turn on, and "we have the numbers" is
@@ -152,11 +163,11 @@ export type DirectCopy = {
 const EN: DirectCopy = {
   kicker: "Private · 10-day programme",
   h: "Last longer. Without pills, herbs or numbing products.",
-  sub: "A private 10-day training programme designed to help you build better control during sex — from your phone, at home.",
+  sub: "A private 10-day training programme designed to help you last longer and build better control during sex — from your phone, at home.",
   flow: ["Measure your starting point", "Train for 10 days", "Measure again"],
   priceLine: "7,500 FCFA to start",
   cta: "Start the 10-day test",
-  ctaNote: "If your number does not improve, we refund you.",
+  ctaNote: "If you are not lasting longer, we refund you.",
   trust: ["Private by design", "Works on any phone", "Nothing to swallow", "One payment"],
 
   problemH: "You already know the problem.",
@@ -181,7 +192,7 @@ const EN: DirectCopy = {
   frameworkSteps: [
     { step: "Step 1", label: "Measure", body: "Know your starting point." },
     { step: "Step 2", label: "Train", body: "Follow the programme for ten days." },
-    { step: "Step 3", label: "Measure again", body: "See whether your number changed." },
+    { step: "Step 3", label: "Measure again", body: "See whether you are lasting longer." },
   ],
 
   timelineH: "Here is what happens over 10 days.",
@@ -233,13 +244,13 @@ const EN: DirectCopy = {
     "Metron is training and education. It is not designed to diagnose or treat medical conditions.",
 
   resultsH: "Real numbers. Not promises.",
-  resultsKicker: "What previously coached participants recorded",
+  resultsKicker: "What men who followed this programme recorded",
   results: [
-    { multiple: "1.5–3×", label: "their starting time, after the 10 days" },
-    { multiple: "2–5×", label: "their starting time, after the 30 days" },
+    { multiple: "1.5–3×", label: "how long they lasted on day 10, against day one" },
+    { multiple: "2–5×", label: "how long they lasted on day 30, against day one" },
   ],
   resultsNote:
-    "These are from men coached through this protocol before the app existed. Each measured himself the same way twice — his first-day number against his last — which is exactly the comparison you will make on yourself. Stated as a range because that is what the records support; an average would imply a precision nobody has.",
+    "These are from men who followed this programme before the app existed. Each timed himself the same way twice — day one, then again at the end — which is exactly the comparison you will make on yourself. Stated as a range because that is what the records support; an average would imply a precision nobody has.",
 
   testimonialsH: "In their words",
   /* OWNER: real customers only. See the Testimonial type above. */
@@ -267,13 +278,13 @@ const EN: DirectCopy = {
     "Private purchase",
     "Secure payment",
     "One payment, no subscription",
-    "Refunded if your number does not move",
+    "Refunded if you are not lasting longer",
   ],
 
   guaranteeH: "Don't take our word for it. Test it.",
   guaranteeSteps: ["Measure yourself", "Train for ten days", "Measure again"],
   guarantee:
-    "If your number has not moved, write to us and we send your money back. You will have lost ten days and nothing else — and you will know, instead of wondering for another year.",
+    "If you are not lasting longer, write to us and we send your money back. You will have lost ten days and nothing else — and you will know, instead of wondering for another year.",
 
   faqH: "Before you start",
   faq: [
@@ -299,7 +310,7 @@ const EN: DirectCopy = {
     },
     {
       q: "What happens after the 10 days?",
-      a: "You take your second measurement and you have two numbers. If it moved, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and your 7,500 comes off the price. Nobody is enrolled automatically, and nothing charges you again.",
+      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and your 7,500 comes off the price. Nobody is enrolled automatically, and nothing charges you again.",
     },
   ],
 
@@ -307,7 +318,7 @@ const EN: DirectCopy = {
   finalSub: "Measure yourself. Train for ten days. Measure again.",
   finalMicro: "Private. No pills. No equipment. One payment.",
 
-  footerTag: "Private training for better control.",
+  footerTag: "Private training for lasting longer and better control.",
 
   ui: {
     today: "Today",
@@ -321,11 +332,11 @@ const EN: DirectCopy = {
 const FR: DirectCopy = {
   kicker: "Privé · programme de 10 jours",
   h: "Tenez plus longtemps. Sans pilules, sans plantes, sans anesthésiants.",
-  sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à construire un meilleur contrôle — depuis votre téléphone, chez vous.",
+  sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
   flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
   priceLine: "7 500 FCFA pour commencer",
   cta: "Commencer le test de 10 jours",
-  ctaNote: "Si votre chiffre ne bouge pas, on vous rembourse.",
+  ctaNote: "Si vous ne tenez pas plus longtemps, on vous rembourse.",
   trust: ["Privé par conception", "Sur tout téléphone", "Rien à avaler", "Un seul paiement"],
 
   problemH: "Vous connaissez déjà le problème.",
@@ -351,7 +362,7 @@ const FR: DirectCopy = {
   frameworkSteps: [
     { step: "Étape 1", label: "Mesurer", body: "Connaissez votre point de départ." },
     { step: "Étape 2", label: "S'entraîner", body: "Suivez le programme pendant dix jours." },
-    { step: "Étape 3", label: "Mesurer à nouveau", body: "Voyez si votre chiffre a bougé." },
+    { step: "Étape 3", label: "Mesurer à nouveau", body: "Voyez si vous tenez plus longtemps." },
   ],
 
   timelineH: "Voici ce qui se passe en 10 jours.",
@@ -404,13 +415,13 @@ const FR: DirectCopy = {
     "Metron, c'est de l'entraînement et de l'éducation. Ce n'est pas conçu pour diagnostiquer ou traiter une condition médicale.",
 
   resultsH: "De vrais chiffres. Pas des promesses.",
-  resultsKicker: "Ce qu'ont enregistré les participants accompagnés",
+  resultsKicker: "Ce qu'ont enregistré les hommes ayant suivi ce programme",
   results: [
-    { multiple: "1,5 à 3×", label: "leur temps de départ, après les 10 jours" },
-    { multiple: "2 à 5×", label: "leur temps de départ, après les 30 jours" },
+    { multiple: "1,5 à 3×", label: "combien de temps ils ont tenu au jour 10, comparé au jour 1" },
+    { multiple: "2 à 5×", label: "combien de temps ils ont tenu au jour 30, comparé au jour 1" },
   ],
   resultsNote:
-    "Ces chiffres viennent d'hommes accompagnés sur ce protocole avant l'existence de l'application. Chacun s'est mesuré deux fois de la même façon — son chiffre du premier jour contre celui de la fin — exactement la comparaison que vous ferez sur vous-même. Donné en fourchette parce que c'est ce que les relevés permettent d'affirmer ; une moyenne laisserait croire à une précision que personne n'a.",
+    "Ces chiffres viennent d'hommes ayant suivi ce programme avant l'existence de l'application. Chacun s'est chronométré deux fois de la même façon — le premier jour, puis à la fin — exactement la comparaison que vous ferez sur vous-même. Donné en fourchette parce que c'est ce que les relevés permettent d'affirmer ; une moyenne laisserait croire à une précision que personne n'a.",
 
   testimonialsH: "Dans leurs mots",
   testimonials: [],
@@ -437,13 +448,13 @@ const FR: DirectCopy = {
     "Achat privé",
     "Paiement sécurisé",
     "Un seul paiement, pas d'abonnement",
-    "Remboursé si votre chiffre ne bouge pas",
+    "Remboursé si vous ne tenez pas plus longtemps",
   ],
 
   guaranteeH: "Ne nous croyez pas sur parole. Testez.",
   guaranteeSteps: ["Mesurez-vous", "Entraînez-vous dix jours", "Mesurez à nouveau"],
   guarantee:
-    "Si votre chiffre n'a pas bougé, écrivez-nous et on vous rembourse. Vous aurez perdu dix jours et rien d'autre — et vous saurez, au lieu de vous poser la question encore un an.",
+    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Vous aurez perdu dix jours et rien d'autre — et vous saurez, au lieu de vous poser la question encore un an.",
 
   faqH: "Avant de commencer",
   faq: [
@@ -469,7 +480,7 @@ const FR: DirectCopy = {
     },
     {
       q: "Que se passe-t-il après les 10 jours ?",
-      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si ça a bougé, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et vos 7 500 sont déduits du prix. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
+      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et vos 7 500 sont déduits du prix. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
     },
   ],
 
@@ -477,7 +488,7 @@ const FR: DirectCopy = {
   finalSub: "Mesurez-vous. Entraînez-vous dix jours. Mesurez à nouveau.",
   finalMicro: "Privé. Sans pilules. Sans matériel. Un seul paiement.",
 
-  footerTag: "Entraînement privé pour un meilleur contrôle.",
+  footerTag: "Entraînement privé pour tenir plus longtemps et mieux se contrôler.",
 
   ui: {
     today: "Aujourd'hui",

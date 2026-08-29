@@ -94,10 +94,10 @@ export const fr = {
     testName: "Le Reset de 10 jours",
     sprintName: "Le Sprint Endurance de 30 jours",
     testPitch:
-      "Mesurez-vous avant de commencer. Faites les 10 jours. Mesurez à nouveau à la fin. Si le chiffre n'a pas bougé, vous le saurez en 10 jours au lieu d'une année de plus à vous poser la question.",
+      "Mesurez-vous avant de commencer. Faites les 10 jours. Mesurez à nouveau à la fin. Si vous ne tenez pas plus longtemps, vous le saurez en 10 jours au lieu d'une année de plus à vous poser la question.",
     includes: "Ce qui est inclus",
     guarantee:
-      "Faites les 10 jours et les deux mesures. Si votre chiffre n'a pas bougé, écrivez-nous et nous vous remboursons.",
+      "Faites les 10 jours et les deux mesures. Si vous ne tenez pas plus longtemps, écrivez-nous et nous vous remboursons.",
     payWith: "Payer avec",
     momo: "Mobile Money",
     card: "Carte bancaire",

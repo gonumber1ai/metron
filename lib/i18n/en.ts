@@ -93,9 +93,10 @@ export const en = {
     testName: "The 10-Day Reset",
     sprintName: "The 30-Day Stamina Sprint",
     testPitch:
-      "Measure yourself before you start. Do the 10 days. Measure again at the end. If the number has not moved, you will know in 10 days instead of another year of guessing.",
+      "Measure yourself before you start. Do the 10 days. Measure again at the end. If you are not lasting longer, you will know in 10 days instead of another year of guessing.",
     includes: "What's inside",
-    guarantee: "Do all 10 days and both measurements. If your number hasn't moved, write to us and we refund you.",
+    guarantee:
+      "Do all 10 days and both measurements. If you are not lasting longer, write to us and we refund you.",
     payWith: "Pay with",
     momo: "Mobile Money",
     card: "Card",
