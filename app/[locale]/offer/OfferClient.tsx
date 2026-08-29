@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getDict } from "@/lib/i18n";
 import { track } from "@/lib/track";
@@ -23,6 +24,7 @@ export function OfferClient({
   geoCountry?: string | null;
 }) {
   const t = getDict(locale);
+  const router = useRouter();
 
   const [country, setCountry] = useState(geoCountry ?? "default");
   const [plan, setPlan] = useState<Plan>("test");
@@ -94,9 +96,20 @@ export function OfferClient({
           <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
             <span className="flex items-center gap-4">
-              <Link href={`/${locale}/result`} className="text-[13px] text-mute hover:text-bone">
+              {/* Real browser back, not a hardcoded /result.
+                  It used to point at the quiz result page, so a man who came
+                  through the no-quiz page and pressed Back landed on a result
+                  screen for a quiz he never took. */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.history.length > 1) router.back();
+                  else router.push(`/${locale}/start`);
+                }}
+                className="text-[13px] text-mute hover:text-bone"
+              >
                 {t.cta.back}
-              </Link>
+              </button>
               <Link
                 href={`/${locale}/login`}
                 className="rounded-full border border-ink-600 bg-ink-800 px-4 py-2 text-[13px] font-bold text-bone transition-colors hover:border-jade hover:text-jade"

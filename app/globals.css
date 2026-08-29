@@ -13,34 +13,37 @@
 
 @theme {
   /* ---------------------------------------------------- surfaces
-     A green-black rather than a blue-black, so the ground is
-     related to the accent instead of arguing with it. Pure #000
-     is avoided on purpose: it reads as a void, and every cheap
-     app on the store is pure black. Each step is a real step, so
-     a card is visibly raised off the page. */
-  --color-ink-900: #04080A; /* page */
-  --color-ink-850: #070D10; /* sunken wells, inputs */
-  --color-ink-800: #0C1518; /* card */
-  --color-ink-700: #142025; /* rules, inactive track */
-  --color-ink-600: #22333A; /* borders */
-  --color-ink-500: #3B5058; /* muted borders, radio rings */
+     Neutral, not green-black. The ramp used to carry a green tint on
+     the theory that it would "relate" to the accent — it did the
+     opposite. When the background is faintly green, a green accent is
+     just a slightly brighter version of the wall behind it, and the
+     whole screen reads muddy. Take the hue out of the neutrals and the
+     green becomes the only chroma anywhere, which is what makes it hit.
+     Near-black rather than #000 so cards can still sit above the page. */
+  --color-ink-900: #050506; /* page */
+  --color-ink-850: #0A0A0C; /* sunken wells, inputs */
+  --color-ink-800: #111114; /* card */
+  --color-ink-700: #1C1C20; /* rules, inactive track */
+  --color-ink-600: #2A2A30; /* borders */
+  --color-ink-500: #45454E; /* muted borders, radio rings */
 
   /* ------------------------------------------------------- text
      Off-white, never #FFF. Pure white on near-black vibrates on
      a cheap LCD and is genuinely harder to read at night. */
-  --color-bone: #EEF4F2;
-  --color-mute: #A2B3B6;
-  --color-faint: #6B7F84;
+  --color-bone: #F4F4F5;
+  --color-mute: #A1A1AA;
+  --color-faint: #71717A;
 
   /* ----------------------------------------------------- accent
-     Health, progress, "go". Deepened from the old neon jade —
-     the brighter version read as a crypto app, and this one holds
-     its own against white text without glowing. */
-  --color-jade-700: #087553;
-  --color-jade-600: #0C9B70;
-  --color-jade: #19D492;
-  --color-jade-300: #74EEC4;
-  --color-jade-050: #072620;
+     One colour, and it is the logo's. Pushed off teal toward a true
+     spring green — the teal version disappeared into a blue-black
+     ground, and against neutral black this reads as a light that is
+     switched on rather than a surface that is painted. */
+  --color-jade-700: #067A45;
+  --color-jade-600: #08A85F;
+  --color-jade: #10DE83;
+  --color-jade-300: #5CF2AC;
+  --color-jade-050: #06241A;
 
   /* ------------------------------------------------------ copper
      Cost, caution, the things he has already paid for that did
@@ -103,12 +106,12 @@ body::before {
   background:
     radial-gradient(
       75rem 42rem at 50% -14rem,
-      color-mix(in srgb, var(--color-jade) 14%, transparent) 0%,
+      color-mix(in srgb, var(--color-jade) 8%, transparent) 0%,
       transparent 66%
     ),
     radial-gradient(
       55rem 38rem at 8% 108%,
-      color-mix(in srgb, var(--color-jade-700) 11%, transparent) 0%,
+      color-mix(in srgb, var(--color-jade-700) 6%, transparent) 0%,
       transparent 70%
     );
 }
@@ -170,8 +173,8 @@ h1 {
 /* The primary action. It should look like the only thing worth
    pressing on the screen. */
 .btn-go {
-  background: linear-gradient(180deg, var(--color-jade-300) 0%, var(--color-jade) 45%, var(--color-jade-600) 100%);
-  color: #032018;
+  background: linear-gradient(180deg, var(--color-jade) 0%, var(--color-jade-600) 100%);
+  color: #04140C;
   letter-spacing: -0.011em;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.32),
