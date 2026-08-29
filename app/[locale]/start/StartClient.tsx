@@ -9,32 +9,31 @@ import { track } from "@/lib/track";
 import { update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
-import { MeasureFlow, Timeline } from "@/components/MeasureFlow";
+import { PhoneMock, MeasureFlow, Timeline } from "@/components/MeasureFlow";
 
 /**
  * The direct sales page. No quiz.
  *
- * ── WHAT THIS PAGE IS ─────────────────────────────────────────────────────
- * Outcome → recognition → reason → the ten days → proof → offer → guarantee
- * → FAQ → close. Desire before mechanics.
+ * ── ARCHITECTURE ──────────────────────────────────────────────────────────
+ * hero → product → problem → mechanism → measure/train/measure → the ten days
+ * → not-buying → who it is for → proof → offer → guarantee → FAQ → close.
  *
- * The old version opened by naming competitors and then spent its length on
- * the protocol. No man wakes up wanting seven fifteen-minute sessions; he
- * wakes up wanting to stop worrying about it. So the sessions moved down into
- * a rail he can skim, and the top of the page is now the outcome and the
- * thing he already feels.
+ * It used to say "listen to our explanation". It now says: here is the
+ * problem, here is the product, here is how it works, here is the evidence,
+ * try it for the price of a meal, and if your number does not move you get
+ * your money back.
  *
- * ── THE ARGUMENT ──────────────────────────────────────────────────────────
- * Measure it. Train it. Measure again. Every product on that shelf makes a
- * promise; not one lets him check it. This one hands him two numbers and lets
- * the result do the arguing — which is also why the guarantee can be as loud
- * as it is.
- *
- * ── VISUAL RULES ──────────────────────────────────────────────────────────
- * Near-black ground, one green, huge type, a lot of air. Every section is one
- * idea. Nothing sexual, nothing herbal, nothing "alpha" — the whole
- * positioning is that this is the serious option, and it has to look it from
- * the first screen.
+ * ── RULES THIS PAGE IS BUILT ON ───────────────────────────────────────────
+ * • Desire before mechanics. The protocol is a rail placed after the
+ *   recognition, not the argument itself.
+ * • Recognition, not misery. The problem section is deliberately short —
+ *   making a man feel worse is not the same as making him feel understood,
+ *   and only one of them sells.
+ * • Scannable. Short paragraph, then points. Nobody reads this like a book.
+ * • Never name the technique. The page shows the SHAPE of the ten days and
+ *   nothing that happens inside a session.
+ * • Nothing invented. No fabricated measurements, no testimonials that do
+ *   not exist, no struck-through price that was never charged.
  */
 export function StartClient({
   locale,
@@ -67,7 +66,7 @@ export function StartClient({
     track("quiz_start", "direct", locale);
   }, [locale]);
 
-  /* One button, used five times. The `where` tag rides along so the funnel can
+  /* One button, used four times. The `where` tag rides along so the funnel can
      say WHICH section closed him rather than only that somebody left. */
   const Go = ({ where, className = "" }: { where: string; className?: string }) => (
     <Link
@@ -79,10 +78,24 @@ export function StartClient({
     </Link>
   );
 
-  const Kicker = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+  const Tick = () => (
+    <span aria-hidden className="mt-[3px] shrink-0 text-jade">
+      <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
+        <path
+          d="M4 10.5 8.2 14.5 16 5.8"
+          stroke="currentColor"
+          strokeWidth="2.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
       {children}
-    </p>
+    </h2>
   );
 
   return (
@@ -92,7 +105,7 @@ export function StartClient({
 
       <div className="min-h-screen pb-28 md:pb-0">
         <header className="border-b border-ink-700">
-          <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
             <Link
               href={`/${locale}/login`}
@@ -103,113 +116,143 @@ export function StartClient({
           </div>
         </header>
 
-        <main className="mx-auto max-w-4xl px-5">
-          {/* ── HERO ─────────────────────────────────────────────────────
-              Outcome, mechanism, price, button, risk reversal. In that
-              order, above the fold, on a phone. */}
-          <section className="pt-12 md:pt-20">
-            <p className="inline-flex items-center gap-2 rounded-full border border-ink-700 bg-ink-800 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-mute">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />
-              {c.kicker}
-            </p>
+        <main className="mx-auto max-w-5xl px-5">
+          {/* ── 1 + 2. HERO AND PRODUCT ──────────────────────────────────
+              The whole offer is understandable without scrolling: outcome,
+              mechanism, price, button, risk reversal — and the product
+              itself, so "what am I actually buying" is answered on sight. */}
+          <section className="grid gap-12 pt-12 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-14 md:pt-20">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full border border-ink-700 bg-ink-800 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-mute">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />
+                {c.kicker}
+              </p>
 
-            <h1 className="mt-6 max-w-3xl text-[2.4rem] leading-[1.03] md:text-[3.9rem]">
-              {c.h}
-            </h1>
+              <h1 className="mt-6 text-[2.4rem] leading-[1.03] md:text-[3.6rem]">
+                {c.h}
+              </h1>
 
-            <p className="mt-6 max-w-2xl text-[1.15rem] leading-[1.6] text-mute md:text-[1.3rem]">
-              {c.sub}
-            </p>
+              <p className="mt-5 max-w-xl text-[1.1rem] leading-[1.6] text-mute md:text-[1.22rem]">
+                {c.sub}
+              </p>
 
-            <div className="mt-9">
-              <MeasureFlow ui={c.ui} labels={c.flow} />
-            </div>
+              {/* measure → train → measure again, stated plainly.
+                  A grid rather than a wrapping row of chips: at the widths
+                  between a phone and a laptop the row broke after the second
+                  chip and left an arrow orphaned at the start of the next
+                  line, pointing at nothing. */}
+              <ol className="mt-7 grid max-w-xl gap-2 sm:grid-cols-3 sm:gap-2.5">
+                {c.flow.map((f, i) => (
+                  <li
+                    key={f}
+                    className="flex items-baseline gap-2.5 rounded-xl border border-jade-700 bg-jade-050 px-4 py-2.5"
+                  >
+                    <span
+                      aria-hidden
+                      className="metric text-[12px] font-bold text-jade"
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="text-[13.5px] font-bold leading-snug text-bone">
+                      {f}
+                    </span>
+                  </li>
+                ))}
+              </ol>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-              <Go where="hero" className="w-full sm:w-auto sm:min-w-[19rem]" />
-              <p className="text-center text-[1.05rem] font-bold text-bone sm:text-left">
-                {c.priceLine}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                <Go where="hero" className="w-full sm:w-auto sm:min-w-[18rem]" />
+                <p className="text-center text-[1.05rem] font-bold text-bone sm:text-left">
+                  {c.priceLine}
+                </p>
+              </div>
+              <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
+                {c.ctaNote}
               </p>
             </div>
-            <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
-              {c.ctaNote}
-            </p>
 
-            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2.5 border-t border-ink-700 pt-6">
-              {c.trust.map((t) => (
-                <li
-                  key={t}
-                  className="flex items-center gap-2 text-[13px] font-bold text-mute"
+            <div className="flex justify-center md:justify-end">
+              <PhoneMock ui={c.ui} />
+            </div>
+          </section>
+
+          <ul className="mt-12 flex flex-wrap gap-x-7 gap-y-2.5 border-y border-ink-700 py-5">
+            {c.trust.map((t) => (
+              <li
+                key={t}
+                className="flex items-center gap-2 text-[13px] font-bold text-mute"
+              >
+                <span aria-hidden className="text-jade">
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
+                    <path
+                      d="M4 10.5 8.2 14.5 16 5.8"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
+
+          {/* ── 3. THE PROBLEM ───────────────────────────────────────────
+              Short on purpose. Recognition, then move on. */}
+          <section className="mt-20 md:mt-28">
+            <H2>{c.problemH}</H2>
+            <div className="mt-7 max-w-2xl border-l-2 border-ink-600 pl-5 md:pl-7">
+              {c.problem.map((p, i) => (
+                <p
+                  key={i}
+                  className={`text-[1.1rem] leading-[1.7] text-mute ${i ? "mt-3.5" : ""}`}
                 >
-                  <span aria-hidden className="text-jade">
-                    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
-                      <path
-                        d="M4 10.5 8.2 14.5 16 5.8"
-                        stroke="currentColor"
-                        strokeWidth="2.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                  {t}
+                  {p}
+                </p>
+              ))}
+            </div>
+            <p className="mt-7 max-w-2xl text-[1.35rem] font-bold leading-[1.4] text-bone md:text-[1.6rem]">
+              {c.problemPivot}
+            </p>
+          </section>
+
+          {/* ── 4. THE MECHANISM ─────────────────────────────────────────
+              Removes the shame. A man who believes it is his character does
+              not buy training. */}
+          <section className="mt-20 md:mt-28">
+            <H2>{c.mechH}</H2>
+            <p className="mt-6 max-w-2xl text-[1.08rem] leading-[1.7] text-bone">
+              {c.mech[0]}
+            </p>
+            <ul className="mt-6 grid max-w-3xl gap-3.5 md:grid-cols-3">
+              {c.mech.slice(1).map((p) => (
+                <li
+                  key={p}
+                  className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4 text-[0.98rem] leading-[1.6] text-mute"
+                >
+                  {p}
                 </li>
               ))}
             </ul>
           </section>
 
-          {/* ── RECOGNITION ──────────────────────────────────────────────
-              This does the quiz's job without asking him anything. He has
-              to see himself here before any number means a thing. */}
+          {/* ── 5. THE FRAMEWORK ─────────────────────────────────────────
+              The signature. This is the positioning, not "10-day programme". */}
           <section className="mt-20 md:mt-28">
-            <h2 className="max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
-              {c.problemH}
-            </h2>
-            <div className="mt-7 max-w-2xl border-l-2 border-ink-600 pl-5 md:pl-7">
-              {c.problem.map((p, i) => (
-                <p
-                  key={i}
-                  className={`leading-[1.7] ${i === 0 ? "" : "mt-4"} ${
-                    i === 0
-                      ? "text-[1.3rem] font-bold text-bone md:text-[1.5rem]"
-                      : "text-[1.05rem] text-mute"
-                  }`}
-                >
-                  {p}
-                </p>
-              ))}
+            <H2>{c.frameworkH}</H2>
+            <p className="mt-5 max-w-2xl text-[1.08rem] leading-[1.7] text-mute">
+              {c.frameworkSub}
+            </p>
+            <div className="mt-9">
+              <MeasureFlow steps={c.frameworkSteps} />
             </div>
           </section>
 
-          {/* ── THE REASON ───────────────────────────────────────────────
-              Short, plain, and it removes the shame. A man who believes it
-              is his character does not buy training. */}
+          {/* ── 6. THE TEN DAYS ──────────────────────────────────────────
+              The mechanics, placed after the desire and drawn as a rail. */}
           <section className="mt-20 md:mt-28">
-            <h2 className="max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
-              {c.mechH}
-            </h2>
-            <div className="mt-7 max-w-2xl">
-              {c.mech.map((p, i) => (
-                <p
-                  key={i}
-                  className={`text-[1.05rem] leading-[1.7] ${
-                    i === 0 ? "text-bone" : "mt-4 text-mute"
-                  }`}
-                >
-                  {p}
-                </p>
-              ))}
-            </div>
-          </section>
-
-          {/* ── THE TEN DAYS ─────────────────────────────────────────────
-              The mechanics, but placed after the desire and drawn as a rail
-              so it can be skimmed. The shape is the point: measure, train,
-              log, measure. Never what happens inside a session. */}
-          <section className="mt-20 md:mt-28">
-            <h2 className="max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
-              {c.timelineH}
-            </h2>
+            <H2>{c.timelineH}</H2>
             <p className="mt-5 max-w-2xl text-[1.05rem] leading-[1.7] text-mute">
               {c.timelineSub}
             </p>
@@ -218,47 +261,115 @@ export function StartClient({
             </div>
           </section>
 
-          {/* ── PROOF ────────────────────────────────────────────────────
-              The page's only sourced claim. The methodology sits directly
-              under it on purpose — "1.5–3×" with no "according to who"
-              answer is worse than no number at all. Read the note at the
-              top of lib/content/direct.ts before touching these. */}
+          {/* ── 7. WHAT YOU ARE NOT BUYING ───────────────────────────────
+              Makes starting feel almost weightless, and separates Metron
+              from the entire shelf in one screen. */}
           <section className="mt-20 md:mt-28">
-            <h2 className="text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
-              {c.resultsH}
-            </h2>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            <H2>{c.notBuyingH}</H2>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {c.notBuying.map((n) => (
+                <li
+                  key={n}
+                  className="rounded-xl border border-ink-600 bg-ink-850 px-5 py-4 text-[1.02rem] font-bold text-bone"
+                >
+                  {n}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 max-w-2xl text-[1.05rem] leading-[1.7] text-mute">
+              {c.notBuyingSub}
+            </p>
+          </section>
+
+          {/* ── 8. WHO IT IS FOR ─────────────────────────────────────────
+              Qualifies him, and the medical line sits here where it reads
+              as honesty rather than as a warning label. */}
+          <section className="mt-20 md:mt-28">
+            <H2>{c.whoForH}</H2>
+            <ul className="mt-7 grid max-w-3xl gap-3.5 md:grid-cols-2 md:gap-x-9">
+              {c.whoFor.map((w) => (
+                <li key={w} className="flex gap-3 text-[1.02rem] leading-relaxed text-bone">
+                  <Tick />
+                  {w}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-7 max-w-2xl text-[0.92rem] leading-relaxed text-faint">
+              {c.whoForNote}
+            </p>
+          </section>
+
+          {/* ── 9. PROOF ─────────────────────────────────────────────────
+              The page's only sourced claim. The kicker says whose numbers
+              these are and the methodology sits directly under them —
+              "1.5–3×" with no answer to "according to who" is worse than no
+              number at all. Read the note at the top of
+              lib/content/direct.ts before touching these. */}
+          <section className="mt-20 md:mt-28">
+            <H2>{c.resultsH}</H2>
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+              {c.resultsKicker}
+            </p>
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
               {c.results.map((r) => (
                 <div key={r.multiple} className="rounded-2xl card p-6 md:p-7">
                   <p className="metric text-[3.2rem] font-bold leading-none text-jade md:text-[4rem]">
                     {r.multiple}
                   </p>
-                  <p className="mt-3 text-[0.98rem] leading-snug text-mute">
-                    {r.label}
-                  </p>
+                  <p className="mt-3 text-[0.98rem] leading-snug text-mute">{r.label}</p>
                 </div>
               ))}
             </div>
             <p className="mt-6 max-w-2xl text-[0.92rem] leading-relaxed text-faint">
               {c.resultsNote}
             </p>
+
+            {/* Renders only when real testimonials exist. Empty is correct
+                until then — see the Testimonial type in direct.ts. */}
+            {c.testimonials.length > 0 && (
+              <div className="mt-12">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+                  {c.testimonialsH}
+                </h3>
+                <div className="mt-6 grid gap-5 md:grid-cols-3">
+                  {c.testimonials.map((t) => (
+                    <figure key={t.quote} className="rounded-2xl card p-6">
+                      {t.before && t.after && (
+                        <p className="metric mb-4 text-[1.25rem] font-bold text-jade">
+                          {t.before} → {t.after}
+                        </p>
+                      )}
+                      <blockquote className="text-[1rem] leading-[1.65] text-bone">
+                        {t.quote}
+                      </blockquote>
+                      <figcaption className="mt-4 text-[13px] font-bold text-faint">
+                        {t.who}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
-          {/* ── THE OFFER ────────────────────────────────────────────────
-              Two prices, both true, neither struck through. 69,000 is the
-              full programme and 7,500 is ten days of it — a strikethrough
-              would invent a discount that does not exist, on the one page
-              whose whole argument is that everyone else makes claims you
-              cannot check. */}
+          {/* ── 10. THE OFFER ────────────────────────────────────────────
+              Two prices, both true, neither struck through: 69,000 is the
+              30-day programme and 7,500 is ten days of it. A strikethrough
+              would invent a discount nobody was ever charged, on the one
+              page whose whole argument is that everyone else makes claims
+              you cannot check. The "you don't pay that today" logic does
+              the same job and survives being questioned. */}
           <section className="mt-20 md:mt-28">
             <div className="rounded-3xl card p-7 md:p-11">
-              <Kicker>{c.offerKicker}</Kicker>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+                {c.offerKicker}
+              </p>
 
-              <div className="mt-5 flex flex-wrap items-end gap-x-7 gap-y-3">
+              <div className="mt-5 flex flex-wrap items-end gap-x-8 gap-y-3">
                 <p className="metric text-[3.6rem] font-bold leading-[0.9] text-jade md:text-[5rem]">
-                  {c.offerH}
+                  {priceOf("test")}
                 </p>
-                <p className="pb-2 text-[13px] font-bold uppercase tracking-[0.14em] text-faint">
+                <p className="pb-2 text-[12px] font-bold uppercase leading-relaxed tracking-[0.14em] text-faint">
                   {c.testLabel}
                   <br />
                   <span className="text-mute">
@@ -271,7 +382,7 @@ export function StartClient({
                 {c.offerBody.map((p, i) => (
                   <p
                     key={i}
-                    className={`leading-[1.7] ${i === 0 ? "" : "mt-4"} ${
+                    className={`leading-[1.7] ${i ? "mt-4" : ""} ${
                       i === 0
                         ? "text-[1.15rem] font-bold text-bone"
                         : "text-[1.02rem] text-mute"
@@ -284,52 +395,47 @@ export function StartClient({
 
               <ul className="mt-8 grid gap-3.5 border-t border-ink-700 pt-7 md:grid-cols-2 md:gap-x-9">
                 {c.includes.map((w) => (
-                  <li
-                    key={w}
-                    className="flex gap-3 text-[0.98rem] leading-relaxed text-bone"
-                  >
-                    <span aria-hidden className="mt-[3px] shrink-0 text-jade">
-                      <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
-                        <path
-                          d="M4 10.5 8.2 14.5 16 5.8"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
+                  <li key={w} className="flex gap-3 text-[0.98rem] leading-relaxed text-bone">
+                    <Tick />
                     {w}
                   </li>
                 ))}
               </ul>
 
               <Go where="offer" className="mt-9 w-full" />
+
+              {/* micro-trust, immediately under the button */}
+              <ul className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2">
+                {c.payTrust.map((p) => (
+                  <li key={p} className="text-[12px] font-bold text-faint">
+                    {p}
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
 
-          {/* ── GUARANTEE ────────────────────────────────────────────────
-              The strongest thing on the page. It is loud because the
-              mechanism makes it safe: he is not asked to believe anything,
-              only to take the same measurement twice. */}
+          {/* ── 11. GUARANTEE ────────────────────────────────────────────
+              Loud, because the mechanism makes it safe: he is not asked to
+              believe anything, only to take one measurement twice. */}
           <section className="mt-20 md:mt-28">
-            <h2 className="text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
-              {c.guaranteeH}
-            </h2>
+            <H2>{c.guaranteeH}</H2>
             <div className="mt-8">
-              <MeasureFlow ui={c.ui} labels={c.guaranteeSteps} tone="quiet" />
+              <MeasureFlow
+                numbered={false}
+                steps={c.guaranteeSteps.map((s) => ({ step: "", label: s, body: "" }))}
+              />
             </div>
             <p className="mt-7 max-w-2xl rounded-2xl border-l-2 border-jade bg-jade-050 px-6 py-5 text-[1.1rem] font-bold leading-[1.65] text-bone">
               {c.guarantee}
             </p>
           </section>
 
-          {/* ── FAQ ──────────────────────────────────────────────────────
-              Native details/summary: it works with the keyboard, it works
-              with a screen reader, and it costs no JavaScript on a
-              connection where every kilobyte is real. */}
+          {/* ── 12. FAQ ──────────────────────────────────────────────────
+              Native details/summary: keyboard, screen reader, and zero
+              JavaScript on a connection where every kilobyte is real. */}
           <section className="mt-20 md:mt-28">
-            <h2 className="text-[1.9rem] leading-[1.12] md:text-[2.6rem]">{c.faqH}</h2>
+            <H2>{c.faqH}</H2>
             <div className="mt-8 max-w-2xl divide-y divide-ink-700 border-y border-ink-700">
               {c.faq.map((f) => (
                 <details key={f.q} className="group">
@@ -349,15 +455,13 @@ export function StartClient({
                       </svg>
                     </span>
                   </summary>
-                  <p className="pb-6 pr-8 text-[1rem] leading-[1.7] text-mute">
-                    {f.a}
-                  </p>
+                  <p className="pb-6 pr-8 text-[1rem] leading-[1.7] text-mute">{f.a}</p>
                 </details>
               ))}
             </div>
           </section>
 
-          {/* ── CLOSE ────────────────────────────────────────────────────── */}
+          {/* ── 13. CLOSE ────────────────────────────────────────────────── */}
           <section className="mt-20 md:mt-28">
             <h2 className="max-w-2xl text-[2.1rem] leading-[1.08] md:text-[3rem]">
               {c.finalH}
@@ -366,25 +470,40 @@ export function StartClient({
               {c.finalSub}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-              <Go where="final" className="w-full sm:w-auto sm:min-w-[19rem]" />
+              <Go where="final" className="w-full sm:w-auto sm:min-w-[18rem]" />
               <p className="text-center text-[1.05rem] font-bold text-bone sm:text-left">
                 {c.priceLine}
               </p>
             </div>
-            <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
-              {c.ctaNote}
+            <p className="mt-3.5 text-[13px] leading-relaxed text-faint">{c.ctaNote}</p>
+            <p className="mt-2 text-[13px] font-bold leading-relaxed text-faint">
+              {c.finalMicro}
             </p>
           </section>
 
-          <footer className="mt-20 border-t border-ink-700 py-8">
-            <p className="max-w-2xl text-[12px] leading-relaxed text-faint">
+          {/* ── FOOTER ───────────────────────────────────────────────────
+              No Privacy / Terms / Refund links: those pages do not exist in
+              this app yet and a link to a 404 costs more trust on this
+              subject than a missing link does. Add them here the day the
+              routes ship. */}
+          <footer className="mt-20 border-t border-ink-700 py-10">
+            <Logo size="sm" />
+            <p className="mt-3 text-[14px] font-bold text-mute">{c.footerTag}</p>
+            <p className="mt-6 max-w-2xl text-[12px] leading-relaxed text-faint">
               {m.disclaimer}
             </p>
           </footer>
         </main>
 
+        {/* Sticky mobile bar: price and action together, so he never has to
+            scroll back up to buy. */}
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink-700 bg-ink-900/95 p-3 backdrop-blur md:hidden">
-          <Go where="sticky_mobile" className="w-full !py-3.5 text-[15px]" />
+          <div className="flex items-center gap-3">
+            <p className="shrink-0 text-[13px] font-bold leading-tight text-bone">
+              {c.priceLine}
+            </p>
+            <Go where="sticky_mobile" className="flex-1 !px-4 !py-3.5 !text-[14px]" />
+          </div>
         </div>
       </div>
     </>
