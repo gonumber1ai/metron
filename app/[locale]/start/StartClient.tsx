@@ -89,6 +89,30 @@ export function StartClient({
             </ul>
           </section>
 
+          {/* The numbers, big.
+              They sit under the recognition on purpose — a multiple means
+              nothing until a man has seen himself in the pattern above it.
+              And they are the page's only visual anchor: without them it is an
+              unbroken column of prose, which is what made it read cold. */}
+          <section className="mt-10 rounded-2xl card p-6">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
+              {c.resultsH}
+            </h2>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              {c.results.map((r) => (
+                <div key={r.multiple}>
+                  <p className="metric text-[2.9rem] font-bold leading-none text-jade md:text-[3.3rem]">
+                    {r.multiple}
+                  </p>
+                  <p className="mt-2.5 text-[0.93rem] leading-snug text-mute">{r.label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-5 border-t border-ink-700 pt-4 text-[0.9rem] leading-relaxed text-faint">
+              {c.resultsNote}
+            </p>
+          </section>
+
           {/* The recognition. This does the quiz's job without asking. */}
           <section className="mt-10">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">

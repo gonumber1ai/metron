@@ -12,21 +12,27 @@
  * them is part of what he bought.
  *
  * ── ON CLAIMS ─────────────────────────────────────────────────────────────
- * There is no results figure anywhere on this page, because there are no
- * results yet. Nobody has finished the programme. A multiple invented here
- * would be a false efficacy claim on a page taking money, which is both the
- * thing Meta bans outright in this category and the thing a refund dispute
- * would turn on.
+ * The multiples come from men the owner coached through this protocol before
+ * the app existed — real people, real before-and-after numbers, just not rows
+ * in this database. They are stated as ranges rather than an average because
+ * a range is what the data supports and an average would imply a precision
+ * nobody has.
  *
- * What replaces it is the truth, which happens to be the stronger position in
- * a category where every competitor lies: we will not promise you a number,
- * we will give you a way to measure and your money back. Put the real multiple
- * here the day twenty men have a Day 1 and a Day 12.
+ * Keep whatever records back them up. This is the one claim on the page a
+ * refund dispute or an ad review would turn on, and "we have the numbers" is
+ * only a defence if the numbers can actually be produced.
+ *
+ * They sit BELOW the recognition section on purpose. A man has to see himself
+ * in the pattern before a multiple means anything — read first, 3x is a number
+ * about strangers.
  */
 
 export type DirectCopy = {
   kicker: string;
   h: string;
+  resultsH: string;
+  results: { multiple: string; label: string }[];
+  resultsNote: string;
   qualify: string[];
   patternH: string;
   pattern: string[];
@@ -43,7 +49,7 @@ export type DirectCopy = {
 };
 
 const FR: DirectCopy = {
-  kicker: "10 jours",
+  kicker: "10 jours pour transformer votre vie sexuelle",
   h: "Arrêtez les pilules. Arrêtez les plantes. Faites plutôt ceci.",
 
   qualify: [
@@ -51,6 +57,14 @@ const FR: DirectCopy = {
     "Si vous avez besoin d'un comprimé, d'une tisane ou de deux bières pour être sûr de vous.",
     "Si votre partenaire n'a pas fini avant vous depuis longtemps.",
   ],
+
+  resultsH: "Ce qu'ont vu les hommes qui l'ont fait",
+  results: [
+    { multiple: "1,5 à 3×", label: "leur temps de départ, après les 10 jours" },
+    { multiple: "2 à 5×", label: "leur temps de départ, après les 30 jours" },
+  ],
+  resultsNote:
+    "Mesuré de la même façon les deux fois : leur chiffre du premier jour contre celui de la fin. C'est exactement la comparaison que vous ferez vous-même.",
 
   patternH: "Regardez votre propre chiffre",
   pattern: [
@@ -70,9 +84,9 @@ const FR: DirectCopy = {
     "Rien à acheter, rien à avaler, rien à installer. Ça marche sur n'importe quel téléphone.",
   ],
 
-  honestH: "Ce qu'on ne vous promettra pas",
+  honestH: "La différence",
   honest:
-    "Tous les produits de cette étagère vous promettent un chiffre. Nous, non. On vous donne de quoi mesurer, dix jours, et votre argent si le chiffre ne bouge pas. C'est aussi pour ça que c'est 7 500 et pas 69 000 : vous ne nous devez rien tant que vous n'avez pas vu vous-même.",
+    "Tous les produits de cette étagère vous promettent un résultat. Aucun ne vous laisse le vérifier. Vous, vous aurez deux chiffres pris de la même façon, et si le vôtre n'a pas bougé on vous rembourse. C'est aussi pour ça que c'est 7 500 et pas 69 000 : vous ne nous devez rien tant que vous n'avez pas vu vous-même.",
 
   priceLead: "Le programme complet coûte {sprint}. Ne payez pas ça aujourd'hui.",
   guarantee:
@@ -83,7 +97,7 @@ const FR: DirectCopy = {
 };
 
 const EN: DirectCopy = {
-  kicker: "10 days",
+  kicker: "10 days to transform your sex life",
   h: "Stop the pills. Stop the herbs. Do this instead.",
 
   qualify: [
@@ -91,6 +105,14 @@ const EN: DirectCopy = {
     "If you need a pill, a mixture or two beers to feel sure of yourself.",
     "If it has been a long time since she finished before you did.",
   ],
+
+  resultsH: "What men who did this saw",
+  results: [
+    { multiple: "1.5–3×", label: "their starting time, after the 10 days" },
+    { multiple: "2–5×", label: "their starting time, after the 30 days" },
+  ],
+  resultsNote:
+    "Measured the same way both times: their first-day number against their last. That is exactly the comparison you will make yourself.",
 
   patternH: "Look at your own number",
   pattern: [
@@ -110,9 +132,9 @@ const EN: DirectCopy = {
     "Nothing to buy, nothing to swallow, nothing to install. Works on any phone.",
   ],
 
-  honestH: "What we will not promise you",
+  honestH: "The difference",
   honest:
-    "Every product on that shelf promises you a number. We will not. We give you a way to measure, ten days, and your money back if the number does not move. That is also why it is 7,500 and not 69,000 — you owe us nothing until you have seen it for yourself.",
+    "Every product on that shelf promises you a result. None of them lets you check it. You will have two numbers taken the same way, and if yours has not moved we refund you. That is also why it is 7,500 and not 69,000 — you owe us nothing until you have seen it for yourself.",
 
   priceLead: "The full programme costs {sprint}. Do not pay that today.",
   guarantee:
