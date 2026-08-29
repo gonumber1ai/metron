@@ -9,7 +9,7 @@ import { Ads, type CampaignRow } from "./Ads";
 export type Snapshot = {
   connected: boolean;
   funnel: { step: string; people: number; pct_of_top: number }[];
-  dropoff: { reached_question: number; quit_here: number; reached: number }[];
+  dropoff: { reached_question: number; quit_here: number; reached: number; continued: number }[];
   recent: Record<string, unknown>[];
   revenue: { currency: string; total: number; count: number }[];
   activity: ActivityRow[];
@@ -62,8 +62,11 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
   const inactive = snap.activity.filter((r) => !r.last_seen).length;
   const needsAttention = unread + inactive;
 
+  // The worst question is the one that loses the largest SHARE of the men who
+  // reached it, not the one with the most quitters — late questions are seen
+  // by fewer people and would never win a raw count.
   const worstQuestion = [...snap.dropoff]
-    .filter((d) => d.reached >= 3)
+    .filter((d) => d.reached >= 5)
     .sort((a, b) => b.quit_here / b.reached - a.quit_here / a.reached)[0];
 
   return (
@@ -206,7 +209,9 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                 title="Quiz drop-off"
                 note={
                   worstQuestion
-                    ? `Most people quit on question ${worstQuestion.reached_question}.`
+                    ? `Question ${worstQuestion.reached_question} loses the most — ${Math.round(
+                        (worstQuestion.quit_here / worstQuestion.reached) * 100,
+                      )}% of the men who reach it stop there.`
                     : "Which question people quit on."
                 }
               >
@@ -214,9 +219,9 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                   <thead>
                     <tr className="text-[11px] uppercase tracking-wide text-faint">
                       <th className="pb-2 pr-3 font-bold">Question</th>
-                      <th className="pb-2 pr-3 font-bold">Reached</th>
-                      <th className="pb-2 pr-3 font-bold">Quit</th>
-                      <th className="pb-2 font-bold">Drop</th>
+                      <th className="pb-2 pr-3 font-bold">Got here</th>
+                      <th className="pb-2 pr-3 font-bold">Quit here</th>
+                      <th className="pb-2 font-bold">Lost</th>
                     </tr>
                   </thead>
                   <tbody>

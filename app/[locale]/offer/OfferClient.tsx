@@ -33,23 +33,28 @@ export function OfferClient({
   useEffect(() => {
     const s = load(locale);
     setRef(s.ref);
-    // Country drives the price book and which rail is shown first. Timezone is
-    // a decent proxy and needs no permission or third-party lookup.
+
+    // Country resolution. Kept in its own block on purpose — see below.
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
       // ?country=CM forces a market. Useful for testing, and for a man on a
       // VPN whose IP lies about where he actually is.
       const forced = new URLSearchParams(window.location.search).get("country");
-      if (forced) {
-        setCountry(forced.toUpperCase());
-        return;
-      }
+      if (forced) setCountry(forced.toUpperCase());
       // The edge header already told us, and it is more reliable than this.
-      if (geoCountry) return;
-      if (tz === "Africa/Douala") setCountry("CM");
+      else if (!geoCountry && tz === "Africa/Douala") setCountry("CM");
     } catch {
       /* keep the default */
     }
+
+    // Fires unconditionally, and that is the entire point of moving it.
+    //
+    // It used to sit after the country block, which returned early whenever
+    // geoCountry was set. Vercel sets that header on every production request,
+    // so the early return was ALWAYS taken and offer_view never fired once in
+    // production. The funnel read "0 opened the offer" while a man was
+    // actually paying through it — the step between the result page and the
+    // money was simply invisible, and it is the step that decides everything.
     track("offer_view", plan, locale);
   }, [locale, geoCountry, plan]);
 
