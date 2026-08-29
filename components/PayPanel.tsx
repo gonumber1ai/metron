@@ -42,10 +42,13 @@ const T = {
     momo: "Mobile Money",
     card: "Card",
     nameLabel: "Your name",
+    namePlaceholder: "John Doe",
+    /* Said at the field rather than in a paragraph further down, because
+       this is the exact second he hesitates over typing his real name. */
+    nameHelp: "Any name works. We never check it.",
     emailLabel: "Your email",
     emailHelp: "Where your access code goes. Nothing else is sent, and the subject never says what it is about.",
-    trust:
-      "Use any name you like — we never check it and we never need your real one. Your statement shows METRON and nothing else. We do not sell or share anything, ever.",
+    trust: "Your statement shows METRON. We never sell or share anything.",
     phoneLabel: "Your Mobile Money number",
     phoneHelp: "9 digits, starts with 6. MTN or Orange.",
     badPhone: "That is not a valid number. 9 digits, starting with 6.",
@@ -72,10 +75,11 @@ const T = {
     momo: "Mobile Money",
     card: "Carte",
     nameLabel: "Votre nom",
+    namePlaceholder: "Jean Dupont",
+    nameHelp: "N'importe quel nom convient. On ne le vérifie jamais.",
     emailLabel: "Votre email",
     emailHelp: "C'est là qu'arrive votre code d'accès. Rien d'autre n'est envoyé, et l'objet n'indique jamais de quoi il s'agit.",
-    trust:
-      "Mettez le nom que vous voulez — on ne le vérifie jamais et on n'a pas besoin du vrai. Votre relevé affiche METRON, rien d'autre. On ne vend et ne partage rien, jamais.",
+    trust: "Votre relevé affiche METRON. On ne vend et ne partage jamais rien.",
     phoneLabel: "Votre numéro Mobile Money",
     phoneHelp: "9 chiffres, commence par 6. MTN ou Orange.",
     badPhone: "Ce numéro n'est pas valide. 9 chiffres, commençant par 6.",
@@ -184,8 +188,15 @@ export function PayPanel({
                 touched.current = true;
                 setTab(k);
               }}
+              /* Selected state, not a call to action. This used to carry
+                 btn-go — the same green gradient as the pay button — so the
+                 loudest thing on a checkout was a toggle the man had already
+                 answered. Only one element on this page should look pressable
+                 and it is the one that takes the money. */
               className={`flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold transition-colors ${
-                tab === k ? "btn-go" : "text-mute"
+                tab === k
+                  ? "border border-jade-700 bg-jade-050 text-jade"
+                  : "border border-transparent text-mute hover:text-bone"
               }`}
             >
               {k === "momo" ? t.momo : t.card}
@@ -472,8 +483,12 @@ function MomoPanel({
           autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder={t.namePlaceholder}
           className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
         />
+        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">
+          {t.nameHelp}
+        </span>
       </label>
 
       <label className="mt-4 block">

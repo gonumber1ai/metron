@@ -89,6 +89,27 @@ export const en = {
     emailSent: "Sent.",
   },
 
+  /* The checkout. Not a sales page — the previous page already sold him.
+     This page removes friction and completes a payment. */
+  checkout: {
+    h: "Start your 10-Day Reset",
+    sub: "Complete your payment below. Your access details are sent the moment it clears.",
+    steps: ["Payment", "Access", "Day 1"],
+    afterH: "After payment",
+    after: ["Your access details arrive by email", "Open Metron", "Take your day-one measurement"],
+    guaranteeH: "10-day result guarantee",
+    guaranteeShort:
+      "Complete the programme and both measurements. If you are not lasting longer, contact us and we refund you.",
+    privacyH: "Private by design",
+    privacyShort:
+      "We never need your real name. Your statement shows METRON, and the access email never says what it is about.",
+    afterTenH: "What happens after the 10 days?",
+    /* {sprint}, {test} and {rest} are filled from the price book. */
+    afterTen:
+      "If the Reset works for you, the 30-Day Stamina Sprint is {sprint}. The {test} you pay today is credited toward it, so you would pay {rest} to continue.",
+    afterTenNote: "You do not need to decide that today.",
+  },
+
   offer: {
     testName: "The 10-Day Reset",
     sprintName: "The 30-Day Stamina Sprint",

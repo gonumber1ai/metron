@@ -90,6 +90,28 @@ export const fr = {
     emailSent: "Envoyé.",
   },
 
+  checkout: {
+    h: "Commencez votre Reset de 10 jours",
+    sub: "Finalisez votre paiement ci-dessous. Vos accès arrivent dès qu'il est validé.",
+    steps: ["Paiement", "Accès", "Jour 1"],
+    afterH: "Après le paiement",
+    after: [
+      "Vos accès arrivent par e-mail",
+      "Ouvrez Metron",
+      "Prenez votre mesure du premier jour",
+    ],
+    guaranteeH: "Garantie résultat 10 jours",
+    guaranteeShort:
+      "Faites le programme et les deux mesures. Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse.",
+    privacyH: "Privé par conception",
+    privacyShort:
+      "On n'a jamais besoin de votre vrai nom. Votre relevé affiche METRON, et l'e-mail d'accès n'indique jamais de quoi il s'agit.",
+    afterTenH: "Que se passe-t-il après les 10 jours ?",
+    afterTen:
+      "Si le Reset marche pour vous, le Sprint Endurance de 30 jours est à {sprint}. Les {test} payés aujourd'hui sont déduits, il vous resterait donc {rest} pour continuer.",
+    afterTenNote: "Vous n'avez pas à décider ça aujourd'hui.",
+  },
+
   offer: {
     testName: "Le Reset de 10 jours",
     sprintName: "Le Sprint Endurance de 30 jours",

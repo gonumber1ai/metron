@@ -1,20 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getDict } from "@/lib/i18n";
 import { track } from "@/lib/track";
 import { PayPanel } from "@/components/PayPanel";
-import { getMarketing, withPrices } from "@/lib/content/marketing";
-import { getPrices, type Plan, type Price } from "@/lib/payments";
-import { load, update } from "@/lib/store";
+import { getMarketing } from "@/lib/content/marketing";
+import { getPrices, type Plan } from "@/lib/payments";
+import { load } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
 
 type Status = "idle" | "working" | "fallback" | "sent";
 
+/**
+ * The checkout. NOT a second sales page.
+ *
+ * The page before this one does the persuading — problem, mechanism, proof,
+ * price justification, guarantee. By the time a man arrives here he has
+ * already decided. Everything on this page exists to remove friction and
+ * complete a payment, and anything that makes him reconsider the offer is a
+ * bug, not a feature.
+ *
+ * ── WHAT CHANGED, AND WHY ─────────────────────────────────────────────────
+ * The two big plan tabs are gone. They asked a man who had just decided to
+ * buy the 10-Day Reset to choose all over again, with a 69,000 option sitting
+ * next to the 7,500 one — the single most expensive thing on the page. The
+ * Reset is now simply what he is buying.
+ *
+ * The 69,000 has not been hidden: it moved BELOW the payment, framed as what
+ * comes after the ten days rather than as a competing choice, with the credit
+ * spelled out and an explicit "you do not need to decide that today".
+ * Eventually that upsell belongs after purchase, inside the app, once he has
+ * felt the thing work.
+ *
+ * The sales copy, the guarantee restated three times, and "less than a meal
+ * out" are all gone. He has read them. Repeating them here reads as anxiety.
+ *
+ * ── WHAT I DID NOT TOUCH ──────────────────────────────────────────────────
+ * PayPanel, and the Fapshi and Whop wiring inside it. Same component, same
+ * props, same behaviour. This file only changes what surrounds it.
+ */
 export function OfferClient({
   locale,
   geoCountry,
@@ -24,13 +52,19 @@ export function OfferClient({
   geoCountry?: string | null;
 }) {
   const t = getDict(locale);
+  const m = getMarketing(locale);
   const router = useRouter();
+  const params = useSearchParams();
 
   const [country, setCountry] = useState(geoCountry ?? "default");
-  const [plan, setPlan] = useState<Plan>("test");
   const [status, setStatus] = useState<Status>("idle");
   const [contact, setContact] = useState("");
   const [ref, setRef] = useState("");
+
+  /* One plan, fixed: whatever the sales page sold him. ?plan=sprint still
+     works so the in-app upgrade can link straight here once it exists —
+     nothing on this page offers the choice. */
+  const plan: Plan = params.get("plan") === "sprint" ? "sprint" : "test";
 
   useEffect(() => {
     const s = load(locale);
@@ -49,29 +83,41 @@ export function OfferClient({
       /* keep the default */
     }
 
-    // Fires unconditionally, and that is the entire point of moving it.
-    //
+    // Fires unconditionally, and that is the entire point of it living here.
     // It used to sit after the country block, which returned early whenever
-    // geoCountry was set. Vercel sets that header on every production request,
-    // so the early return was ALWAYS taken and offer_view never fired once in
-    // production. The funnel read "0 opened the offer" while a man was
-    // actually paying through it — the step between the result page and the
-    // money was simply invisible, and it is the step that decides everything.
+    // geoCountry was set — and Vercel sets that header on every production
+    // request, so offer_view never fired once in production. The funnel read
+    // "0 opened the offer" while men were paying through it.
     track("offer_view", plan, locale);
   }, [locale, geoCountry, plan]);
 
   const prices = getPrices(country);
   const forPlan = prices.filter((p) => p.plan === plan);
-  // The toggle used to show two names and no money. A man choosing between two
-  // plans is choosing between two prices, and hiding them behind a tap is the
-  // one thing on this page guaranteed to cost a sale.
   const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
-  // Copy and buttons read the same price book, so an English page in London
-  // quotes dollars rather than francs.
-  const m = withPrices(getMarketing(locale), {
-    test: priceOf("test"),
-    sprint: priceOf("sprint"),
-  });
+
+  /* The credit maths, shown rather than asserted: what is left of the Sprint
+     after today's payment. Formatted the way the price book formats, and only
+     when both plans quote the same currency — a man should never be shown
+     francs minus dollars. */
+  const remaining = (() => {
+    const test = prices.find((p) => p.plan === "test");
+    const sprint = prices.find((p) => p.plan === "sprint");
+    if (!test || !sprint || test.currency !== sprint.currency) return null;
+    const left = sprint.amountMinor - test.amountMinor;
+    if (left <= 0) return null;
+    if (sprint.currency === "XAF") {
+      return `${String(left).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} FCFA`;
+    }
+    return `$${(left / 100).toFixed(0)}`;
+  })();
+
+  const afterTen = t.checkout.afterTen
+    .split("{sprint}")
+    .join(priceOf("sprint"))
+    .split("{test}")
+    .join(priceOf("test"))
+    .split("{rest}")
+    .join(remaining ?? "");
 
   const [sending, sendLead] = useAction(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +129,7 @@ export function OfferClient({
     if (res.ok) setStatus("sent");
   });
 
-  const includes = plan === "test" ? m.includes : m.sprintIncludes;
+  const planName = plan === "test" ? t.offer.testName : t.offer.sprintName;
 
   return (
     <>
@@ -93,13 +139,13 @@ export function OfferClient({
 
       <div className="min-h-screen">
         <header className="border-b border-ink-700">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
+          <div className="mx-auto flex max-w-xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
             <span className="flex items-center gap-4">
-              {/* Real browser back, not a hardcoded /result.
-                  It used to point at the quiz result page, so a man who came
-                  through the no-quiz page and pressed Back landed on a result
-                  screen for a quiz he never took. */}
+              {/* Real browser back, not a hardcoded /result. It used to point
+                  at the quiz result page, so a man who came through the
+                  no-quiz page and pressed Back landed on a result screen for
+                  a quiz he never took. */}
               <button
                 type="button"
                 onClick={() => {
@@ -120,103 +166,53 @@ export function OfferClient({
           </div>
         </header>
 
-        <main className="mx-auto max-w-2xl px-5 py-10">
-          {/* plan toggle */}
-          <div
-            role="tablist"
-            aria-label="Plan"
-            className="grid grid-cols-2 gap-2"
-          >
-            {(["test", "sprint"] as Plan[]).map((p) => {
-              const on = plan === p;
-              return (
-                <button
-                  key={p}
-                  role="tab"
-                  aria-selected={on}
-                  onClick={() => {
-                    setPlan(p);
-                    setStatus("idle");
-                  }}
-                  className={`rounded-2xl border-2 px-4 py-3.5 text-left transition-colors ${
-                    on
-                      ? "border-jade bg-jade-050"
-                      : "border-ink-700 bg-ink-800 hover:border-ink-500"
+        <main className="mx-auto max-w-xl px-5 py-10 md:py-14">
+          {/* ── WHAT HE IS BUYING ────────────────────────────────────────
+              Stated, not offered. No choice to make here. */}
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+            {planName}
+          </p>
+          <h1 className="mt-3 text-[1.9rem] leading-[1.1] md:text-[2.3rem]">
+            {plan === "test" ? t.checkout.h : planName}
+          </h1>
+          <p className="metric mt-4 text-[2.8rem] font-bold leading-none text-jade md:text-[3.2rem]">
+            {priceOf(plan)}
+          </p>
+          <p className="mt-4 text-[0.98rem] leading-relaxed text-mute">
+            {t.checkout.sub}
+          </p>
+
+          {/* Where he is in the process. Three steps, first one live. */}
+          <ol className="mt-7 flex items-center gap-2.5">
+            {t.checkout.steps.map((s, i) => (
+              <li key={s} className="flex flex-1 items-center gap-2.5">
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-bold ${
+                    i === 0 ? "bg-jade text-[#04140C]" : "bg-ink-700 text-faint"
                   }`}
                 >
-                  <span
-                    className={`block text-[13px] font-bold ${on ? "text-bone" : "text-mute"}`}
-                  >
-                    {p === "test" ? t.offer.testName : t.offer.sprintName}
-                  </span>
-                  <span className="metric mt-1.5 block text-[1.15rem] font-bold text-bone">
-                    {priceOf(p)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {i + 1}
+                </span>
+                <span
+                  className={`text-[12.5px] font-bold ${
+                    i === 0 ? "text-bone" : "text-faint"
+                  }`}
+                >
+                  {s}
+                </span>
+                {i < t.checkout.steps.length - 1 && (
+                  <span aria-hidden className="h-px flex-1 bg-ink-700" />
+                )}
+              </li>
+            ))}
+          </ol>
 
-          <section className="mt-6 rounded-2xl card p-6">
-            {/* The anchor. The trial only looks cheap next to the real price,
-                so the real price has to be on the page before it. */}
-            {plan === "test" ? (
-              <>
-                <h1 className="text-[1.35rem] font-bold leading-snug tracking-tight">
-                  {m.offerIntro.h}
-                </h1>
-                <div className="mt-4 space-y-3">
-                  {m.offerIntro.p.map((line, i) => (
-                    <p
-                      key={i}
-                      className={
-                        i === 2
-                          ? "rounded-xl border-l-2 border-jade bg-jade-050 px-4 py-3 text-[1rem] font-semibold leading-relaxed text-bone"
-                          : "text-[0.98rem] leading-relaxed text-mute"
-                      }
-                    >
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <h1 className="text-[1.35rem] font-bold leading-snug tracking-tight">
-                  {t.offer.sprintName}
-                </h1>
-                <p className="mt-2 text-[0.98rem] leading-relaxed text-mute">{m.sprintPitch}</p>
-              </>
-            )}
-
-            <h2 className="mt-7 text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
-              {t.offer.includes}
-            </h2>
-            <ul className="mt-3 space-y-2.5">
-              {includes.map((x) => (
-                <li key={x} className="flex gap-3 text-[0.95rem] leading-relaxed text-bone">
-                  <span aria-hidden className="mt-[3px] shrink-0 text-jade">
-                    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
-                      <path
-                        d="M4 10.5 8.2 14.5 16 5.8"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* ------------------------------------------------------- payment */}
-          {/* Embedded, both rails. He never leaves the site — which matters
-              more than usual on a page about something he is embarrassed by.
-              MoMo pushes a USSD prompt to his handset; cards render inline. */}
-          <section className="mt-6">
+          {/* ── PAYMENT ──────────────────────────────────────────────────
+              Untouched. Both rails, embedded — he never leaves the site,
+              which matters more than usual on a page about something he is
+              embarrassed by. MoMo pushes a USSD prompt to his handset;
+              cards render inline. */}
+          <section className="mt-8">
             <PayPanel
               locale={locale}
               plan={plan}
@@ -226,9 +222,66 @@ export function OfferClient({
             />
           </section>
 
-          <p className="mt-4 text-center text-[0.9rem] leading-relaxed text-faint">
-            {t.offer.guarantee}
-          </p>
+          {/* ── AFTER PAYMENT ────────────────────────────────────────────
+              Removes the "what actually happens when I hand over money"
+              hesitation, which is the last one standing at this point. */}
+          <section className="mt-8 rounded-2xl border border-ink-600 bg-ink-850 px-5 py-5">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+              {t.checkout.afterH}
+            </h2>
+            <ol className="mt-4 space-y-2.5">
+              {t.checkout.after.map((s, i) => (
+                <li key={s} className="flex gap-3 text-[0.95rem] leading-snug text-bone">
+                  <span
+                    aria-hidden
+                    className="metric shrink-0 text-[0.95rem] font-bold text-jade"
+                  >
+                    {i + 1}
+                  </span>
+                  {s}
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Guarantee and privacy, once each and compressed. Both were
+              already made on the sales page; restating them at length here
+              reads as anxiety rather than reassurance. */}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <section className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+                {t.checkout.guaranteeH}
+              </h2>
+              <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">
+                {t.checkout.guaranteeShort}
+              </p>
+            </section>
+            <section className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+                {t.checkout.privacyH}
+              </h2>
+              <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">
+                {t.checkout.privacyShort}
+              </p>
+            </section>
+          </div>
+
+          {/* ── THE SPRINT, AS A FUTURE ──────────────────────────────────
+              Below the payment and deliberately quiet: no card, no accent,
+              no button. It anchors the value of what he is paying today and
+              answers "what is this leading to" without asking him to weigh a
+              69,000 decision at the moment he is entering a PIN. */}
+          {plan === "test" && remaining && (
+            <section className="mt-8 border-t border-ink-700 pt-6">
+              <h2 className="text-[0.98rem] font-bold text-bone">
+                {t.checkout.afterTenH}
+              </h2>
+              <p className="mt-2.5 text-[0.92rem] leading-relaxed text-mute">{afterTen}</p>
+              <p className="mt-2.5 text-[0.92rem] font-bold leading-relaxed text-bone">
+                {t.checkout.afterTenNote}
+              </p>
+            </section>
+          )}
 
           {/* --------------------------------------------- fallback capture */}
           {status === "fallback" && (
@@ -274,7 +327,7 @@ export function OfferClient({
           )}
 
           <footer className="mt-10 border-t border-ink-700 pt-6">
-            <p className="text-[12px] leading-relaxed text-faint">{m.disclaimer}</p>
+            <p className="text-[11.5px] leading-relaxed text-faint">{m.disclaimer}</p>
           </footer>
         </main>
       </div>

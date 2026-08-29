@@ -93,6 +93,13 @@ export type DirectCopy = {
   problem: string[];
   problemPivot: string;
 
+  /* the punch — pain, urgency, CTA, then the explanation */
+  urgencyBefore: string;
+  urgencyHighlight: string;
+  urgencyAfter: string;
+  urgencyBody: string;
+  urgencyPunch: string;
+
   /* mechanism */
   mechH: string;
   mech: string[];
@@ -166,7 +173,10 @@ const EN: DirectCopy = {
   sub: "A private 10-day training programme designed to help you last longer and build better control during sex — from your phone, at home.",
   flow: ["Measure your starting point", "Train for 10 days", "Measure again"],
   priceLine: "7,500 FCFA to start",
-  cta: "Start the 10-day test",
+  /* The product's real name, the one the checkout and the app both use. The
+     page used to say "10-day test" here and the checkout said "10-Day Reset",
+     which reads as two different things at the exact moment he commits. */
+  cta: "Start the 10-Day Reset",
   ctaNote: "If you are not lasting longer, we refund you.",
   trust: ["Private by design", "Works on any phone", "Nothing to swallow", "One payment"],
 
@@ -177,6 +187,13 @@ const EN: DirectCopy = {
     "Then next time comes, and the same thing happens.",
   ],
   problemPivot: "You have been managing this for years. You have never actually trained it.",
+
+  urgencyBefore: "The longer you stay at ",
+  urgencyHighlight: "2 or 3 minutes",
+  urgencyAfter: ", the harder it is to break that pattern.",
+  urgencyBody:
+    "Every time you have sex and finish around the same time, you reinforce the same response.",
+  urgencyPunch: "10 days can start changing that.",
 
   mechH: "There is a reason the same thing keeps happening.",
   mech: [
@@ -335,7 +352,7 @@ const FR: DirectCopy = {
   sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
   flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
   priceLine: "7 500 FCFA pour commencer",
-  cta: "Commencer le test de 10 jours",
+  cta: "Commencer le Reset de 10 jours",
   ctaNote: "Si vous ne tenez pas plus longtemps, on vous rembourse.",
   trust: ["Privé par conception", "Sur tout téléphone", "Rien à avaler", "Un seul paiement"],
 
@@ -347,6 +364,13 @@ const FR: DirectCopy = {
   ],
   problemPivot:
     "Vous gérez ça depuis des années. Vous ne l'avez jamais vraiment entraîné.",
+
+  urgencyBefore: "Plus vous restez à ",
+  urgencyHighlight: "2 ou 3 minutes",
+  urgencyAfter: ", plus ce schéma devient difficile à casser.",
+  urgencyBody:
+    "Chaque fois que vous faites l'amour et que vous finissez au même moment, vous renforcez la même réponse.",
+  urgencyPunch: "10 jours peuvent commencer à changer ça.",
 
   mechH: "Il y a une raison pour laquelle la même chose se répète.",
   mech: [

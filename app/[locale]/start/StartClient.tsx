@@ -221,6 +221,40 @@ export function StartClient({
             </p>
           </section>
 
+          {/* ── THE PUNCH ────────────────────────────────────────────────
+              Pain → urgency → CTA → explanation. This sits between the
+              recognition and the mechanism because that is the moment it
+              costs him something to keep reading: he has just agreed that
+              nothing has changed in years, and the next thing he learns is
+              that waiting makes it harder.
+
+              Deliberately bare — one headline, one line, one button. No
+              bullets, no icons, nothing underneath. It should hold roughly
+              one phone screen and then let him fall straight into "there is
+              a reason the same thing keeps happening". */}
+          <section className="mt-14 md:mt-20">
+            <div className="rounded-3xl border border-ink-600 bg-ink-850 px-6 py-12 md:px-14 md:py-16">
+              <h2 className="max-w-3xl text-[2rem] leading-[1.08] md:text-[3.1rem]">
+                {c.urgencyBefore}
+                <span className="text-jade">{c.urgencyHighlight}</span>
+                {c.urgencyAfter}
+              </h2>
+
+              <p className="mt-7 max-w-2xl text-[1.05rem] leading-[1.7] text-mute md:text-[1.15rem]">
+                {c.urgencyBody}
+              </p>
+
+              <p className="mt-8 text-[1.4rem] font-bold leading-tight text-bone md:text-[1.8rem]">
+                {c.urgencyPunch}
+              </p>
+
+              <Go where="urgency" className="mt-9 w-full sm:w-auto sm:min-w-[19rem]" />
+              <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
+                {c.priceLine} · {c.ctaNote}
+              </p>
+            </div>
+          </section>
+
           {/* ── 4. THE MECHANISM ─────────────────────────────────────────
               Removes the shame. A man who believes it is his character does
               not buy training. */}
