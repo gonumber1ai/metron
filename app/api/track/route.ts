@@ -26,6 +26,7 @@ const ALLOWED = new Set([
      that page's measurement worth having. */
   "gate_view",
   "gate_pass",
+  "start_view",
   "start_cta",
   "pay_attempt",
 ]);

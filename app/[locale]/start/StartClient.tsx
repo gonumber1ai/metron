@@ -78,7 +78,13 @@ export function StartClient({
     } catch {
       /* a missing tag is not worth breaking the page over */
     }
-    track("quiz_start", "direct", locale);
+    /* Its own event, not the quiz's.
+       This used to fire quiz_start with detail "direct", which meant the two
+       funnels shared their first step: every man on this page was counted as
+       having started the quiz, and the quiz's numbers were inflated by traffic
+       that never saw a question. The views read both names so the rows
+       recorded before this change are not lost. */
+    track("start_view", undefined, locale);
   }, [locale]);
 
   /* One button, used four times. The `where` tag rides along so the funnel can

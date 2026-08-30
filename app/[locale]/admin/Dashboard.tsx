@@ -145,8 +145,11 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
             {(
               [
                 ["overview", "Overview"],
-                ["ads", "Ads"],
-                ["start", "Start"],
+                /* One tab per funnel, named after the road rather than
+                   after the channel. Both are fed by ads; what separates them
+                   is whether the man answered nine questions or read a page. */
+                ["ads", "Quiz funnel"],
+                ["start", "Direct funnel"],
                 ["customers", `Customers${paid ? ` (${paid})` : ""}`],
                 ["leads", `Leads${snap.recent.length ? ` (${snap.recent.length})` : ""}`],
                 ["write", "Write to people"],
