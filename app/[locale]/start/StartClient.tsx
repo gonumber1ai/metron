@@ -177,10 +177,6 @@ export function StartClient({
                 {c.sub}
               </p>
 
-              <p className="mt-4 max-w-xl text-[1.15rem] font-bold leading-[1.5] text-bone md:text-[1.3rem]">
-                {c.subPunch}
-              </p>
-
               {/* measure → train → measure again, stated plainly.
                   A grid rather than a wrapping row of chips: at the widths
                   between a phone and a laptop the row broke after the second
@@ -391,50 +387,6 @@ export function StartClient({
             )}
           </section>
 
-          {/* ── 4. THE MECHANISM ─────────────────────────────────────────
-              Removes the shame. A man who believes it is his character does
-              not buy training. */}
-          <section className="mt-20 md:mt-28">
-            <H2>{c.mechH}</H2>
-            <p className="mt-6 max-w-2xl text-[1.08rem] leading-[1.7] text-bone">
-              {c.mech[0]}
-            </p>
-            <ul className="mt-6 grid max-w-3xl gap-3.5 md:grid-cols-3">
-              {c.mech.slice(1).map((p) => (
-                <li
-                  key={p}
-                  className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4 text-[0.98rem] leading-[1.6] text-mute"
-                >
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* ── 5. THE FRAMEWORK ─────────────────────────────────────────
-              The signature. This is the positioning, not "10-day programme". */}
-          <section className="mt-20 md:mt-28">
-            <H2>{c.frameworkH}</H2>
-            <p className="mt-5 max-w-2xl text-[1.08rem] leading-[1.7] text-mute">
-              {c.frameworkSub}
-            </p>
-            <div className="mt-9">
-              <MeasureFlow steps={c.frameworkSteps} />
-            </div>
-
-            {/* The same three beats, running inside the actual product. The
-                cards above carry them as text because they stay legible at
-                375px; this carries them as screens, which is what answers
-                "what will I actually be looking at". */}
-            <Image
-              src={fr ? stepsFr : stepsEn}
-              alt={c.stepsAlt}
-              sizes="(min-width: 1024px) 900px, 100vw"
-              className="mt-6 h-auto w-full rounded-2xl border border-ink-700"
-              placeholder="blur"
-            />
-          </section>
-
           {/* ── 6. THE TEN DAYS ──────────────────────────────────────────
               The mechanics, placed after the desire and drawn as a rail. */}
           <section className="mt-20 md:mt-28">
@@ -445,26 +397,6 @@ export function StartClient({
             <div className="mt-10">
               <Timeline steps={c.timeline} />
             </div>
-          </section>
-
-          {/* ── 7. WHAT YOU ARE NOT BUYING ───────────────────────────────
-              Makes starting feel almost weightless, and separates Metron
-              from the entire shelf in one screen. */}
-          <section className="mt-20 md:mt-28">
-            <H2>{c.notBuyingH}</H2>
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-              {c.notBuying.map((n) => (
-                <li
-                  key={n}
-                  className="rounded-xl border border-ink-600 bg-ink-850 px-5 py-4 text-[1.02rem] font-bold text-bone"
-                >
-                  {n}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 max-w-2xl text-[1.05rem] leading-[1.7] text-mute">
-              {c.notBuyingSub}
-            </p>
           </section>
 
           {/* ── 8. WHO IT IS FOR ─────────────────────────────────────────
@@ -482,22 +414,6 @@ export function StartClient({
             </ul>
             <p className="mt-7 max-w-2xl text-[0.92rem] leading-relaxed text-faint">
               {c.whoForNote}
-            </p>
-          </section>
-
-          {/* ── 11. GUARANTEE ────────────────────────────────────────────
-              Loud, because the mechanism makes it safe: he is not asked to
-              believe anything, only to take one measurement twice. */}
-          <section className="mt-20 md:mt-28">
-            <H2>{c.guaranteeH}</H2>
-            <div className="mt-8">
-              <MeasureFlow
-                numbered={false}
-                steps={c.guaranteeSteps.map((s) => ({ step: "", label: s, body: "" }))}
-              />
-            </div>
-            <p className="mt-7 max-w-2xl rounded-2xl border-l-2 border-jade bg-jade-050 px-6 py-5 text-[1.1rem] font-bold leading-[1.65] text-bone">
-              {c.guarantee}
             </p>
           </section>
 

@@ -82,7 +82,6 @@ export type DirectCopy = {
   kicker: string;
   h: string;
   sub: string;
-  subPunch: string;
   flow: string[];
   priceLine: string;
   cta: string;
@@ -203,12 +202,11 @@ export type DirectCopy = {
 const EN: DirectCopy = {
   kicker: "Private · 10-day programme",
   h: "Last longer. Without pills, herbs or numbing products.",
-  sub: "A private 10-day programme designed to help you build better control and last longer during sex.",
-  subPunch: "You don't have to believe us. Test yourself.",
+  sub: "A private 10-day programme designed to help you last longer in bed and build better control during sex.",
   flow: [
-    "DAY 1: Measure how long you last.",
-    "DAYS 2\u201311: Follow 7 guided 15-minute training sessions.",
-    "DAY 12: Measure again.",
+    "Measure how long you last on day 1",
+    "Follow the 10 day program",
+    "Measure again and see for yourself",
   ],
   priceLine: "{test} to start",
   /* The product's real name, the one the checkout and the app both use. The
@@ -216,7 +214,7 @@ const EN: DirectCopy = {
      which reads as two different things at the exact moment he commits. */
   cta: "Start the 10-Day Reset",
   ctaNote: "If you are not lasting longer, we refund you.",
-  trust: ["Private", "No pills", "No equipment", "One payment"],
+  trust: ["Private by design", "Last Longer", "Nothing to swallow", "One payment"],
 
   problemH: "You already know the problem.",
   problem: [
@@ -441,7 +439,6 @@ const FR: DirectCopy = {
   kicker: "Privé · programme de 10 jours",
   h: "Tenez plus longtemps. Sans pilules, sans plantes, sans anesthésiants.",
   sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
-  subPunch: "Vous n’avez pas à nous croire. Testez-vous.",
   flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
   priceLine: "{test} pour commencer",
   cta: "Commencer le Reset de 10 jours",
