@@ -46,6 +46,25 @@
 drop view if exists public.funnel_start;
 
 create view public.funnel_start as
+-- ---------------------------------------------------------------------------
+-- Only men who actually walked the direct road.
+--
+-- Without this the view counted offer_view from EVERY funnel, and offer_view
+-- fires on /offer no matter how a man arrived. Quiz traffic under the same ad
+-- tag therefore landed in saw_checkout and paid, which is how a1 showed one
+-- page view and three checkouts, and how tags with zero button presses showed
+-- a sale. Every number after "saw the page" was inflated by the funnel this
+-- screen exists to be measured against.
+--
+-- A ref qualifies by touching the gate, the direct sales page, one of its buy
+-- buttons, or the pay button. Quiz refs have none of those.
+-- ---------------------------------------------------------------------------
+with direct as (
+  select distinct ref
+  from public.events
+  where name in ('gate_view', 'gate_pass', 'start_cta', 'pay_attempt')
+     or (name = 'quiz_start' and detail = 'direct')
+)
 select
   coalesce(e.campaign, '(none)')                                        as campaign,
   e.locale,
@@ -61,13 +80,11 @@ select
   min(e.created_at)                                                     as first_seen,
   max(e.created_at)                                                     as last_seen
 from public.events e
+join direct d
+  on d.ref = e.ref
 left join public.payments p
   on p.ref = e.ref and p.status = 'paid'
 group by coalesce(e.campaign, '(none)'), e.locale
-having count(distinct e.ref) filter (
-         where e.name in ('gate_view', 'start_cta', 'pay_attempt')
-            or (e.name = 'quiz_start' and e.detail = 'direct')
-       ) > 0
 order by page_views desc;
 
 -- ---------------------------------------------------------------------------
@@ -75,7 +92,8 @@ order by page_views desc;
 --
 -- One row per CTA position. `people` counts distinct men rather than presses,
 -- because a man who taps the sticky bar three times before paying is one
--- decision, not three.
+-- decision, not three. `presses` is deliberately raw rows — the ratio between
+-- the two says whether a button is being hunted for.
 -- ---------------------------------------------------------------------------
 drop view if exists public.start_cta_breakdown;
 
