@@ -92,13 +92,8 @@ export const fr = {
 
   gate: {
     kicker: "Bien-être masculin · programme privé",
-    h: "Un programme d'entraînement de 10 jours pour hommes.",
-    sub: "Metron est un programme privé, sur application, construit sur une idée : mesurez où vous en êtes, entraînez-vous dix jours, puis mesurez à nouveau. Rien à avaler, rien à acheter, personne à rencontrer.",
-    points: [
-      "À faire en privé, depuis votre propre téléphone",
-      "Dix jours, environ quinze minutes par jour",
-      "Vous mesurez vous-même votre résultat au début et à la fin",
-    ],
+    h: "Un programme de 10 jours pour hommes.",
+    sub: "Metron est un programme privé, sur application, construit sur une idée : mesurez où vous en êtes, suivez votre programme comme indiqué dans l'application pendant dix jours, puis mesurez à nouveau. Rien à avaler, rien à acheter, personne à rencontrer.",
     ageH: "À confirmer avant de continuer",
     age: "Ce programme s'adresse à un public adulte et traite d'un sujet réservé aux adultes.",
     cta: "J'ai 18 ans ou plus — continuer",

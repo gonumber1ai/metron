@@ -95,13 +95,8 @@ export const en = {
      here is shown to every visitor. */
   gate: {
     kicker: "Men's wellness · private programme",
-    h: "A 10-day training programme for men.",
-    sub: "Metron is a private, app-based programme built on one idea: measure where you are now, train for ten days, then measure again. Nothing to swallow, nothing to buy, nobody to meet.",
-    points: [
-      "Done privately from your own phone",
-      "Ten days, about fifteen minutes a day",
-      "You measure your own result at the start and at the end",
-    ],
+    h: "A 10-day programme for men.",
+    sub: "Metron is a private, app-based programme built on one idea: measure where you are now, follow your programme as directed in the application for ten days, then measure again. Nothing to swallow, nothing to buy, nobody to meet.",
     ageH: "Confirm before you continue",
     age: "This programme is intended for adults and covers adult subject matter.",
     cta: "I am 18 or over — continue",

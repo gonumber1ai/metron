@@ -85,26 +85,12 @@ export function GateClient({ locale }: { locale: string }) {
 
           <p className="mt-5 text-[1.05rem] leading-[1.7] text-mute">{t.gate.sub}</p>
 
-          <ul className="mt-7 space-y-3">
-            {t.gate.points.map((p) => (
-              <li key={p} className="flex gap-3 text-[1rem] leading-relaxed text-bone">
-                <span aria-hidden className="mt-[3px] shrink-0 text-jade">
-                  <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
-                    <path
-                      d="M4 10.5 8.2 14.5 16 5.8"
-                      stroke="currentColor"
-                      strokeWidth="2.3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                {p}
-              </li>
-            ))}
-          </ul>
+          {/* The three tick bullets that used to sit here said, in order, what
+              the sentence above already says: private, ten days, you measure
+              it. This page is a door, not a pitch — the selling happens one
+              click later, and a door that argues is a door people close. */}
 
-          <section className="mt-10 rounded-2xl border border-ink-600 bg-ink-850 px-6 py-6">
+          <section className="mt-9 rounded-2xl border border-ink-600 bg-ink-850 px-6 py-6">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
               {t.gate.ageH}
             </h2>
