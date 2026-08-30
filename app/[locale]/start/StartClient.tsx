@@ -84,7 +84,11 @@ export function StartClient({
   const Go = ({ where, className = "" }: { where: string; className?: string }) => (
     <Link
       href={`/${locale}/offer`}
-      onClick={() => track("result_view", `direct_${where}`, locale)}
+      /* start_cta carries the position in `detail`, so the admin can say which
+         block on this page actually closes him. It used to fire result_view
+         with a "direct_" prefix, which quietly polluted the quiz funnel's
+         result step with men who had never taken a quiz. */
+      onClick={() => track("start_cta", where, locale)}
       className={`flex items-center justify-center rounded-full btn-go px-7 py-4 text-center text-[16px] font-bold ${className}`}
     >
       {c.cta}

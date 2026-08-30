@@ -37,17 +37,25 @@ export default async function AdminPage() {
     revenue: [],
     activity: [],
     campaigns: [],
+    startRows: [],
+    ctaRows: [],
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns] = await Promise.all([
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows] =
+      await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
       client.from("intake").select("*").limit(60),
       client.from("payments").select("currency, amount_minor, plan").eq("status", "paid"),
       client.from("activity").select("*").limit(100),
       client.from("funnel_by_campaign").select("*").limit(50),
+      /* Views from 009_start_funnel.sql. Missing until that file is run, and a
+         missing view must not take the whole dashboard down with it — the
+         Start tab explains itself when empty. */
+      client.from("funnel_start").select("*").limit(50),
+      client.from("start_cta_breakdown").select("*").limit(50),
     ]);
 
     snap.funnel = funnel.data ?? [];
@@ -55,6 +63,8 @@ export default async function AdminPage() {
     snap.recent = recent.data ?? [];
     snap.activity = activity.data ?? [];
     snap.campaigns = campaigns.data ?? [];
+    snap.startRows = startRows.data ?? [];
+    snap.ctaRows = ctaRows.data ?? [];
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.

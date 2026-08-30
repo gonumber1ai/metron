@@ -89,6 +89,26 @@ export const en = {
     emailSent: "Sent.",
   },
 
+  /* The page the ads point at.
+     Deliberately plain: what the product is, who it is for, an adult
+     confirmation, and a way through. Everything here is true and everything
+     here is shown to every visitor. */
+  gate: {
+    kicker: "Men's wellness · private programme",
+    h: "A 10-day training programme for men.",
+    sub: "Metron is a private, app-based programme built on one idea: measure where you are now, train for ten days, then measure again. Nothing to swallow, nothing to buy, nobody to meet.",
+    points: [
+      "Done privately from your own phone",
+      "Ten days, about fifteen minutes a day",
+      "You measure your own result at the start and at the end",
+    ],
+    ageH: "Confirm before you continue",
+    age: "This programme is intended for adults and covers adult subject matter.",
+    cta: "I am 18 or over — continue",
+    leave: "Not for me",
+    note: "Metron is education and training. It does not diagnose or treat any medical condition. If symptoms started suddenly, involve pain, or began after starting a medication, speak to a doctor.",
+  },
+
   /* The checkout. Not a sales page — the previous page already sold him.
      This page removes friction and completes a payment. */
   checkout: {

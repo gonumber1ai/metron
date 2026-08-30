@@ -21,6 +21,12 @@ const ALLOWED = new Set([
   "result_view",
   "offer_view",
   "login_view",
+  /* The direct funnel. gate_* is the age gate the ads point at; start_cta
+     carries WHICH button he pressed in `detail`, which is the only part of
+     that page's measurement worth having. */
+  "gate_view",
+  "gate_pass",
+  "start_cta",
 ]);
 
 export async function POST(req: Request) {
