@@ -231,7 +231,7 @@ export function StartClient({
               Short on purpose. Recognition, then move on. */}
           <section className="mt-20 md:mt-28">
             <H2>{c.problemH}</H2>
-            <div className="mt-7 max-w-2xl border-l-2 border-ink-600 pl-5 md:pl-7">
+            <div className="mt-7 max-w-2xl border-l-2 border-alert pl-5 md:pl-7">
               {c.problem.map((p, i) => (
                 <p
                   key={i}
@@ -272,7 +272,7 @@ export function StartClient({
             <div className="rounded-3xl border border-ink-600 bg-ink-850 px-6 py-12 md:px-14 md:py-16">
               <h2 className="max-w-3xl text-[2rem] leading-[1.08] md:text-[3.1rem]">
                 {c.urgencyBefore}
-                <span className="text-jade">{c.urgencyHighlight}</span>
+                <span className="text-alert">{c.urgencyHighlight}</span>
                 {c.urgencyAfter}
               </h2>
 
