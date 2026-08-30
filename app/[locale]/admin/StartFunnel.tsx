@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export type StartRow = {
   campaign: string;
   locale: string;
@@ -50,6 +52,33 @@ function pct(n: number, of: number): string {
 }
 
 export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) {
+  /* Tag names, shared with the Ads tab on purpose — same key, so a tag named
+     on either screen is named on both. The tags in the URL are deliberately
+     meaningless (b1, w1) because Meta reads them and so does the man before he
+     clicks; the meaning lives here, in a browser only you use. */
+  const [labels, setLabels] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("metron.adlabels");
+      if (raw) setLabels(JSON.parse(raw) as Record<string, string>);
+    } catch {
+      /* no saved names is fine — the tag still identifies the row */
+    }
+  }, []);
+
+  function nameIt(key: string, v: string) {
+    const next = { ...labels, [key]: v };
+    setLabels(next);
+    try {
+      window.localStorage.setItem("metron.adlabels", JSON.stringify(next));
+    } catch {
+      /* private mode; the table works, it just will not remember */
+    }
+  }
+
+  const keyOf = (r: StartRow) => `${r.campaign}::${r.locale}`;
+
   const sum = (k: keyof StartRow) =>
     rows.reduce((t, r) => t + (Number(r[k]) || 0), 0);
 
@@ -212,7 +241,15 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
                     key={`${r.campaign}::${r.locale}`}
                     className="border-t border-ink-700 text-bone"
                   >
-                    <td className="py-2.5 pr-4 font-bold">{r.campaign}</td>
+                    <td className="py-2.5 pr-4">
+                      <span className="block font-bold">{r.campaign}</span>
+                      <input
+                        value={labels[keyOf(r)] ?? ""}
+                        onChange={(e) => nameIt(keyOf(r), e.target.value)}
+                        placeholder="name it"
+                        className="mt-1 w-32 rounded-md border border-ink-600 bg-ink-900 px-2 py-1 text-[12px] text-mute placeholder:text-faint focus:border-jade focus:text-bone focus:outline-none"
+                      />
+                    </td>
                     <td className="py-2.5 pr-4 uppercase text-mute">{r.locale}</td>
                     <td className="py-2.5 pr-4 text-mute">
                       {r.gate_passed}/{r.gate_views}
