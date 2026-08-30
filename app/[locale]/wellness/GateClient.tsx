@@ -70,7 +70,7 @@ export function GateClient({ locale }: { locale: string }) {
       <style>{`body{background:var(--color-ink-900);color:var(--color-bone)}`}</style>
 
       <div className="flex min-h-screen flex-col">
-        <header className="border-b border-ink-700">
+        <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/90 backdrop-blur">
           <div className="mx-auto flex max-w-xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
           </div>

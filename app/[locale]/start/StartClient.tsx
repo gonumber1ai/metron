@@ -123,7 +123,11 @@ export function StartClient({
       <MetaPixel event="ViewContent" />
 
       <div className="min-h-screen pb-28 md:pb-0">
-        <header className="border-b border-ink-700">
+        {/* Sticky: on a page this long the only way back to the logo — and to
+            the log-in link a returning buyer needs — was a scroll to the top.
+            z-30 clears the mobile buy bar at z-20; the blur keeps the page
+            legible through it rather than hiding a band of it. */}
+        <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/90 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
             <Logo size="sm" />
             <Link
@@ -434,17 +438,27 @@ export function StartClient({
                     <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
                       {c.shotsH}
                     </h3>
-                    <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    {/* Three columns now that every front carries all three
+                        messages. A screenshot written in the other language
+                        gets its translation underneath — the image proves a
+                        real man wrote it, the caption makes it readable. */}
+                    <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                       {c.shots.map((s) => (
-                        <Image
-                          key={s.src}
-                          src={s.src}
-                          alt={s.alt}
-                          width={840}
-                          height={900}
-                          sizes="(min-width: 640px) 420px, 100vw"
-                          className="h-auto w-full rounded-2xl border border-ink-600"
-                        />
+                        <figure key={s.src} className="m-0">
+                          <Image
+                            src={s.src}
+                            alt={s.alt}
+                            width={840}
+                            height={900}
+                            sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 100vw"
+                            className="h-auto w-full rounded-2xl border border-ink-600"
+                          />
+                          {s.caption && (
+                            <figcaption className="mt-2.5 text-[0.82rem] leading-relaxed text-faint">
+                              {s.caption}
+                            </figcaption>
+                          )}
+                        </figure>
                       ))}
                     </div>
                   </div>

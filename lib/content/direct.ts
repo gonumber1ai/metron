@@ -135,7 +135,10 @@ export type DirectCopy = {
      under the transcribed quotes: the text is what a man reads, the shots are
      what convinces him the text was not written by us. */
   shotsH: string;
-  shots: { src: string; alt: string }[];
+  /* `caption` carries a translation when the screenshot is in the other
+     language. The image is the proof that a real man wrote it; the caption is
+     what makes it readable. Never a paraphrase — it says what he said. */
+  shots: { src: string; alt: string; caption?: string }[];
 
   /* offer */
   offerKicker: string;
@@ -332,6 +335,12 @@ const EN: DirectCopy = {
       src: "/reviews/review-en-magic.webp",
       alt: "WhatsApp message reading: under 3 minutes to over 7 minutes. Magic.",
     },
+    {
+      src: "/reviews/review-fr-9min.webp",
+      alt: "WhatsApp message in French from a customer who went from 2 to 4 minutes on the 10-day programme, then past 9 minutes after the 30-day.",
+      caption:
+        "In French: “I went from 2 to 4 minutes when I started the 10-day programme. Then I did the 30-day one, and I finished it about 2 weeks ago. I still last more than 9 minutes every time, and probably more, because my girlfriend is already reacting a lot before I even finish.”",
+    },
   ],
 
   wasLabel: "was",
@@ -344,7 +353,7 @@ const EN: DirectCopy = {
   offerBody: [
     "The full programme costs {sprint}. You do not pay that today.",
     "Ten days, fifteen minutes a day, and two numbers taken the same way. You do not have to believe anything we say — the second number settles it.",
-    "If you are not lasting longer, write to us and we send your money back. If you are, the 30-day programme is what we point you to next — it holds the time you gained and moves it out of your own hands into real sex, with a partner. Not a decision for today.",
+    "If you are not lasting longer, write to us and we send your money back. If you are, most men go on to the 30-day programme — it holds the time you gained and moves it out of your own hands into real sex, with a partner. Not a decision for today.",
   ],
   includes: [
     "The 10-day programme",
@@ -392,7 +401,7 @@ const EN: DirectCopy = {
     },
     {
       q: "What happens after the 10 days?",
-      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and it is what we point you to next — it holds the time you gained and moves it into real sex, with a partner. Separate programme, 15,000 FCFA, and nothing enrols you automatically. Nobody is enrolled automatically, and nothing charges you again.",
+      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and most men go on to it — it holds the time you gained and moves it into real sex, with a partner. Separate programme, 15,000 FCFA, and nothing enrols you automatically. Nobody is enrolled automatically, and nothing charges you again.",
     },
   ],
 
@@ -538,6 +547,18 @@ const FR: DirectCopy = {
       src: "/reviews/review-fr-9min.webp",
       alt: "Message WhatsApp : passé de 2 à 4 minutes avec le programme de 10 jours, puis plus de 9 minutes après celui de 30 jours.",
     },
+    {
+      src: "/reviews/review-en-427.webp",
+      alt: "Message WhatsApp en anglais : 4:27 au jour 12 contre 1:23 au premier jour, puis achat du programme de 30 jours.",
+      caption:
+        "En anglais : « J’ai terminé le programme de 10 jours et je me suis mesuré au 12e jour : 4:27 minutes exactement. Au premier jour, j’étais à 1:23. J’ai toujours été en dessous de 2 minutes et ça me stressait, alors j’ai déjà pris le programme de 30 jours. Merci. »",
+    },
+    {
+      src: "/reviews/review-en-magic.webp",
+      alt: "Message WhatsApp en anglais : de moins de 3 minutes à plus de 7 minutes.",
+      caption:
+        "En anglais : « De moins de 3 minutes à plus de 7 minutes. Magique. »",
+    },
   ],
 
   wasLabel: "avant",
@@ -550,7 +571,7 @@ const FR: DirectCopy = {
   offerBody: [
     "Le programme complet coûte {sprint}. Vous ne payez pas ça aujourd'hui.",
     "Dix jours, quinze minutes par jour, et deux chiffres pris de la même façon. Vous n'avez rien à croire sur parole — c'est le deuxième chiffre qui tranche.",
-    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Si vous tenez plus longtemps, on vous oriente vers le programme de 30 jours : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Ça ne se décide pas aujourd'hui.",
+    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Si vous tenez plus longtemps, la plupart des hommes enchaînent avec le programme de 30 jours : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Ça ne se décide pas aujourd'hui.",
   ],
   includes: [
     "Le programme de 10 jours",
@@ -598,7 +619,7 @@ const FR: DirectCopy = {
     },
     {
       q: "Que se passe-t-il après les 10 jours ?",
-      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et c'est là qu'on vous oriente ensuite : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Programme séparé, 15 000 FCFA, et personne n'est inscrit automatiquement. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
+      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et la plupart des hommes y enchaînent : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Programme séparé, 15 000 FCFA, et personne n'est inscrit automatiquement. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
     },
   ],
 

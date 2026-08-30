@@ -62,7 +62,12 @@ export function Logo({
       <span className="text-jade">
         <LogoMark className={mark} />
       </span>
-      <span className={`${text} ${word} font-bold tracking-tight`}>Metron</span>
+      {/* Set as real capitals rather than CSS uppercase: a screen reader
+          announces "METRON" as a word either way, but a text-transform gets
+          lost the moment this lockup is copied into an email or a PDF, and the
+          wordmark on every piece of brand artwork is capitals. Letter-spacing
+          is opened up because caps set tight read as shouting. */}
+      <span className={`${text} ${word} font-bold tracking-[0.08em]`}>METRON</span>
     </span>
   );
 }
