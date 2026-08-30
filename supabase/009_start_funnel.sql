@@ -9,8 +9,17 @@
 -- and that black box is the entire page we keep rewriting.
 --
 -- Two new events close it:
---   gate_pass   the visitor cleared the age gate the ad points at
---   start_cta   he pressed a buy button, and WHICH one (detail = position)
+--   gate_pass    the visitor cleared the age gate the ad points at
+--   start_cta    he pressed a buy button, and WHICH one (detail = position)
+--   pay_attempt  he filled the form and pressed Pay
+--
+-- pay_attempt matters more than it looks. Without it the funnel reads "reached
+-- checkout" and then "paid", and the two failures hiding in that gap need
+-- opposite fixes: a man who never pressed Pay was stopped by the form or the
+-- price, a man who pressed it and did not pay was stopped by the rail — wrong
+-- PIN, no balance, or direct-pay still unapproved. Attempts minus payments is
+-- that second number, and it is the difference between rewriting a page and
+-- ringing Fapshi.
 --
 -- Position matters more than the total. Five buttons sit on that page — hero,
 -- urgency, offer, guarantee, final, sticky — and knowing that the urgency
@@ -40,6 +49,7 @@ select
   )                                                                     as page_views,
   count(distinct e.ref) filter (where e.name = 'start_cta')             as clicked,
   count(distinct e.ref) filter (where e.name = 'offer_view')            as saw_checkout,
+  count(distinct e.ref) filter (where e.name = 'pay_attempt')           as tried_to_pay,
   count(distinct p.ref)                                                 as paid,
   min(e.created_at)                                                     as first_seen,
   max(e.created_at)                                                     as last_seen
@@ -48,7 +58,7 @@ left join public.payments p
   on p.ref = e.ref and p.status = 'paid'
 group by coalesce(e.campaign, '(none)'), e.locale
 having count(distinct e.ref) filter (
-         where e.name in ('gate_view', 'start_cta')
+         where e.name in ('gate_view', 'start_cta', 'pay_attempt')
             or (e.name = 'quiz_start' and e.detail = 'direct')
        ) > 0
 order by page_views desc;

@@ -27,6 +27,7 @@ const ALLOWED = new Set([
   "gate_view",
   "gate_pass",
   "start_cta",
+  "pay_attempt",
 ]);
 
 export async function POST(req: Request) {

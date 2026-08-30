@@ -8,6 +8,7 @@ import type { Plan, Price } from "@/lib/payments";
 import { OperatorMarks } from "./OperatorMarks";
 import { LogoBuilding } from "./LogoBuilding";
 import { trackCheckoutStarted } from "./MetaPixel";
+import { track } from "@/lib/track";
 
 // The embed is browser-only and pulls an iframe — never render it on the server.
 const WhopCheckoutEmbed = dynamic(
@@ -301,6 +302,13 @@ function MomoPanel({
     // He has committed — this is the signal Meta optimises toward, and it is
     // worth far more than a page view.
     trackCheckoutStarted(plan);
+    /* Our own funnel, not just Meta's. Without this the admin sees "reached
+       checkout" and then "paid" with nothing between, and the two failures in
+       that gap need opposite fixes: a man who never pressed Pay was stopped by
+       the form or the price, a man who pressed it and did not pay was stopped
+       by the rail — a wrong PIN, no balance, or direct-pay still unapproved.
+       Attempts minus payments is that second number. */
+    track("pay_attempt", plan, locale);
     const ref = load(locale).ref;
 
     try {

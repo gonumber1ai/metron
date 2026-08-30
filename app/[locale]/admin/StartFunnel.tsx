@@ -8,6 +8,7 @@ export type StartRow = {
   page_views: number;
   clicked: number;
   saw_checkout: number;
+  tried_to_pay: number;
   paid: number;
 };
 
@@ -57,6 +58,7 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
   const pageViews = sum("page_views");
   const clicked = sum("clicked");
   const checkout = sum("saw_checkout");
+  const tried = sum("tried_to_pay");
   const paid = sum("paid");
 
   if (!rows.length && !cta.length) {
@@ -82,7 +84,8 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
   const steps = [
     { from: "the gate", a: gateViews, b: gatePassed },
     { from: "the sales page", a: pageViews, b: clicked },
-    { from: "the checkout", a: checkout, b: paid },
+    { from: "the checkout form", a: checkout, b: tried },
+    { from: "the payment itself", a: tried, b: paid },
   ].filter((s) => s.a > 0);
 
   const worst = steps.length
@@ -111,14 +114,15 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
         <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
           The whole road
         </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-7">
           {[
             ["Saw the gate", gateViews, null],
             ["Passed it", gatePassed, gateViews],
             ["Saw the page", pageViews, gatePassed || gateViews],
             ["Pressed buy", clicked, pageViews],
             ["Reached checkout", checkout, clicked],
-            ["Paid", paid, checkout],
+            ["Pressed Pay", tried, checkout],
+            ["Paid", paid, tried],
           ].map(([label, n, of]) => (
             <div
               key={label as string}
@@ -198,6 +202,7 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
                   <th className="pb-2 pr-4 font-bold">Page</th>
                   <th className="pb-2 pr-4 font-bold">Pressed</th>
                   <th className="pb-2 pr-4 font-bold">Checkout</th>
+                  <th className="pb-2 pr-4 font-bold">Tried</th>
                   <th className="pb-2 font-bold">Paid</th>
                 </tr>
               </thead>
@@ -215,6 +220,7 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
                     <td className="py-2.5 pr-4">{r.page_views}</td>
                     <td className="py-2.5 pr-4">{r.clicked}</td>
                     <td className="py-2.5 pr-4 text-mute">{r.saw_checkout}</td>
+                    <td className="py-2.5 pr-4 text-mute">{r.tried_to_pay}</td>
                     <td className="py-2.5 font-bold text-jade">{r.paid}</td>
                   </tr>
                 ))}
