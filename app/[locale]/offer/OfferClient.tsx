@@ -94,30 +94,19 @@ export function OfferClient({
   const prices = getPrices(country);
   const forPlan = prices.filter((p) => p.plan === plan);
   const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
+  /* Only ever a price this plan was genuinely listed at — see Price.was. */
+  const wasOf = (p: Plan) => prices.find((x) => x.plan === p)?.was ?? "";
 
-  /* The credit maths, shown rather than asserted: what is left of the Sprint
-     after today's payment. Formatted the way the price book formats, and only
-     when both plans quote the same currency — a man should never be shown
-     francs minus dollars. */
-  const remaining = (() => {
-    const test = prices.find((p) => p.plan === "test");
-    const sprint = prices.find((p) => p.plan === "sprint");
-    if (!test || !sprint || test.currency !== sprint.currency) return null;
-    const left = sprint.amountMinor - test.amountMinor;
-    if (left <= 0) return null;
-    if (sprint.currency === "XAF") {
-      return `${String(left).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} FCFA`;
-    }
-    return `$${(left / 100).toFixed(0)}`;
-  })();
-
+  /* No credit arithmetic any more. The 30-day is 15,000 flat — two products,
+     two prices, nothing to work out at the moment he is entering a PIN. The
+     remainder calculation that used to live here is gone rather than left
+     unused, because a dead sum is the kind of thing that gets re-wired into a
+     page a year later by someone who assumes it still means something. */
   const afterTen = t.checkout.afterTen
     .split("{sprint}")
     .join(priceOf("sprint"))
     .split("{test}")
-    .join(priceOf("test"))
-    .split("{rest}")
-    .join(remaining ?? "");
+    .join(priceOf("test"));
 
   const [sending, sendLead] = useAction(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,9 +164,20 @@ export function OfferClient({
           <h1 className="mt-3 text-[1.9rem] leading-[1.1] md:text-[2.3rem]">
             {plan === "test" ? t.checkout.h : planName}
           </h1>
-          <p className="metric mt-4 text-[2.8rem] font-bold leading-none text-jade md:text-[3.2rem]">
-            {priceOf(plan)}
-          </p>
+          <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-1">
+            <p className="metric text-[2.8rem] font-bold leading-none text-jade md:text-[3.2rem]">
+              {priceOf(plan)}
+            </p>
+            {/* The real former price, struck. Muted rather than red: a red
+                slash is the visual signature of every guru discount on the
+                internet, and this page is trying to be the serious option in
+                a category the buyer already suspects. */}
+            {wasOf(plan) && (
+              <p className="metric text-[1.3rem] font-bold leading-none text-faint line-through decoration-2">
+                {wasOf(plan)}
+              </p>
+            )}
+          </div>
           <p className="mt-4 text-[0.98rem] leading-relaxed text-mute">
             {t.checkout.sub}
           </p>
@@ -271,7 +271,7 @@ export function OfferClient({
               no button. It anchors the value of what he is paying today and
               answers "what is this leading to" without asking him to weigh a
               69,000 decision at the moment he is entering a PIN. */}
-          {plan === "test" && remaining && (
+          {plan === "test" && (
             <section className="mt-8 border-t border-ink-700 pt-6">
               <h2 className="text-[0.98rem] font-bold text-bone">
                 {t.checkout.afterTenH}

@@ -124,7 +124,7 @@ export const fr = {
       "On n'a jamais besoin de votre vrai nom. Votre relevé affiche METRON, et l'e-mail d'accès n'indique jamais de quoi il s'agit.",
     afterTenH: "Que se passe-t-il après les 10 jours ?",
     afterTen:
-      "Si le Reset marche pour vous, le Sprint Endurance de 30 jours est à {sprint}. Les {test} payés aujourd'hui sont déduits, il vous resterait donc {rest} pour continuer.",
+      "Si le Reset marche pour vous, le Sprint Endurance de 30 jours est à {sprint}. C'est un programme séparé avec son propre prix — rien ici ne vous y inscrit.",
     afterTenNote: "Vous n'avez pas à décider ça aujourd'hui.",
   },
 

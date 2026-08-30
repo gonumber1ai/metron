@@ -126,7 +126,7 @@ export const en = {
     afterTenH: "What happens after the 10 days?",
     /* {sprint}, {test} and {rest} are filled from the price book. */
     afterTen:
-      "If the Reset works for you, the 30-Day Stamina Sprint is {sprint}. The {test} you pay today is credited toward it, so you would pay {rest} to continue.",
+      "If the Reset works for you, the 30-Day Stamina Sprint is {sprint}. It is a separate programme with its own price — nothing here signs you up for it.",
     afterTenNote: "You do not need to decide that today.",
   },
 

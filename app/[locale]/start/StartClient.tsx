@@ -61,6 +61,8 @@ export function StartClient({
 
   const prices = getPrices(country);
   const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
+  /* Only ever a price this plan was genuinely listed at — see Price.was. */
+  const wasOf = (p: Plan) => prices.find((x) => x.plan === p)?.was ?? "";
   const c = withDirectPrices(getDirect(locale), {
     test: priceOf("test"),
     sprint: priceOf("sprint"),
@@ -464,10 +466,24 @@ export function StartClient({
                 {c.offerKicker}
               </p>
 
-              <div className="mt-5 flex flex-wrap items-end gap-x-8 gap-y-3">
+              <div className="mt-5 flex flex-wrap items-end gap-x-6 gap-y-3">
                 <p className="metric text-[3.6rem] font-bold leading-[0.9] text-jade md:text-[5rem]">
                   {priceOf("test")}
                 </p>
+                {/* The real former price, struck.
+                    Muted rather than red on purpose: a red slash is the visual
+                    signature of every guru discount on the internet, and this
+                    page is trying to be the serious option in a category the
+                    buyer already suspects. The anchor still lands; it just does
+                    not announce itself as a clearance bin. */}
+                {wasOf("test") && (
+                  <p className="metric pb-2 text-[1.6rem] font-bold leading-none text-faint">
+                    <span className="text-[0.72em] font-normal uppercase tracking-[0.14em]">
+                      {c.wasLabel}{" "}
+                    </span>
+                    <span className="line-through decoration-2">{wasOf("test")}</span>
+                  </p>
+                )}
                 <p className="pb-2 text-[12px] font-bold uppercase leading-relaxed tracking-[0.14em] text-faint">
                   {c.testLabel}
                   <br />
@@ -476,6 +492,13 @@ export function StartClient({
                   </span>
                 </p>
               </div>
+
+              {/* Why it fell. An unexplained drop reads as desperation, or as
+                  proof the old number was invented — both cost more than the
+                  discount wins. */}
+              <p className="mt-5 max-w-2xl border-l-2 border-ink-600 pl-4 text-[0.95rem] leading-relaxed text-mute">
+                {c.dropNote}
+              </p>
 
               <div className="mt-7 max-w-2xl border-t border-ink-700 pt-6">
                 {c.offerBody.map((p, i) => (

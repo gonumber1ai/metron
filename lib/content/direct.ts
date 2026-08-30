@@ -141,6 +141,12 @@ export type DirectCopy = {
   offerKicker: string;
   fullLabel: string;
   testLabel: string;
+  /* Why the price fell. An unexplained drop reads as either desperation or
+     as proof the old number was invented — both cost more than the discount
+     wins. The reason given is the true one and it is the same argument the
+     urgency block already makes. */
+  wasLabel: string;
+  dropNote: string;
   offerBody: string[];
   includes: string[];
   payTrust: string[];
@@ -314,13 +320,17 @@ const EN: DirectCopy = {
     },
   ],
 
+  wasLabel: "was",
+  dropNote:
+    "We lowered the price on 30 August. Every month spent finishing at the same number makes it harder to change, and what you can afford should not be the reason you wait another one.",
+
   offerKicker: "Try Metron for 10 days",
   fullLabel: "Full programme",
   testLabel: "10-day test",
   offerBody: [
     "The full programme costs {sprint}. You do not pay that today.",
     "You do not know yet whether this works on you, and we have not earned it. So you pay {test} to test it — less than a bag of herbs that lasts a month.",
-    "If it works, the {test} comes off the {sprint}. If it does not, you tell us and we send it back.",
+    "If it does not work, you tell us and we send it back. If it does, the 30-day programme is there when you want it.",
   ],
   includes: [
     "The 10-day programme",
@@ -368,7 +378,7 @@ const EN: DirectCopy = {
     },
     {
       q: "What happens after the 10 days?",
-      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and your {test} comes off the price. Nobody is enrolled automatically, and nothing charges you again.",
+      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and it is 15,000 FCFA, separate from this one. Nobody is enrolled automatically, and nothing charges you again.",
     },
   ],
 
@@ -516,13 +526,17 @@ const FR: DirectCopy = {
     },
   ],
 
+  wasLabel: "avant",
+  dropNote:
+    "Nous avons baissé le prix le 30 août. Chaque mois passé à finir au même chiffre rend le changement plus difficile, et ce que vous pouvez payer ne devrait pas être la raison d'attendre encore un mois.",
+
   offerKicker: "Essayez Metron pendant 10 jours",
   fullLabel: "Programme complet",
   testLabel: "Test de 10 jours",
   offerBody: [
     "Le programme complet coûte {sprint}. Vous ne payez pas ça aujourd'hui.",
     "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité. Alors vous payez {test} pour le tester — moins qu'un sachet de plantes qui dure un mois.",
-    "Si ça marche, les {test} sont déduits des {sprint}. Sinon, vous nous écrivez et on vous rembourse.",
+    "Si ça ne marche pas, vous nous écrivez et on vous rembourse. Si ça marche, le programme de 30 jours est là quand vous le voudrez.",
   ],
   includes: [
     "Le programme de 10 jours",
@@ -570,7 +584,7 @@ const FR: DirectCopy = {
     },
     {
       q: "Que se passe-t-il après les 10 jours ?",
-      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et vos {test} sont déduits du prix. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
+      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et il coûte 15 000 FCFA, séparément de celui-ci. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
     },
   ],
 

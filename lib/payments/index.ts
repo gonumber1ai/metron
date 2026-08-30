@@ -28,6 +28,14 @@ export type Price = {
   provider: ProviderId;
   /** what the buyer sees */
   display: string;
+  /**
+   * The price this plan was ACTUALLY listed at before, shown struck through.
+   *
+   * Only ever a real former price. An invented "was" is the oldest trick in
+   * this category and the one a sceptical buyer is scanning for — and the true
+   * numbers happen to be the stronger anchors anyway.
+   */
+  was?: string;
 };
 
 /**
@@ -58,14 +66,23 @@ export type Price = {
  * sits under the herb price, where trying it is a smaller decision than the
  * thing he already buys.
  *
- * 3,500 rather than 2,500: both are impulse money, the gap between them will
- * not change many minds, and the lower one gives up nearly a third of the
- * revenue and a bigger share of it again to transaction fees. Being UNDER the
- * 5,000 he already spends is the psychological win; being far under it is not
- * worth paying for.
+ * 2,500 is the owner's call over the 3,500 I argued for. His reasoning: at
+ * this stage buying men INTO the funnel is worth more than the margin on each
+ * one, because a trial buyer is the only pool the 15,000 can ever be sold to.
+ * That holds as long as the 30-day converts; if it does not, the whole ladder
+ * is a 2,500 business and the price has to be revisited.
+ *
+ * The 30-day is 15,000 FLAT. There is no credit for what he paid for the
+ * trial — two products, two prices, no arithmetic to explain at the moment he
+ * is deciding.
  */
-const TEST_XAF = 3500;
+const TEST_XAF = 2500;
 const SPRINT_XAF = 15000;
+
+/* What each plan was listed at until 30 August 2026. Both were live prices on
+   the public site, so both are honest to strike through. */
+const TEST_XAF_WAS = 7500;
+const SPRINT_XAF_WAS = 69000;
 /** minor units: $15.00 and $125.00 */
 const TEST_USD = 1500;
 const SPRINT_USD = 12500;
@@ -75,8 +92,8 @@ const FCFA = (n: number) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NB)}${
 
 export const priceBook: Record<string, Price[]> = {
   default: [
-    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF) },
-    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF) },
+    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF), was: FCFA(TEST_XAF_WAS) },
+    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF), was: FCFA(SPRINT_XAF_WAS) },
     { plan: "test", currency: "USD", amountMinor: TEST_USD, provider: "whop", display: "$15" },
     { plan: "sprint", currency: "USD", amountMinor: SPRINT_USD, provider: "whop", display: "$125" },
   ],
