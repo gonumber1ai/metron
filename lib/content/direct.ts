@@ -144,7 +144,21 @@ export type DirectCopy = {
   /* Why the price fell. An unexplained drop reads as either desperation or
      as proof the old number was invented — both cost more than the discount
      wins. The reason given is the true one and it is the same argument the
-     urgency block already makes. */
+     urgency block already makes.
+
+     ── NEVER DE-SELL AT THE BUTTON ────────────────────────────────────────
+     Honest is not the same as apologetic. This block used to open with "you
+     do not know yet whether this works on you, and we have not earned it",
+     which was written when the job was talking a man DOWN from a 69,000
+     programme to a 7,500 trial — there, the humility bought something. With
+     one cheap price it buys nothing and plants doubt at the exact second he
+     decides. Confidence carries the guarantee; the guarantee does not need
+     an apology in front of it.
+
+     And never compare the price to a competitor's product. "Less than a bag
+     of herbs that lasts a month" put a rival in his head at the buy moment
+     and invited the arithmetic we lose — theirs lasts a month, this is ten
+     days. The herb price is why we priced here; it is not copy. */
   wasLabel: string;
   dropNote: string;
   offerBody: string[];
@@ -329,8 +343,8 @@ const EN: DirectCopy = {
   testLabel: "10-day test",
   offerBody: [
     "The full programme costs {sprint}. You do not pay that today.",
-    "You do not know yet whether this works on you, and we have not earned it. So you pay {test} to test it — less than a bag of herbs that lasts a month.",
-    "If it does not work, you tell us and we send it back. If it does, the 30-day programme is there when you want it.",
+    "Ten days, fifteen minutes a day, and two numbers taken the same way. You do not have to believe anything we say — the second number settles it.",
+    "If you are not lasting longer, write to us and we send your money back. If you are, the 30-day programme is there when you want it.",
   ],
   includes: [
     "The 10-day programme",
@@ -535,8 +549,8 @@ const FR: DirectCopy = {
   testLabel: "Test de 10 jours",
   offerBody: [
     "Le programme complet coûte {sprint}. Vous ne payez pas ça aujourd'hui.",
-    "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité. Alors vous payez {test} pour le tester — moins qu'un sachet de plantes qui dure un mois.",
-    "Si ça ne marche pas, vous nous écrivez et on vous rembourse. Si ça marche, le programme de 30 jours est là quand vous le voudrez.",
+    "Dix jours, quinze minutes par jour, et deux chiffres pris de la même façon. Vous n'avez rien à croire sur parole — c'est le deuxième chiffre qui tranche.",
+    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Si vous tenez plus longtemps, le programme de 30 jours est là quand vous le voudrez.",
   ],
   includes: [
     "Le programme de 10 jours",
