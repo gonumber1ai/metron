@@ -265,12 +265,46 @@ export function StartClient({
             </p>
           </section>
 
+          {/* ── THE PUNCH ────────────────────────────────────────────────
+              Pain → urgency → CTA → explanation. This sits between the
+              recognition and the mechanism because that is the moment it
+              costs him something to keep reading: he has just agreed that
+              nothing has changed in years, and the next thing he learns is
+              that waiting makes it harder.
+
+              Deliberately bare — one headline, one line, one button. No
+              bullets, no icons, nothing underneath. It should hold roughly
+              one phone screen and then let him fall straight into "there is
+              a reason the same thing keeps happening". */}
+          <section className="mt-14 md:mt-20">
+            <div className="rounded-3xl border border-alert/40 bg-alert/[0.05] px-6 py-12 md:px-14 md:py-16">
+              <h2 className="max-w-3xl text-[2rem] leading-[1.08] md:text-[3.1rem]">
+                {c.urgencyBefore}
+                <span className="text-alert">{c.urgencyHighlight}</span>
+                {c.urgencyAfter}
+              </h2>
+
+              <p className="mt-7 max-w-2xl text-[1.05rem] leading-[1.7] text-bone md:text-[1.15rem]">
+                {c.urgencyBody}
+              </p>
+
+              <p className="mt-8 text-[1.4rem] font-bold leading-tight text-bone md:text-[1.8rem]">
+                {c.urgencyPunch}
+              </p>
+
+              <Go where="urgency" className="mt-9 w-full sm:w-auto sm:min-w-[19rem]" />
+              <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
+                {c.priceLine} · {c.ctaNote}
+              </p>
+            </div>
+          </section>
+
           {/* ── WHAT IS TRAINED ──────────────────────────────────────────
-              Sits directly under "you have never actually trained it",
+              Sits directly under the urgency block,
               because that line raises the question this answers: trained
-              how. Naming the techniques is a deliberate reversal of the
-              earlier rule that the method stays hidden until purchase —
-              the owner's call, made with a month of funnel data behind it. */}
+              how. It follows the urgency rather than interrupting it: he
+              hears what staying costs first, and is told what changes it
+              second. */}
           <section className="mt-14 md:mt-20">
             <div className="rounded-3xl card px-6 py-10 md:px-12 md:py-14">
               <h2 className="max-w-2xl text-[1.7rem] leading-[1.12] md:text-[2.2rem]">
@@ -303,40 +337,6 @@ export function StartClient({
                 {c.trainNote}
               </p>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">{c.trainMicro}</p>
-            </div>
-          </section>
-
-          {/* ── THE PUNCH ────────────────────────────────────────────────
-              Pain → urgency → CTA → explanation. This sits between the
-              recognition and the mechanism because that is the moment it
-              costs him something to keep reading: he has just agreed that
-              nothing has changed in years, and the next thing he learns is
-              that waiting makes it harder.
-
-              Deliberately bare — one headline, one line, one button. No
-              bullets, no icons, nothing underneath. It should hold roughly
-              one phone screen and then let him fall straight into "there is
-              a reason the same thing keeps happening". */}
-          <section className="mt-14 md:mt-20">
-            <div className="rounded-3xl border border-alert/40 bg-alert/[0.05] px-6 py-12 md:px-14 md:py-16">
-              <h2 className="max-w-3xl text-[2rem] leading-[1.08] md:text-[3.1rem]">
-                {c.urgencyBefore}
-                <span className="text-alert">{c.urgencyHighlight}</span>
-                {c.urgencyAfter}
-              </h2>
-
-              <p className="mt-7 max-w-2xl text-[1.05rem] leading-[1.7] text-bone md:text-[1.15rem]">
-                {c.urgencyBody}
-              </p>
-
-              <p className="mt-8 text-[1.4rem] font-bold leading-tight text-bone md:text-[1.8rem]">
-                {c.urgencyPunch}
-              </p>
-
-              <Go where="urgency" className="mt-9 w-full sm:w-auto sm:min-w-[19rem]" />
-              <p className="mt-3.5 text-[13px] leading-relaxed text-faint">
-                {c.priceLine} · {c.ctaNote}
-              </p>
             </div>
           </section>
 
