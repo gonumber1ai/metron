@@ -422,6 +422,31 @@ export function StartClient({
                     </figure>
                   ))}
                 </div>
+
+                {/* The originals. The transcribed quotes above are what he
+                    reads; these are what convince him we did not write them.
+                    Cropped to the conversation — the iOS keyboard was half the
+                    pixel weight and none of the proof. */}
+                {c.shots.length > 0 && (
+                  <div className="mt-10">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+                      {c.shotsH}
+                    </h3>
+                    <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                      {c.shots.map((s) => (
+                        <Image
+                          key={s.src}
+                          src={s.src}
+                          alt={s.alt}
+                          width={840}
+                          height={900}
+                          sizes="(min-width: 640px) 420px, 100vw"
+                          className="h-auto w-full rounded-2xl border border-ink-600"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>

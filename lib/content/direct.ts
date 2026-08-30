@@ -131,6 +131,11 @@ export type DirectCopy = {
   resultsNote: string;
   testimonialsH: string;
   testimonials: Testimonial[];
+  /* The original WhatsApp messages, cropped to the conversation. Rendered
+     under the transcribed quotes: the text is what a man reads, the shots are
+     what convinces him the text was not written by us. */
+  shotsH: string;
+  shots: { src: string; alt: string }[];
 
   /* offer */
   offerKicker: string;
@@ -294,6 +299,18 @@ const EN: DirectCopy = {
     {
       quote: "Sent my results in the app already. Can only say thank you guys.",
       who: "Metron customer · 10-Day Reset",
+    },
+  ],
+
+  shotsH: "The original messages",
+  shots: [
+    {
+      src: "/reviews/review-en-427.webp",
+      alt: "WhatsApp message: finished the 10 day program, measured 4:27 on day 12 against 1:23 on day one, and bought the 30 day plan.",
+    },
+    {
+      src: "/reviews/review-en-magic.webp",
+      alt: "WhatsApp message reading: under 3 minutes to over 7 minutes. Magic.",
     },
   ],
 
@@ -488,6 +505,14 @@ const FR: DirectCopy = {
       who: "Client Metron · Reset 10 jours puis Sprint 30 jours",
       before: "2:00",
       after: "9:00+",
+    },
+  ],
+
+  shotsH: "Les messages d'origine",
+  shots: [
+    {
+      src: "/reviews/review-fr-9min.webp",
+      alt: "Message WhatsApp : passé de 2 à 4 minutes avec le programme de 10 jours, puis plus de 9 minutes après celui de 30 jours.",
     },
   ],
 
