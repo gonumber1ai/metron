@@ -177,23 +177,21 @@ export function StartClient({
                 {c.sub}
               </p>
 
+              <p className="mt-4 max-w-xl text-[1.15rem] font-bold leading-[1.5] text-bone md:text-[1.3rem]">
+                {c.subPunch}
+              </p>
+
               {/* measure → train → measure again, stated plainly.
                   A grid rather than a wrapping row of chips: at the widths
                   between a phone and a laptop the row broke after the second
                   chip and left an arrow orphaned at the start of the next
                   line, pointing at nothing. */}
               <ol className="mt-7 grid max-w-xl gap-2 sm:grid-cols-3 sm:gap-2.5">
-                {c.flow.map((f, i) => (
+                {c.flow.map((f) => (
                   <li
                     key={f}
                     className="flex items-baseline gap-2.5 rounded-xl border border-jade-700 bg-jade-050 px-4 py-2.5"
                   >
-                    <span
-                      aria-hidden
-                      className="metric text-[12px] font-bold text-jade"
-                    >
-                      {i + 1}
-                    </span>
                     <span className="text-[13.5px] font-bold leading-snug text-bone">
                       {f}
                     </span>
@@ -305,6 +303,94 @@ export function StartClient({
             </div>
           </section>
 
+          {/* ── 9. PROOF ─────────────────────────────────────────────────
+              The page's only sourced claim. The kicker says whose numbers
+              these are and the methodology sits directly under them —
+              "1.5–3×" with no answer to "according to who" is worse than no
+              number at all. Read the note at the top of
+              lib/content/direct.ts before touching these. */}
+          <section className="mt-20 md:mt-28">
+            <H2>{c.resultsH}</H2>
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+              {c.resultsKicker}
+            </p>
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+              {c.results.map((r) => (
+                <div key={r.multiple} className="rounded-2xl card p-6 md:p-7">
+                  <p className="metric text-[3.2rem] font-bold leading-none text-jade md:text-[4rem]">
+                    {r.multiple}
+                  </p>
+                  <p className="mt-3 text-[0.98rem] leading-snug text-mute">{r.label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 max-w-2xl text-[0.92rem] leading-relaxed text-faint">
+              {c.resultsNote}
+            </p>
+
+            {/* Renders only when real testimonials exist. Empty is correct
+                until then — see the Testimonial type in direct.ts. */}
+            {c.testimonials.length > 0 && (
+              <div className="mt-12">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+                  {c.testimonialsH}
+                </h3>
+                <div className="mt-6 grid gap-5 md:grid-cols-3">
+                  {c.testimonials.map((t) => (
+                    <figure key={t.quote} className="rounded-2xl card p-6">
+                      {t.before && t.after && (
+                        <p className="metric mb-4 text-[1.25rem] font-bold text-jade">
+                          {t.before} → {t.after}
+                        </p>
+                      )}
+                      <blockquote className="text-[1rem] leading-[1.65] text-bone">
+                        {t.quote}
+                      </blockquote>
+                      <figcaption className="mt-4 text-[13px] font-bold text-faint">
+                        {t.who}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+
+                {/* The originals. The transcribed quotes above are what he
+                    reads; these are what convince him we did not write them.
+                    Cropped to the conversation — the iOS keyboard was half the
+                    pixel weight and none of the proof. */}
+                {c.shots.length > 0 && (
+                  <div className="mt-10">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+                      {c.shotsH}
+                    </h3>
+                    {/* Three columns now that every front carries all three
+                        messages. A screenshot written in the other language
+                        gets its translation underneath — the image proves a
+                        real man wrote it, the caption makes it readable. */}
+                    <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {c.shots.map((s) => (
+                        <figure key={s.src} className="m-0">
+                          <Image
+                            src={s.src}
+                            alt={s.alt}
+                            width={840}
+                            height={900}
+                            sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 100vw"
+                            className="h-auto w-full rounded-2xl border border-ink-600"
+                          />
+                          {s.caption && (
+                            <figcaption className="mt-2.5 text-[0.82rem] leading-relaxed text-faint">
+                              {s.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
           {/* ── 4. THE MECHANISM ─────────────────────────────────────────
               Removes the shame. A man who believes it is his character does
               not buy training. */}
@@ -399,92 +485,20 @@ export function StartClient({
             </p>
           </section>
 
-          {/* ── 9. PROOF ─────────────────────────────────────────────────
-              The page's only sourced claim. The kicker says whose numbers
-              these are and the methodology sits directly under them —
-              "1.5–3×" with no answer to "according to who" is worse than no
-              number at all. Read the note at the top of
-              lib/content/direct.ts before touching these. */}
+          {/* ── 11. GUARANTEE ────────────────────────────────────────────
+              Loud, because the mechanism makes it safe: he is not asked to
+              believe anything, only to take one measurement twice. */}
           <section className="mt-20 md:mt-28">
-            <H2>{c.resultsH}</H2>
-            <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
-              {c.resultsKicker}
-            </p>
-            <div className="mt-7 grid gap-6 sm:grid-cols-2">
-              {c.results.map((r) => (
-                <div key={r.multiple} className="rounded-2xl card p-6 md:p-7">
-                  <p className="metric text-[3.2rem] font-bold leading-none text-jade md:text-[4rem]">
-                    {r.multiple}
-                  </p>
-                  <p className="mt-3 text-[0.98rem] leading-snug text-mute">{r.label}</p>
-                </div>
-              ))}
+            <H2>{c.guaranteeH}</H2>
+            <div className="mt-8">
+              <MeasureFlow
+                numbered={false}
+                steps={c.guaranteeSteps.map((s) => ({ step: "", label: s, body: "" }))}
+              />
             </div>
-            <p className="mt-6 max-w-2xl text-[0.92rem] leading-relaxed text-faint">
-              {c.resultsNote}
+            <p className="mt-7 max-w-2xl rounded-2xl border-l-2 border-jade bg-jade-050 px-6 py-5 text-[1.1rem] font-bold leading-[1.65] text-bone">
+              {c.guarantee}
             </p>
-
-            {/* Renders only when real testimonials exist. Empty is correct
-                until then — see the Testimonial type in direct.ts. */}
-            {c.testimonials.length > 0 && (
-              <div className="mt-12">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
-                  {c.testimonialsH}
-                </h3>
-                <div className="mt-6 grid gap-5 md:grid-cols-3">
-                  {c.testimonials.map((t) => (
-                    <figure key={t.quote} className="rounded-2xl card p-6">
-                      {t.before && t.after && (
-                        <p className="metric mb-4 text-[1.25rem] font-bold text-jade">
-                          {t.before} → {t.after}
-                        </p>
-                      )}
-                      <blockquote className="text-[1rem] leading-[1.65] text-bone">
-                        {t.quote}
-                      </blockquote>
-                      <figcaption className="mt-4 text-[13px] font-bold text-faint">
-                        {t.who}
-                      </figcaption>
-                    </figure>
-                  ))}
-                </div>
-
-                {/* The originals. The transcribed quotes above are what he
-                    reads; these are what convince him we did not write them.
-                    Cropped to the conversation — the iOS keyboard was half the
-                    pixel weight and none of the proof. */}
-                {c.shots.length > 0 && (
-                  <div className="mt-10">
-                    <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
-                      {c.shotsH}
-                    </h3>
-                    {/* Three columns now that every front carries all three
-                        messages. A screenshot written in the other language
-                        gets its translation underneath — the image proves a
-                        real man wrote it, the caption makes it readable. */}
-                    <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                      {c.shots.map((s) => (
-                        <figure key={s.src} className="m-0">
-                          <Image
-                            src={s.src}
-                            alt={s.alt}
-                            width={840}
-                            height={900}
-                            sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 100vw"
-                            className="h-auto w-full rounded-2xl border border-ink-600"
-                          />
-                          {s.caption && (
-                            <figcaption className="mt-2.5 text-[0.82rem] leading-relaxed text-faint">
-                              {s.caption}
-                            </figcaption>
-                          )}
-                        </figure>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </section>
 
           {/* ── 10. THE OFFER ────────────────────────────────────────────
@@ -569,22 +583,6 @@ export function StartClient({
                 ))}
               </ul>
             </div>
-          </section>
-
-          {/* ── 11. GUARANTEE ────────────────────────────────────────────
-              Loud, because the mechanism makes it safe: he is not asked to
-              believe anything, only to take one measurement twice. */}
-          <section className="mt-20 md:mt-28">
-            <H2>{c.guaranteeH}</H2>
-            <div className="mt-8">
-              <MeasureFlow
-                numbered={false}
-                steps={c.guaranteeSteps.map((s) => ({ step: "", label: s, body: "" }))}
-              />
-            </div>
-            <p className="mt-7 max-w-2xl rounded-2xl border-l-2 border-jade bg-jade-050 px-6 py-5 text-[1.1rem] font-bold leading-[1.65] text-bone">
-              {c.guarantee}
-            </p>
           </section>
 
           {/* ── 12. FAQ ──────────────────────────────────────────────────

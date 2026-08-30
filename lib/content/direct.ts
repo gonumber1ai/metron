@@ -82,6 +82,7 @@ export type DirectCopy = {
   kicker: string;
   h: string;
   sub: string;
+  subPunch: string;
   flow: string[];
   priceLine: string;
   cta: string;
@@ -202,29 +203,34 @@ export type DirectCopy = {
 const EN: DirectCopy = {
   kicker: "Private · 10-day programme",
   h: "Last longer. Without pills, herbs or numbing products.",
-  sub: "A private 10-day training programme designed to help you last longer and build better control during sex — from your phone, at home.",
-  flow: ["Measure your starting point", "Train for 10 days", "Measure again"],
+  sub: "A private 10-day programme designed to help you build better control and last longer during sex.",
+  subPunch: "You don't have to believe us. Test yourself.",
+  flow: [
+    "DAY 1: Measure how long you last.",
+    "DAYS 2\u201311: Follow 7 guided 15-minute training sessions.",
+    "DAY 12: Measure again.",
+  ],
   priceLine: "{test} to start",
   /* The product's real name, the one the checkout and the app both use. The
      page used to say "10-day test" here and the checkout said "10-Day Reset",
      which reads as two different things at the exact moment he commits. */
   cta: "Start the 10-Day Reset",
   ctaNote: "If you are not lasting longer, we refund you.",
-  trust: ["Private by design", "Works on any phone", "Nothing to swallow", "One payment"],
+  trust: ["Private", "No pills", "No equipment", "One payment"],
 
   problemH: "You already know the problem.",
   problem: [
-    "It ends sooner than you wanted. Again.",
-    "You lie there working out how long that was. You wonder whether she was satisfied. You tell yourself next time will be different.",
+    "You came before you wanted. Again.",
+    "You begin wondering how long it was. You wonder if she was satisfied. You tell yourself next time you\u2019ll last longer.",
     "Then next time comes, and the same thing happens.",
   ],
-  problemPivot: "You have been managing this for years. You have never actually trained it.",
+  problemPivot: "You have been managing this for years. And it still hasn\u2019t improved.",
 
   urgencyBefore: "The longer you stay at ",
   urgencyHighlight: "2 or 3 minutes",
-  urgencyAfter: ", the harder it is to break that pattern.",
+  urgencyAfter: ", the harder it is to last longer than that.",
   urgencyBody:
-    "Every time you have sex and finish around the same time, you reinforce the same response.",
+    "Every time you have sex and finish around the same time, you reinforce that time \u2014 and you could go on for years inside that same timeframe.",
   urgencyPunch: "10 days can start changing that.",
 
   mechH: "There is a reason the same thing keeps happening.",
@@ -283,8 +289,8 @@ const EN: DirectCopy = {
 
   whoForH: "Who this is for",
   whoFor: [
-    "You usually finish sooner than you want to",
-    "You want real control, not something to hide behind",
+    "You last less than 7 minutes in bed",
+    "You want real control of your sex life",
     "You want to do it privately",
     "You do not want pills or products",
     "You can give it fifteen minutes a day",
@@ -299,7 +305,7 @@ const EN: DirectCopy = {
     { multiple: "2–5×", label: "how long they lasted on day 30, against day one" },
   ],
   resultsNote:
-    "These are from men who followed this programme before the app existed. Each timed himself the same way twice — day one, then again at the end — which is exactly the comparison you will make on yourself. Stated as a range because that is what the records support; an average would imply a precision nobody has.",
+    "These are from men who followed this programme. Each timed himself twice \u2014 day one, then again at the end. This is how we know it works. Stated as a range because that is what the records support; an average would imply a precision nobody has.",
 
   testimonialsH: "In their words",
   /* Real customers, sent to us on WhatsApp. Transcribed exactly, trimmed only
@@ -411,8 +417,8 @@ const EN: DirectCopy = {
     },
   ],
 
-  finalH: "Stop guessing. Start measuring.",
-  finalSub: "Measure yourself. Train for ten days. Measure again.",
+  finalH: "Break the 7 minute mark. Start today.",
+  finalSub: "Measure yourself. Train for ten days. Measure again. Your day 12 number settles it.",
   finalMicro: "Private. No pills. No equipment. One payment.",
 
   footerTag: "Private training for lasting longer and better control.",
@@ -435,6 +441,7 @@ const FR: DirectCopy = {
   kicker: "Privé · programme de 10 jours",
   h: "Tenez plus longtemps. Sans pilules, sans plantes, sans anesthésiants.",
   sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
+  subPunch: "Vous n’avez pas à nous croire. Testez-vous.",
   flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
   priceLine: "{test} pour commencer",
   cta: "Commencer le Reset de 10 jours",
