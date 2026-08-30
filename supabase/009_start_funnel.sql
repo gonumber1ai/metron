@@ -38,7 +38,14 @@
 -- them into one table produces a column that is null for half the rows and a
 -- screen nobody can read.
 -- ---------------------------------------------------------------------------
-create or replace view public.funnel_start as
+-- Dropped first, not replaced. `create or replace view` matches columns by
+-- POSITION, so adding tried_to_pay ahead of paid is read as renaming paid —
+-- Postgres refuses with 42P16. A view holds no data and nothing depends on
+-- this one, so dropping and rebuilding is free and makes the file re-runnable
+-- however many times its column list changes.
+drop view if exists public.funnel_start;
+
+create view public.funnel_start as
 select
   coalesce(e.campaign, '(none)')                                        as campaign,
   e.locale,
@@ -70,7 +77,9 @@ order by page_views desc;
 -- because a man who taps the sticky bar three times before paying is one
 -- decision, not three.
 -- ---------------------------------------------------------------------------
-create or replace view public.start_cta_breakdown as
+drop view if exists public.start_cta_breakdown;
+
+create view public.start_cta_breakdown as
 select
   coalesce(e.detail, '(unknown)')  as position,
   e.locale,
