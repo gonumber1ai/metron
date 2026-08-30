@@ -48,11 +48,6 @@ const LANGS: { code: string; name: string }[] = [
   { code: "fr", name: "French" },
 ];
 
-function pct(n: number, of: number): string {
-  if (!of) return "—";
-  return `${Math.round((n / of) * 100)}%`;
-}
-
 export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) {
   /* Tag names, shared with the Ads tab on purpose — same key, so a tag named
      on either screen is named on both. The tags in the URL stay meaningless
@@ -114,28 +109,38 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
         const tried = sum("tried_to_pay");
         const paid = sum("paid");
 
-        /* The step losing the most people, said in a sentence, per language.
-           The screen should answer "what do I fix" before showing a table. */
-        const steps = [
-          { at: "the gate", a: gateViews, b: gatePassed },
-          { at: "the sales page", a: pageViews, b: clicked },
-          { at: "the checkout form", a: checkout, b: tried },
-          { at: "the payment itself", a: tried, b: paid },
-        ].filter((s) => s.a > 0);
-
-        const worst = steps.length
-          ? steps.reduce((w, s) => (s.b / s.a < w.b / w.a ? s : w))
-          : null;
-
-        const road: [string, number, number | null][] = [
-          ["Saw the gate", gateViews, null],
-          ["Passed it", gatePassed, gateViews],
-          ["Saw the page", pageViews, gatePassed || gateViews],
-          ["Pressed buy", clicked, pageViews],
-          ["Reached checkout", checkout, clicked],
-          ["Pressed Pay", tried, checkout],
-          ["Paid", paid, tried],
+        /* The biggest fall between two consecutive counts.
+           Two rules keep this honest, and both came from it lying:
+             • a step is skipped when the one before it is empty, or when it
+               somehow holds MORE men than the step before — the road is not a
+               strict sequence, since traffic older than the gate enters at the
+               page, and dividing across that produced "300%".
+             • a step is skipped when nothing has ever been recorded at it but
+               men clearly got past it. pay_attempt shipped after these sales,
+               so the screen announced "0% carry on" directly above a payment
+               that had plainly happened. */
+        const road: [string, number][] = [
+          ["Saw the gate", gateViews],
+          ["Passed the gate", gatePassed],
+          ["Saw the page", pageViews],
+          ["Pressed buy", clicked],
+          ["Reached checkout", checkout],
+          ["Pressed Pay", tried],
+          ["Paid", paid],
         ];
+
+        let worst: { from: string; to: string; lost: number } | null = null;
+        for (let i = 1; i < road.length; i++) {
+          const [fromLabel, a] = road[i - 1];
+          const [toLabel, b] = road[i];
+          if (a <= 0 || b > a) continue;
+          const laterHasPeople = road.slice(i + 1).some(([, n]) => n > 0);
+          if (b === 0 && laterHasPeople) continue;
+          const lost = a - b;
+          if (lost > 0 && (!worst || lost > worst.lost)) {
+            worst = { from: fromLabel, to: toLabel, lost };
+          }
+        }
 
         return (
           <section key={code} className="space-y-4">
@@ -149,30 +154,41 @@ export function StartFunnel({ rows, cta }: { rows: StartRow[]; cta: CtaRow[] }) 
               </span>
             </div>
 
-            {worst && (
-              <p className="text-[1.05rem] font-bold leading-snug text-bone">
-                {worst.a - worst.b} of {worst.a} drop out at {worst.at}.{" "}
-                <span className="font-normal text-mute">
-                  {pct(worst.b, worst.a)} carry on — the widest hole in {name}.
-                </span>
-              </p>
-            )}
+            <p className="text-[1.05rem] leading-relaxed text-bone">
+              {worst ? (
+                <>
+                  Biggest loss:{" "}
+                  <span className="font-bold">
+                    {worst.lost} {worst.lost === 1 ? "man" : "men"}
+                  </span>{" "}
+                  <span className="text-mute">
+                    stopped between &ldquo;{worst.from}&rdquo; and &ldquo;
+                    {worst.to}&rdquo;.
+                  </span>
+                </>
+              ) : (
+                <span className="text-mute">Nobody has dropped out yet.</span>
+              )}
+            </p>
 
-            <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-7">
-              {road.map(([label, n, of]) => (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+              {road.map(([label, n], i) => (
                 <div
                   key={label}
-                  className="rounded-xl border border-ink-600 bg-ink-850 px-4 py-3.5"
+                  className={`rounded-xl border px-4 py-3.5 ${
+                    i === road.length - 1
+                      ? "border-jade-700 bg-jade-050"
+                      : "border-ink-600 bg-ink-850"
+                  }`}
                 >
-                  <p className="metric text-[1.7rem] font-bold leading-none text-bone">
+                  <p
+                    className={`metric text-[1.7rem] font-bold leading-none ${
+                      i === road.length - 1 ? "text-jade" : "text-bone"
+                    }`}
+                  >
                     {n}
                   </p>
                   <p className="mt-1.5 text-[0.8rem] leading-snug text-mute">{label}</p>
-                  {of ? (
-                    <p className="mt-1 text-[0.78rem] font-bold text-jade">
-                      {pct(n, of)}
-                    </p>
-                  ) : null}
                 </div>
               ))}
             </div>

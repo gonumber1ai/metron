@@ -54,9 +54,34 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("overview");
 
   const step = (name: string) => snap.funnel.find((f) => f.step === name)?.people ?? 0;
-  const paid = step("paid");
-  const started = step("quiz_start");
-  const finished = step("quiz_complete");
+
+  /* Customers come from the payments themselves, not from a funnel step.
+     The step counted quiz buyers only, so a sale made on the direct page put
+     money in the revenue tile and left "0 customers" beside it. */
+  const paid = snap.revenue.reduce((n, r) => n + r.count, 0);
+
+  const sumBy = <T,>(rows: T[], k: keyof T) =>
+    rows.reduce((n, r) => n + (Number(r[k]) || 0), 0);
+
+  /* One summary per road. Both are counted from their own view, which 011
+     keeps disjoint, so no man is in both. */
+  const quiz = {
+    arrived: sumBy(snap.campaigns, "started"),
+    middle: sumBy(snap.campaigns, "finished"),
+    middleLabel: "finished the quiz",
+    checkout: sumBy(snap.campaigns, "saw_offer"),
+    paid: sumBy(snap.campaigns, "paid"),
+  };
+  const direct = {
+    arrived: Math.max(
+      sumBy(snap.startRows, "gate_views"),
+      sumBy(snap.startRows, "page_views"),
+    ),
+    middle: sumBy(snap.startRows, "clicked"),
+    middleLabel: "pressed a buy button",
+    checkout: sumBy(snap.startRows, "saw_checkout"),
+    paid: sumBy(snap.startRows, "paid"),
+  };
 
   // From conversations, not from activity: activity only covers paid
   // customers, so an unanswered message from anybody else never raised the
@@ -119,14 +144,14 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
               tone="jade"
             />
             <Stat
-              label="Quizzes finished"
-              value={String(finished)}
-              sub={started ? `${pct(finished, started)} of ${started} started` : "none started"}
+              label="People reached"
+              value={String(quiz.arrived + direct.arrived)}
+              sub={`${direct.arrived} direct · ${quiz.arrived} quiz`}
             />
             <Stat
-              label="Conversion"
-              value={finished ? pct(paid, finished) : "—"}
-              sub="finished quiz → paid"
+              label="Bought"
+              value={paid ? pct(paid, quiz.arrived + direct.arrived) : "—"}
+              sub="of everyone who arrived"
             />
             <Stat
               label="Needs attention"
@@ -171,52 +196,40 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
           </nav>
 
           {/* ------------------------------------------------------- overview */}
+          {/* Both roads, side by side, in counts. No percentage of a previous
+              step: the steps are not a strict sequence — traffic that predates
+              the gate enters at the page — and dividing by the wrong
+              denominator produced "300%", which teaches a reader to distrust
+              the whole screen. */}
           {tab === "overview" && (
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
-              <Panel title="Funnel" note="How many people reached each step.">
-                <div className="space-y-1.5">
-                  {snap.funnel.map((f, i) => {
-                    const prev = i > 0 ? snap.funnel[i - 1].people : f.people;
-                    const top = snap.funnel[0]?.people ?? 0;
-                    const width = top ? Math.max((f.people / top) * 100, 1.5) : 1.5;
-                    const drop = i > 0 && prev > 0 && f.people / prev < 0.5;
-                    return (
-                      <div key={f.step}>
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-[0.9rem] text-bone">
-                            {STEP_LABEL[f.step] ?? f.step}
-                          </span>
-                          <span className="metric text-[0.9rem] font-bold text-bone">
-                            {f.people}
-                            {i > 0 && (
-                              <span
-                                className={`ml-2 text-[12px] font-normal ${
-                                  drop ? "text-alert" : "text-faint"
-                                }`}
-                              >
-                                {pct(f.people, prev)}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                        <div className="mt-1.5 mb-2.5 h-1.5 w-full rounded-full bg-ink-700">
-                          <div
-                            className="h-full rounded-full bg-jade"
-                            style={{ width: `${width}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {snap.funnel.length === 0 && <Empty>No activity yet.</Empty>}
-                </div>
-              </Panel>
+              <FunnelCard
+                title="Direct funnel"
+                note="Ad → wellness page → sales page → checkout"
+                f={direct}
+              />
+              <FunnelCard
+                title="Quiz funnel"
+                note="Ad → quiz → result → checkout"
+                f={quiz}
+              />
+            </div>
+          )}
 
+          {/* ------------------------------------------------------ customers */}
+          {tab === "customers" && (
+            <Customers rows={snap.activity} conversations={snap.conversations} />
+          )}
+
+          {/* ---------------------------------------------------------- ads */}
+          {tab === "ads" && (
+            <div className="mt-6 space-y-6">
+              <Ads rows={snap.campaigns} />
               <Panel
-                title="Quiz drop-off"
+                title="Where the quiz loses them"
                 note={
                   worstQuestion
-                    ? `Question ${worstQuestion.reached_question} loses the most — ${Math.round(
+                    ? `Question ${worstQuestion.reached_question} is the worst — ${Math.round(
                         (worstQuestion.quit_here / worstQuestion.reached) * 100,
                       )}% of the men who reach it stop there.`
                     : "Which question people quit on."
@@ -239,11 +252,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                           <td className="metric py-2 pr-3 font-bold">Q{d.reached_question}</td>
                           <td className="metric py-2 pr-3 text-mute">{d.reached}</td>
                           <td className="metric py-2 pr-3 text-mute">{d.quit_here}</td>
-                          <td
-                            className={`metric py-2 font-bold ${
-                              bad ? "text-alert" : "text-mute"
-                            }`}
-                          >
+                          <td className={`metric py-2 font-bold ${bad ? "text-alert" : "text-mute"}`}>
                             {pct(d.quit_here, d.reached)}
                           </td>
                         </tr>
@@ -261,14 +270,6 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
               </Panel>
             </div>
           )}
-
-          {/* ------------------------------------------------------ customers */}
-          {tab === "customers" && (
-            <Customers rows={snap.activity} conversations={snap.conversations} />
-          )}
-
-          {/* ---------------------------------------------------------- ads */}
-          {tab === "ads" && <Ads rows={snap.campaigns} />}
 
           {tab === "start" && (
             <StartFunnel rows={snap.startRows} cta={snap.ctaRows} />
@@ -340,6 +341,98 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
 }
 
 /* ------------------------------------------------------------------ */
+
+/**
+ * One road, in four counts and one sentence.
+ *
+ * Written for someone who does not read dashboards. Four numbers, each with a
+ * plain label, and underneath them the single fact worth acting on: the step
+ * that lost the most men. No ratios between steps — the steps are not a strict
+ * sequence and the wrong denominator was printing 300%.
+ */
+function FunnelCard({
+  title,
+  note,
+  f,
+}: {
+  title: string;
+  note: string;
+  f: {
+    arrived: number;
+    middle: number;
+    middleLabel: string;
+    checkout: number;
+    paid: number;
+  };
+}) {
+  const rows: [string, number][] = [
+    ["Arrived", f.arrived],
+    [f.middleLabel.charAt(0).toUpperCase() + f.middleLabel.slice(1), f.middle],
+    ["Reached checkout", f.checkout],
+    ["Paid", f.paid],
+  ];
+
+  /* The biggest fall between two consecutive counts. A step is only judged
+     when the one before it actually has people in it, so a stage nobody has
+     reached yet cannot be reported as the problem. */
+  let worst: { from: string; to: string; lost: number } | null = null;
+  for (let i = 1; i < rows.length; i++) {
+    const [fromLabel, a] = rows[i - 1];
+    const [toLabel, b] = rows[i];
+    if (a <= 0 || b > a) continue;
+    const lost = a - b;
+    if (lost > 0 && (!worst || lost > worst.lost)) {
+      worst = { from: fromLabel, to: toLabel, lost };
+    }
+  }
+
+  return (
+    <div className="rounded-2xl card p-6">
+      <h2 className="text-[1.1rem] font-bold text-bone">{title}</h2>
+      <p className="mt-1 text-[0.85rem] text-faint">{note}</p>
+
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {rows.map(([label, n], i) => (
+          <div
+            key={label}
+            className={`rounded-xl border px-4 py-3.5 ${
+              i === rows.length - 1
+                ? "border-jade-700 bg-jade-050"
+                : "border-ink-600 bg-ink-850"
+            }`}
+          >
+            <p
+              className={`metric text-[1.8rem] font-bold leading-none ${
+                i === rows.length - 1 ? "text-jade" : "text-bone"
+              }`}
+            >
+              {n}
+            </p>
+            <p className="mt-1.5 text-[0.78rem] leading-snug text-mute">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-5 border-t border-ink-700 pt-4 text-[0.95rem] leading-relaxed text-bone">
+        {f.arrived === 0 ? (
+          <span className="text-mute">Nobody has come down this road yet.</span>
+        ) : worst ? (
+          <>
+            Biggest loss:{" "}
+            <span className="font-bold">
+              {worst.lost} {worst.lost === 1 ? "man" : "men"}
+            </span>{" "}
+            <span className="text-mute">
+              stopped between &ldquo;{worst.from}&rdquo; and &ldquo;{worst.to}&rdquo;.
+            </span>
+          </>
+        ) : (
+          <span className="text-mute">Nobody has dropped out yet.</span>
+        )}
+      </p>
+    </div>
+  );
+}
 
 function Stat({
   label,
