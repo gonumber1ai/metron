@@ -117,8 +117,20 @@ export function StartClient({
     </span>
   );
 
-  const H2 = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem]">
+  const H2 = ({
+    children,
+    tone,
+  }: {
+    children: React.ReactNode;
+    /** "alarm" paints the heading red — for the blocks that state the problem
+        and what waiting costs, and nowhere else. */
+    tone?: "alarm";
+  }) => (
+    <h2
+      className={`max-w-2xl text-[1.9rem] leading-[1.12] md:text-[2.6rem] ${
+        tone === "alarm" ? "text-alert" : ""
+      }`}
+    >
       {children}
     </h2>
   );
@@ -230,12 +242,14 @@ export function StartClient({
           {/* ── 3. THE PROBLEM ───────────────────────────────────────────
               Short on purpose. Recognition, then move on. */}
           <section className="mt-20 md:mt-28">
-            <H2>{c.problemH}</H2>
+            <H2 tone="alarm">{c.problemH}</H2>
             <div className="mt-7 max-w-2xl border-l-2 border-alert pl-5 md:pl-7">
               {c.problem.map((p, i) => (
                 <p
                   key={i}
-                  className={`text-[1.1rem] leading-[1.7] text-mute ${i ? "mt-3.5" : ""}`}
+                  className={`text-[1.1rem] leading-[1.7] ${
+                    i === 0 ? "font-bold text-bone" : "text-mute"
+                  } ${i ? "mt-3.5" : ""}`}
                 >
                   {p}
                 </p>
@@ -252,7 +266,7 @@ export function StartClient({
               placeholder="blur"
             />
 
-            <p className="mt-9 max-w-2xl text-[1.35rem] font-bold leading-[1.4] text-bone md:text-[1.6rem]">
+            <p className="mt-9 max-w-2xl text-[1.35rem] font-bold leading-[1.4] text-alert md:text-[1.6rem]">
               {c.problemPivot}
             </p>
           </section>
@@ -269,14 +283,14 @@ export function StartClient({
               one phone screen and then let him fall straight into "there is
               a reason the same thing keeps happening". */}
           <section className="mt-14 md:mt-20">
-            <div className="rounded-3xl border border-ink-600 bg-ink-850 px-6 py-12 md:px-14 md:py-16">
+            <div className="rounded-3xl border border-alert/40 bg-alert/[0.05] px-6 py-12 md:px-14 md:py-16">
               <h2 className="max-w-3xl text-[2rem] leading-[1.08] md:text-[3.1rem]">
                 {c.urgencyBefore}
                 <span className="text-alert">{c.urgencyHighlight}</span>
                 {c.urgencyAfter}
               </h2>
 
-              <p className="mt-7 max-w-2xl text-[1.05rem] leading-[1.7] text-mute md:text-[1.15rem]">
+              <p className="mt-7 max-w-2xl text-[1.05rem] leading-[1.7] text-bone md:text-[1.15rem]">
                 {c.urgencyBody}
               </p>
 
