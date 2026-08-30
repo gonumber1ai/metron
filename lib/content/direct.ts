@@ -454,21 +454,25 @@ const EN: DirectCopy = {
 const FR: DirectCopy = {
   kicker: "Privé · programme de 10 jours",
   h: "Tenez plus longtemps. Sans pilules, sans plantes, sans anesthésiants.",
-  sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
-  flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
+  sub: "Un programme privé de 10 jours conçu pour vous aider à tenir plus longtemps au lit et à mieux vous contrôler pendant les rapports.",
+  flow: [
+    "Mesurez combien de temps vous tenez au jour 1",
+    "Suivez le programme de 10 jours",
+    "Mesurez à nouveau et voyez par vous-même",
+  ],
   priceLine: "{test} pour commencer",
   cta: "Commencer le Reset de 10 jours",
   ctaNote: "Si vous ne tenez pas plus longtemps, on vous rembourse.",
-  trust: ["Privé par conception", "Sur tout téléphone", "Rien à avaler", "Un seul paiement"],
+  trust: ["Privé par conception", "Tenez plus longtemps", "Rien à avaler", "Un seul paiement"],
 
   problemH: "Vous connaissez déjà le problème.",
   problem: [
-    "Ça se termine plus tôt que vous ne le vouliez. Encore.",
-    "Vous restez allongé à calculer combien de temps ça a duré. Vous vous demandez si elle est satisfaite. Vous vous dites que la prochaine fois sera différente.",
+    "Vous avez joui avant de le vouloir. Encore.",
+    "Vous commencez à vous demander combien de temps ça a duré. Vous vous demandez si elle est satisfaite. Vous vous dites que la prochaine fois vous tiendrez plus longtemps.",
     "Puis la prochaine fois arrive, et la même chose se produit.",
   ],
   problemPivot:
-    "Vous gérez ça depuis des années. Vous ne l'avez jamais vraiment entraîné.",
+    "Vous gérez ça depuis des années. Et ça ne s'est toujours pas amélioré.",
   trainH: "Entraînez ce qui contrôle le moment où vous finissez.",
   trainSub: "En 10 jours, Metron vous guide à travers :",
   train: [
@@ -483,9 +487,9 @@ const FR: DirectCopy = {
 
   urgencyBefore: "Plus vous restez à ",
   urgencyHighlight: "2 ou 3 minutes",
-  urgencyAfter: ", plus ce schéma devient difficile à casser.",
+  urgencyAfter: ", plus il est difficile de tenir plus longtemps que ça.",
   urgencyBody:
-    "Chaque fois que vous faites l'amour et que vous finissez au même moment, vous renforcez la même réponse.",
+    "Chaque fois que vous faites l'amour et que vous finissez au même moment, vous renforcez ce temps — et vous pourriez rester des années dans ce même intervalle.",
   urgencyPunch: "10 jours peuvent commencer à changer ça.",
 
   mechH: "Il y a une raison pour laquelle la même chose se répète.",
@@ -545,8 +549,8 @@ const FR: DirectCopy = {
 
   whoForH: "Pour qui c'est fait",
   whoFor: [
-    "Vous finissez généralement plus tôt que vous ne le voudriez",
-    "Vous voulez un vrai contrôle, pas quelque chose derrière quoi vous cacher",
+    "Vous tenez moins de 7 minutes au lit",
+    "Vous voulez un vrai contrôle de votre vie sexuelle",
     "Vous voulez le faire en privé",
     "Vous ne voulez ni pilules ni produits",
     "Vous pouvez y consacrer quinze minutes par jour",
@@ -561,7 +565,7 @@ const FR: DirectCopy = {
     { multiple: "2 à 5×", label: "combien de temps ils ont tenu au jour 30, comparé au jour 1" },
   ],
   resultsNote:
-    "Ces chiffres viennent d'hommes ayant suivi ce programme avant l'existence de l'application. Chacun s'est chronométré deux fois de la même façon — le premier jour, puis à la fin — exactement la comparaison que vous ferez sur vous-même. Donné en fourchette parce que c'est ce que les relevés permettent d'affirmer ; une moyenne laisserait croire à une précision que personne n'a.",
+    "Ces chiffres viennent d'hommes ayant suivi ce programme. Chacun s'est chronométré deux fois — le premier jour, puis à la fin. C'est comme ça qu'on sait que ça marche. Donné en fourchette parce que c'est ce que les relevés permettent d'affirmer ; une moyenne laisserait croire à une précision que personne n'a.",
 
   testimonialsH: "Dans leurs mots",
   /* Clients réels, messages WhatsApp. Transcrits tels quels, coupés seulement
@@ -666,8 +670,8 @@ const FR: DirectCopy = {
     },
   ],
 
-  finalH: "Ne devinez plus. Mesurez.",
-  finalSub: "Mesurez-vous. Entraînez-vous dix jours. Mesurez à nouveau.",
+  finalH: "Passez la barre des 7 minutes. Commencez aujourd'hui.",
+  finalSub: "Mesurez-vous. Entraînez-vous dix jours. Mesurez à nouveau. Votre chiffre du jour 12 tranche.",
   finalMicro: "Privé. Sans pilules. Sans matériel. Un seul paiement.",
 
   footerTag: "Entraînement privé pour tenir plus longtemps et mieux se contrôler.",
