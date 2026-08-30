@@ -232,7 +232,7 @@ const EN: DirectCopy = {
   trainSub: "Over 10 days, Metron guides you through:",
   train: [
     { label: "Arousal control", body: "learn when you’re getting close and when to slow down." },
-    { label: "Start-stop training", body: "practise building arousal, backing off and regaining control." },
+    { label: "Control training", body: "a simple exercise that builds arousal, backs it off, and puts the timing back under your control." },
     { label: "Pelvic-floor training", body: "guided contractions and relaxation exercises for better control." },
     { label: "Squeeze technique", body: "learn when and how to use it as you get close." },
     { label: "Sleep & nutrition", body: "simple habits that support better sexual performance." },
@@ -473,7 +473,7 @@ const FR: DirectCopy = {
   trainSub: "En 10 jours, Metron vous guide à travers :",
   train: [
     { label: "Contrôle de l’excitation", body: "apprenez à sentir quand vous approchez et quand ralentir." },
-    { label: "Entraînement start-stop", body: "montez l’excitation, redescendez, reprenez le contrôle." },
+    { label: "Entraînement au contrôle", body: "un exercice simple qui fait monter l’excitation, la fait redescendre, et vous rend le contrôle du moment." },
     { label: "Plancher pelvien", body: "contractions et relâchements guidés pour un meilleur contrôle." },
     { label: "Technique du squeeze", body: "apprenez quand et comment l’utiliser quand vous approchez." },
     { label: "Sommeil et alimentation", body: "des habitudes simples qui soutiennent la performance sexuelle." },
