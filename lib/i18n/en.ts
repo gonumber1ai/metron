@@ -126,7 +126,7 @@ export const en = {
     afterTenH: "What happens after the 10 days?",
     /* {sprint}, {test} and {rest} are filled from the price book. */
     afterTen:
-      "If the Reset works for you, the 30-Day Stamina Sprint is {sprint}. It is a separate programme with its own price — nothing here signs you up for it.",
+      "The Reset gets you moving. The 30-Day Stamina Sprint ({sprint}) is what we point you to afterwards — it holds the time you gained and moves it into real sex, with a partner. Separate programme, separate price, and nothing here signs you up for it.",
     afterTenNote: "You do not need to decide that today.",
   },
 

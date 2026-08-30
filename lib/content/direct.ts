@@ -344,7 +344,7 @@ const EN: DirectCopy = {
   offerBody: [
     "The full programme costs {sprint}. You do not pay that today.",
     "Ten days, fifteen minutes a day, and two numbers taken the same way. You do not have to believe anything we say — the second number settles it.",
-    "If you are not lasting longer, write to us and we send your money back. If you are, the 30-day programme is there when you want it.",
+    "If you are not lasting longer, write to us and we send your money back. If you are, the 30-day programme is what we point you to next — it holds the time you gained and moves it out of your own hands into real sex, with a partner. Not a decision for today.",
   ],
   includes: [
     "The 10-day programme",
@@ -392,7 +392,7 @@ const EN: DirectCopy = {
     },
     {
       q: "What happens after the 10 days?",
-      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and it is 15,000 FCFA, separate from this one. Nobody is enrolled automatically, and nothing charges you again.",
+      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and it is what we point you to next — it holds the time you gained and moves it into real sex, with a partner. Separate programme, 15,000 FCFA, and nothing enrols you automatically. Nobody is enrolled automatically, and nothing charges you again.",
     },
   ],
 
@@ -550,7 +550,7 @@ const FR: DirectCopy = {
   offerBody: [
     "Le programme complet coûte {sprint}. Vous ne payez pas ça aujourd'hui.",
     "Dix jours, quinze minutes par jour, et deux chiffres pris de la même façon. Vous n'avez rien à croire sur parole — c'est le deuxième chiffre qui tranche.",
-    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Si vous tenez plus longtemps, le programme de 30 jours est là quand vous le voudrez.",
+    "Si vous ne tenez pas plus longtemps, écrivez-nous et on vous rembourse. Si vous tenez plus longtemps, on vous oriente vers le programme de 30 jours : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Ça ne se décide pas aujourd'hui.",
   ],
   includes: [
     "Le programme de 10 jours",
@@ -598,7 +598,7 @@ const FR: DirectCopy = {
     },
     {
       q: "Que se passe-t-il après les 10 jours ?",
-      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et il coûte 15 000 FCFA, séparément de celui-ci. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
+      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et c'est là qu'on vous oriente ensuite : il consolide le temps gagné et le transpose dans un vrai rapport, avec une partenaire. Programme séparé, 15 000 FCFA, et personne n'est inscrit automatiquement. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
     },
   ],
 
