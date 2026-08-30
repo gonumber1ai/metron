@@ -94,14 +94,16 @@ export const en = {
      confirmation, and a way through. Everything here is true and everything
      here is shown to every visitor. */
   gate: {
-    kicker: "Men's wellness · private programme",
-    h: "A 10-day programme for men.",
-    sub: "Metron is a private, app-based programme built on one idea: measure where you are now, follow your programme as directed in the application for ten days, then measure again. Nothing to swallow, nothing to buy, nobody to meet.",
-    ageH: "Confirm before you continue",
-    age: "This programme is intended for adults and covers adult subject matter.",
-    cta: "I am 18 or over — continue",
+    kicker: "Metron",
+    h: "A 10-Day Programme to Improve Your Duration",
+    sub: "Private. No appointments. No herbs. No pills.",
+    cta: "Start My 10-Day Programme",
+    haveAccount: "Already have an account?",
+    login: "Log in",
+    ageH: "18+ Programme",
+    age: "Metron is intended for adults aged 18 and over and contains adult wellness content.",
     leave: "Not for me",
-    note: "Metron is education and training. It does not diagnose or treat any medical condition. If symptoms started suddenly, involve pain, or began after starting a medication, speak to a doctor.",
+    note: "Metron provides educational and training content. It does not diagnose or treat medical conditions. If symptoms started suddenly, involve pain, or began after starting medication, speak with a healthcare professional.",
   },
 
   /* The checkout. Not a sales page — the previous page already sold him.

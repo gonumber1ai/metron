@@ -91,14 +91,16 @@ export const fr = {
   },
 
   gate: {
-    kicker: "Bien-être masculin · programme privé",
-    h: "Un programme de 10 jours pour hommes.",
-    sub: "Metron est un programme privé, sur application, construit sur une idée : mesurez où vous en êtes, suivez votre programme comme indiqué dans l'application pendant dix jours, puis mesurez à nouveau. Rien à avaler, rien à acheter, personne à rencontrer.",
-    ageH: "À confirmer avant de continuer",
-    age: "Ce programme s'adresse à un public adulte et traite d'un sujet réservé aux adultes.",
-    cta: "J'ai 18 ans ou plus — continuer",
+    kicker: "Metron",
+    h: "Un programme de 10 jours pour améliorer votre durée",
+    sub: "Privé. Sans rendez-vous. Sans plantes. Sans pilules.",
+    cta: "Commencer mon programme de 10 jours",
+    haveAccount: "Vous avez déjà un compte ?",
+    login: "Se connecter",
+    ageH: "Programme 18+",
+    age: "Metron s'adresse aux adultes de 18 ans et plus et contient du contenu de bien-être pour adultes.",
     leave: "Ce n'est pas pour moi",
-    note: "Metron, c'est de l'éducation et de l'entraînement. Cela ne diagnostique ni ne traite aucune condition médicale. Si les symptômes sont apparus soudainement, s'accompagnent de douleurs ou ont commencé après la prise d'un médicament, parlez-en à un médecin.",
+    note: "Metron propose du contenu éducatif et d'entraînement. Cela ne diagnostique ni ne traite aucune condition médicale. Si les symptômes sont apparus soudainement, s'accompagnent de douleurs ou ont commencé après la prise d'un médicament, parlez-en à un professionnel de santé.",
   },
 
   checkout: {

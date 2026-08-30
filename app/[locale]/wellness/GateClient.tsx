@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getDict } from "@/lib/i18n";
 import { track } from "@/lib/track";
@@ -77,44 +78,56 @@ export function GateClient({ locale }: { locale: string }) {
         </header>
 
         <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12 md:py-16">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-jade">
             {t.gate.kicker}
           </p>
 
           <h1 className="mt-4 text-[2rem] leading-[1.1] md:text-[2.5rem]">{t.gate.h}</h1>
 
-          <p className="mt-5 text-[1.05rem] leading-[1.7] text-mute">{t.gate.sub}</p>
+          <p className="mt-5 text-[1.15rem] font-semibold leading-[1.6] text-mute">
+            {t.gate.sub}
+          </p>
 
-          {/* The three tick bullets that used to sit here said, in order, what
-              the sentence above already says: private, ten days, you measure
-              it. This page is a door, not a pitch — the selling happens one
-              click later, and a door that argues is a door people close. */}
+          {/* The button, before the 18+ box rather than inside it.
+              It used to sit at the bottom of a bordered confirmation panel, so
+              the first thing a man met was a legal notice and the way forward
+              was underneath it. Eighteen of twenty-three stopped here. The
+              door goes first; the notice it carries goes after. */}
+          <button
+            type="button"
+            onClick={go}
+            className="mt-9 flex w-full items-center justify-center rounded-full btn-go px-6 py-[18px] text-[16px] font-bold"
+          >
+            {t.gate.cta}
+          </button>
 
-          <section className="mt-9 rounded-2xl border border-ink-600 bg-ink-850 px-6 py-6">
+          <p className="mt-5 text-center text-[13.5px] text-faint">
+            {t.gate.haveAccount}{" "}
+            <Link
+              href={`/${locale}/login`}
+              className="font-bold text-jade underline-offset-2 hover:underline"
+            >
+              {t.gate.login}
+            </Link>
+          </p>
+
+          <section className="mt-10 border-t border-ink-700 pt-7">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
               {t.gate.ageH}
             </h2>
-            <p className="mt-3 text-[1rem] leading-relaxed text-bone">{t.gate.age}</p>
+            <p className="mt-2.5 text-[0.95rem] leading-relaxed text-mute">{t.gate.age}</p>
 
-            <button
-              type="button"
-              onClick={go}
-              className="mt-6 flex w-full items-center justify-center rounded-full btn-go px-6 py-4 text-[16px] font-bold"
-            >
-              {t.gate.cta}
-            </button>
+            <p className="mt-4 text-[12px] leading-relaxed text-faint">{t.gate.note}</p>
 
             {/* A real way out. A gate with only one door is a formality, and a
                 formality is not a safeguard. */}
             <a
               href="https://www.google.com"
-              className="mt-4 block text-center text-[13px] text-faint underline-offset-2 hover:text-mute hover:underline"
+              className="mt-5 inline-block text-[13px] text-faint underline-offset-2 hover:text-mute hover:underline"
             >
               {t.gate.leave}
             </a>
           </section>
-
-          <p className="mt-8 text-[12px] leading-relaxed text-faint">{t.gate.note}</p>
         </main>
       </div>
     </>

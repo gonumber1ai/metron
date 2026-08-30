@@ -328,6 +328,12 @@ const EN: DirectCopy = {
   shotsH: "The original messages",
   shots: [
     {
+      src: "/reviews/review-fr-partner.webp",
+      alt: "WhatsApp message in French: his partner asking what he took yesterday and when they can see each other again, forwarded with his own note about the 10 days.",
+      caption:
+        "In French. He forwarded what his partner had sent him \u2014 \u201cBb what did you take yesterday\u201d and \u201cwhen are we seeing each other again\u201d \u2014 then wrote: \u201c10 days\u2026 I don\u2019t even know where you got this training programme from, but it\u2019s magic.\u201d",
+    },
+    {
       src: "/reviews/review-en-427.webp",
       alt: "WhatsApp message: finished the 10 day program, measured 4:27 on day 12 against 1:23 on day one, and bought the 30 day plan.",
     },
@@ -543,6 +549,12 @@ const FR: DirectCopy = {
 
   shotsH: "Les messages d'origine",
   shots: [
+    {
+      src: "/reviews/review-fr-partner.webp",
+      alt: "Message WhatsApp : sa partenaire demande ce qu\u2019il a pris la veille et quand ils se revoient, transf\u00e9r\u00e9 avec son propre message sur les 10 jours.",
+      caption:
+        "Il a transf\u00e9r\u00e9 ce que sa partenaire lui avait \u00e9crit, puis a ajout\u00e9 : \u00ab 10 jours\u2026 Je ne sais m\u00eame pas d\u2019o\u00f9 vous avez sorti ce programme d\u2019entra\u00eenement, mais c\u2019est la magie. \u00bb",
+    },
     {
       src: "/reviews/review-fr-9min.webp",
       alt: "Message WhatsApp : passé de 2 à 4 minutes avec le programme de 10 jours, puis plus de 9 minutes après celui de 30 jours.",
