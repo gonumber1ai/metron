@@ -181,7 +181,7 @@ const EN: DirectCopy = {
   h: "Last longer. Without pills, herbs or numbing products.",
   sub: "A private 10-day training programme designed to help you last longer and build better control during sex — from your phone, at home.",
   flow: ["Measure your starting point", "Train for 10 days", "Measure again"],
-  priceLine: "7,500 FCFA to start",
+  priceLine: "{test} to start",
   /* The product's real name, the one the checkout and the app both use. The
      page used to say "10-day test" here and the checkout said "10-Day Reset",
      which reads as two different things at the exact moment he commits. */
@@ -318,9 +318,9 @@ const EN: DirectCopy = {
   fullLabel: "Full programme",
   testLabel: "10-day test",
   offerBody: [
-    "The full programme costs 69,000 FCFA. You do not pay that today.",
-    "You do not know yet whether this works on you, and we have not earned it. So you pay 7,500 to test it — less than a meal out.",
-    "If it works, the 7,500 comes off the 69,000. If it does not, you tell us and we send it back.",
+    "The full programme costs {sprint}. You do not pay that today.",
+    "You do not know yet whether this works on you, and we have not earned it. So you pay {test} to test it — less than a bag of herbs that lasts a month.",
+    "If it works, the {test} comes off the {sprint}. If it does not, you tell us and we send it back.",
   ],
   includes: [
     "The 10-day programme",
@@ -368,7 +368,7 @@ const EN: DirectCopy = {
     },
     {
       q: "What happens after the 10 days?",
-      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and your 7,500 comes off the price. Nobody is enrolled automatically, and nothing charges you again.",
+      a: "You take your second measurement and you have two numbers. If you are lasting longer, most men go on to the 30-day programme — control alone and control with a partner are two different skills — and your {test} comes off the price. Nobody is enrolled automatically, and nothing charges you again.",
     },
   ],
 
@@ -397,7 +397,7 @@ const FR: DirectCopy = {
   h: "Tenez plus longtemps. Sans pilules, sans plantes, sans anesthésiants.",
   sub: "Un programme d'entraînement privé de 10 jours conçu pour vous aider à tenir plus longtemps et à mieux vous contrôler — depuis votre téléphone, chez vous.",
   flow: ["Mesurez votre point de départ", "Entraînez-vous 10 jours", "Mesurez à nouveau"],
-  priceLine: "7 500 FCFA pour commencer",
+  priceLine: "{test} pour commencer",
   cta: "Commencer le Reset de 10 jours",
   ctaNote: "Si vous ne tenez pas plus longtemps, on vous rembourse.",
   trust: ["Privé par conception", "Sur tout téléphone", "Rien à avaler", "Un seul paiement"],
@@ -520,9 +520,9 @@ const FR: DirectCopy = {
   fullLabel: "Programme complet",
   testLabel: "Test de 10 jours",
   offerBody: [
-    "Le programme complet coûte 69 000 FCFA. Vous ne payez pas ça aujourd'hui.",
-    "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité. Alors vous payez 7 500 pour le tester — moins qu'un repas dehors.",
-    "Si ça marche, les 7 500 sont déduits des 69 000. Sinon, vous nous écrivez et on vous rembourse.",
+    "Le programme complet coûte {sprint}. Vous ne payez pas ça aujourd'hui.",
+    "Vous ne savez pas encore si ça marche sur vous, et nous ne l'avons pas mérité. Alors vous payez {test} pour le tester — moins qu'un sachet de plantes qui dure un mois.",
+    "Si ça marche, les {test} sont déduits des {sprint}. Sinon, vous nous écrivez et on vous rembourse.",
   ],
   includes: [
     "Le programme de 10 jours",
@@ -570,7 +570,7 @@ const FR: DirectCopy = {
     },
     {
       q: "Que se passe-t-il après les 10 jours ?",
-      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et vos 7 500 sont déduits du prix. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
+      a: "Vous prenez votre deuxième mesure et vous avez deux chiffres. Si vous tenez plus longtemps, la plupart des hommes continuent sur le programme de 30 jours — le contrôle seul et le contrôle avec une partenaire sont deux compétences différentes — et vos {test} sont déduits du prix. Personne n'est inscrit automatiquement, et rien ne vous prélève à nouveau.",
     },
   ],
 
@@ -615,8 +615,11 @@ export function withDirectPrices(
       .join(prices.test)
       .split("{sprint}")
       .join(prices.sprint)
-      .replace(/7[  ]?500 FCFA/g, prices.test)
-      .replace(/69[  ]?000 FCFA/g, prices.sprint);
+      ;
+  /* Placeholders only. There used to be a regex here that swapped the literal
+     "7,500 FCFA" and "69,000 FCFA" as a safety net, and it was worse than
+     nothing: it required the " FCFA" suffix, so every bare "7,500" in a
+     sentence slipped through and kept printing a price nobody charges. */
 
   return {
     ...c,

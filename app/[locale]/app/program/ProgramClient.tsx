@@ -6,6 +6,7 @@ import { daysFor, totalDays, TEST_LAST_DAY } from "@/lib/content/protocol";
 import { useMetron } from "@/components/useMetron";
 import { improved, retest } from "@/lib/store";
 import { tasksDone } from "@/lib/store";
+import { getPrices } from "@/lib/payments";
 
 export function ProgramClient({ locale }: { locale: string }) {
   const t = getDict(locale);
@@ -13,6 +14,14 @@ export function ProgramClient({ locale }: { locale: string }) {
   const plan = state.plan ?? "test";
   const didRetest = !!retest(state);
   const wonIt = improved(state);
+  /* The trial price, from the price book. It used to be typed into this file
+     as "7,500" in four places, which meant a price change on the sales page
+     left the in-app upsell and the refund promise quoting a number nobody had
+     been charged. Country is unknown in here, so this is the home market
+     figure — the same one the buyer saw at checkout. */
+  const testPrice =
+    getPrices("CM").find((p) => p.plan === "test")?.display ?? "";
+
   const days = daysFor(locale, plan);
   const last = totalDays(plan);
 
@@ -162,7 +171,7 @@ export function ProgramClient({ locale }: { locale: string }) {
                       depuis le début.
                     </p>
                     <p className="font-semibold">
-                      Vos 7 500 sont déduits si vous continuez dans les 72 heures.
+                      Vos {testPrice} sont déduits si vous continuez dans les 72 heures.
                     </p>
                   </>
                 ) : (
@@ -176,7 +185,7 @@ export function ProgramClient({ locale }: { locale: string }) {
                       partner. That is the part you actually wanted.
                     </p>
                     <p className="font-semibold">
-                      Your 7,500 comes off the price if you continue within 72 hours.
+                      Your {testPrice} comes off the price if you continue within 72 hours.
                     </p>
                   </>
                 )}
@@ -197,7 +206,7 @@ export function ProgramClient({ locale }: { locale: string }) {
                 {locale === "fr" ? (
                   <>
                     <p className="font-semibold">
-                      N'achetez rien d'autre. Écrivez-nous et on vous rembourse vos 7 500.
+                      N'achetez rien d'autre. Écrivez-nous et on vous rembourse vos {testPrice}.
                     </p>
                     <p>
                       Ensuite allez voir un médecin. Demandez : tension, glycémie, thyroïde,
@@ -209,7 +218,7 @@ export function ProgramClient({ locale }: { locale: string }) {
                 ) : (
                   <>
                     <p className="font-semibold">
-                      Do not buy anything else. Message us and we refund your 7,500.
+                      Do not buy anything else. Message us and we refund your {testPrice}.
                     </p>
                     <p>
                       Then go and see a doctor. Ask for blood pressure, blood sugar, thyroid

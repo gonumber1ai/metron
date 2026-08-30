@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { paymentStatus, isPaid, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
 import { sendPurchaseConfirmation, sendAdminAlert, looksLikeEmail } from "@/lib/email/send";
+import { contactForRef } from "@/lib/supabase/server";
 import { recordPayment, recordIntake } from "@/lib/supabase/server";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
 
@@ -52,17 +53,30 @@ export async function POST(req: Request) {
       amountMinor: m?.amount ?? m?.receipt?.amount ?? 0,
     });
 
-    void sendAdminAlert({
-      subject: `Sale — ${wPlan === "sprint" ? "30-day" : "10-day"} (card)`,
-      lines: [
-        `plan        ${wPlan}`,
-        `rail        whop (card)`,
-        `amount      ${m?.amount ?? "?"} ${(m?.currency ?? "USD").toUpperCase()}`,
-        `email       ${wEmail ?? "(none)"}`,
-        `access code ${ref}`,
-        `membership  ${membershipId}`,
-      ],
-    });
+    /* Alert last, and awaited only far enough to read his contact details.
+       The whole point of this mail is that it can be acted on from a lock
+       screen: if he left a WhatsApp number instead of an email, his code has
+       to be sent by hand, and it has to happen while he is still holding the
+       phone he just paid with. */
+    void (async () => {
+      const who = await contactForRef(ref);
+      void sendAdminAlert({
+        subject: `Sale — ${wPlan === "sprint" ? "30-day" : "10-day"} (card)`,
+        lines: [
+          `plan        ${wPlan}`,
+          `rail        whop (card)`,
+          `amount      ${m?.amount ?? "?"} ${(m?.currency ?? "USD").toUpperCase()}`,
+          `name        ${who?.name ?? "(none)"}`,
+          `email       ${wEmail ?? who?.contact ?? "(none)"}`,
+          `whatsapp    ${who?.whatsapp ? `+${who.whatsapp}` : "(none)"}`,
+          `access code ${ref}`,
+          ...(who?.whatsapp && !wEmail
+            ? ["", "NO EMAIL — send the access code to that WhatsApp number."]
+            : []),
+          `membership  ${membershipId}`,
+        ],
+      });
+    })();
 
     const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan: wPlan });
     res.cookies.set(
@@ -114,18 +128,25 @@ export async function POST(req: Request) {
     amountMinor: tx!.amount ?? 0,
   });
 
-  void sendAdminAlert({
-    subject: `Sale — ${plan === "sprint" ? "30-day" : "10-day"} (Mobile Money)`,
-    lines: [
-      `plan        ${plan}`,
-      `rail        fapshi (Mobile Money)`,
-      `amount      ${tx!.amount ?? "?"} XAF`,
-      `payer       ${tx!.payerName ?? "(none)"}`,
-      `email       ${tx!.email ?? "(none)"}`,
-      `access code ${ref}`,
-      `transaction ${transId}`,
-    ],
-  });
+  void (async () => {
+    const who = await contactForRef(ref);
+    void sendAdminAlert({
+      subject: `Sale — ${plan === "sprint" ? "30-day" : "10-day"} (Mobile Money)`,
+      lines: [
+        `plan        ${plan}`,
+        `rail        fapshi (Mobile Money)`,
+        `amount      ${tx!.amount ?? "?"} XAF`,
+        `payer       ${tx!.payerName ?? who?.name ?? "(none)"}`,
+        `email       ${tx!.email ?? who?.contact ?? "(none)"}`,
+        `whatsapp    ${who?.whatsapp ? `+${who.whatsapp}` : "(none)"}`,
+        `access code ${ref}`,
+        ...(who?.whatsapp && !tx!.email
+          ? ["", "NO EMAIL — send the access code to that WhatsApp number."]
+          : []),
+        `transaction ${transId}`,
+      ],
+    });
+  })();
 
   const res = NextResponse.json({ status: "SUCCESSFUL", paid: true, plan });
   res.cookies.set(

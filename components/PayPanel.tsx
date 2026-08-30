@@ -47,7 +47,11 @@ const T = {
        this is the exact second he hesitates over typing his real name. */
     nameHelp: "Any name works. We never check it.",
     emailLabel: "Your email",
+    emailOptional: "optional",
     emailHelp: "Where your access code goes. Nothing else is sent, and the subject never says what it is about.",
+    waLabel: "Your WhatsApp number",
+    waHelp: "Only if you do not use email. We send your access code here instead. It can be a different number from the one you are paying with.",
+    needOne: "Give us an email or a WhatsApp number — that is how your access code reaches you.",
     trust: "Your statement shows METRON. We never sell or share anything.",
     phoneLabel: "Your Mobile Money number",
     phoneHelp: "9 digits, starts with 6. MTN or Orange.",
@@ -78,7 +82,11 @@ const T = {
     namePlaceholder: "Jean Dupont",
     nameHelp: "N'importe quel nom convient. On ne le vérifie jamais.",
     emailLabel: "Votre email",
+    emailOptional: "facultatif",
     emailHelp: "C'est là qu'arrive votre code d'accès. Rien d'autre n'est envoyé, et l'objet n'indique jamais de quoi il s'agit.",
+    waLabel: "Votre numéro WhatsApp",
+    waHelp: "Seulement si vous n'utilisez pas d'email. On vous envoie votre code d'accès là. Ça peut être un autre numéro que celui avec lequel vous payez.",
+    needOne: "Donnez-nous un email ou un numéro WhatsApp — c'est comme ça que votre code d'accès vous parvient.",
     trust: "Votre relevé affiche METRON. On ne vend et ne partage jamais rien.",
     phoneLabel: "Votre numéro Mobile Money",
     phoneHelp: "9 chiffres, commence par 6. MTN ou Orange.",
@@ -254,6 +262,7 @@ function MomoPanel({
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [wa, setWa] = useState("");
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
   // poll() is kicked off in the same tick as setFrameUrl, so reading the state
   // there would see the previous render's null and pick the short timeout.
@@ -266,8 +275,20 @@ function MomoPanel({
   useEffect(() => () => { stop.current = true; }, []);
 
   const digits = phone.replace(/\D/g, "").slice(0, 9);
+  const waDigits = wa.replace(/\D/g, "").slice(0, 15);
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
-  const valid = PHONE_RE.test(digits) && name.trim().length >= 2 && emailOk;
+  /* One way to reach him, not specifically an email.
+     Plenty of men here have no email at all, and the old form made an address
+     mandatory at the exact moment he was reaching for his PIN — so he either
+     left, or he invented one, paid, and never received a code. That second
+     one is a refund and a complaint rather than a customer.
+     WhatsApp is not validated as a Cameroonian number on purpose: it can be
+     any country, and it is deliberately allowed to differ from the number he
+     is paying with, because the phone with the money in it is often not the
+     phone he actually reads. */
+  const waOk = waDigits.length >= 8;
+  const valid =
+    PHONE_RE.test(digits) && name.trim().length >= 2 && (emailOk || waOk);
   const op = operatorOf(digits);
 
   async function pay() {
@@ -294,6 +315,7 @@ function MomoPanel({
           locale,
           name: name.trim(),
           email: email.trim(),
+          whatsapp: waDigits,
           // So the admin view shows who this man is, not just that someone paid.
           quiz: load(locale).quiz,
         }),
@@ -492,7 +514,10 @@ function MomoPanel({
       </label>
 
       <label className="mt-4 block">
-        <span className="text-[0.9rem] font-semibold text-bone">{t.emailLabel}</span>
+        <span className="flex items-baseline justify-between gap-3">
+          <span className="text-[0.9rem] font-semibold text-bone">{t.emailLabel}</span>
+          <span className="text-[0.78rem] text-faint">{t.emailOptional}</span>
+        </span>
         <input
           type="email"
           inputMode="email"
@@ -504,6 +529,29 @@ function MomoPanel({
         />
         <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">{t.emailHelp}</span>
       </label>
+
+      {/* The way out for a man with no email. It is a separate number from the
+          Mobile Money one on purpose: the phone holding the money is often not
+          the phone he reads. */}
+      <label className="mt-4 block">
+        <span className="text-[0.9rem] font-semibold text-bone">{t.waLabel}</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={wa}
+          onChange={(e) => setWa(e.target.value)}
+          placeholder="+237 6XX XXX XXX"
+          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+        />
+        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">{t.waHelp}</span>
+      </label>
+
+      {/* Only once he has filled the rest — a rule stated before he has done
+          anything reads as a demand rather than as help. */}
+      {name.trim().length >= 2 && PHONE_RE.test(digits) && !emailOk && !waOk && (
+        <p className="mt-3 text-[0.85rem] leading-snug text-amber">{t.needOne}</p>
+      )}
 
       <label className="mt-4 block">
         <span className="flex flex-wrap items-center justify-between gap-2">

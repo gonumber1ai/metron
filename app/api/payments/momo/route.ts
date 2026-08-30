@@ -66,6 +66,7 @@ export async function POST(req: Request) {
     locale?: string;
     name?: string;
     email?: string;
+    whatsapp?: string;
     /** the scored assessment, so the admin view shows who this man is */
     quiz?: unknown;
   };
@@ -82,6 +83,10 @@ export async function POST(req: Request) {
   // Not politeness: Fapshi's own checkout asks for all three, and the email is
   // the only way a Mobile Money buyer ever receives his access code.
   const email = (body.email ?? "").trim().slice(0, 120);
+  /* His WhatsApp number, when he gave one instead of an email. Kept apart from
+     `phone`: that is the wallet paying, and it is frequently not the handset he
+     actually reads. Never sent to Fapshi — it is ours, for reaching him. */
+  const whatsapp = (body.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
 
   if (!ref) {
     return NextResponse.json({ status: "error", message: "missing ref" }, { status: 400 });
@@ -105,7 +110,11 @@ export async function POST(req: Request) {
   void recordIntake({
     ref,
     name,
-    contact: email || undefined,
+    // Whichever one he actually gave. `contact` is what support and the
+    // recovery flow look him up by, so a man with no email must still land in
+    // it — otherwise he pays and becomes unfindable.
+    contact: email || (whatsapp ? `+${whatsapp}` : undefined),
+    whatsapp: whatsapp || undefined,
     phone,
     plan,
     locale,

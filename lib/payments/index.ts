@@ -49,8 +49,23 @@ export type Price = {
  * first row for a plan when it needs a price to print in a sentence, and the
  * sentence should say francs.
  */
-const TEST_XAF = 7500;
-const SPRINT_XAF = 69000;
+/**
+ * Priced against the shelf, not against the effort.
+ *
+ * The competition here is not another programme — it is a 5,000 franc bag of
+ * herbs that lasts a month. Against that, 7,500 for ten days read expensive,
+ * and 32 men finished the quiz without one of them paying. So the trial now
+ * sits under the herb price, where trying it is a smaller decision than the
+ * thing he already buys.
+ *
+ * 3,500 rather than 2,500: both are impulse money, the gap between them will
+ * not change many minds, and the lower one gives up nearly a third of the
+ * revenue and a bigger share of it again to transaction fees. Being UNDER the
+ * 5,000 he already spends is the psychological win; being far under it is not
+ * worth paying for.
+ */
+const TEST_XAF = 3500;
+const SPRINT_XAF = 15000;
 /** minor units: $15.00 and $125.00 */
 const TEST_USD = 1500;
 const SPRINT_USD = 12500;

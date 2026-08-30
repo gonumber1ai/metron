@@ -131,6 +131,8 @@ export async function recordIntake(input: {
   provider?: string;
   stage?: "lead" | "checkout_started" | "paid";
   quiz?: unknown;
+  /** Only set when he gave one instead of an email. See 010_whatsapp.sql. */
+  whatsapp?: string;
 }): Promise<boolean> {
   const client = db();
   if (!client) return false;
@@ -149,6 +151,7 @@ export async function recordIntake(input: {
     if (input.plan) row.plan = input.plan;
     if (input.provider) row.provider = input.provider;
     if (input.quiz) row.quiz = input.quiz;
+    if (input.whatsapp) row.whatsapp = input.whatsapp;
     // `contact` is NOT NULL in the base schema; fall back to whatever we have.
     if (!row.contact) row.contact = input.phone ?? input.ref;
 
@@ -161,6 +164,36 @@ export async function recordIntake(input: {
   } catch (err) {
     console.error("[supabase] recordIntake threw", err);
     return false;
+  }
+}
+
+/**
+ * How to reach a man who just paid.
+ *
+ * Read at the moment the sale alert is written, so the owner's phone shows the
+ * WhatsApp number and the access code together and he can forward it in one
+ * action. Never throws and never blocks: a missing contact detail must not be
+ * able to fail a payment webhook.
+ */
+export async function contactForRef(
+  ref: string,
+): Promise<{ name?: string; contact?: string; whatsapp?: string } | null> {
+  const client = db();
+  if (!client) return null;
+  try {
+    const { data, error } = await client
+      .from("leads")
+      .select("name, contact, whatsapp")
+      .eq("ref", ref)
+      .maybeSingle();
+    if (error || !data) return null;
+    return {
+      name: (data.name as string) || undefined,
+      contact: (data.contact as string) || undefined,
+      whatsapp: (data.whatsapp as string) || undefined,
+    };
+  } catch {
+    return null;
   }
 }
 
