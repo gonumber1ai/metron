@@ -92,6 +92,11 @@ export type DirectCopy = {
   problemH: string;
   problem: string[];
   problemPivot: string;
+  trainH: string;
+  trainSub: string;
+  train: { label: string; body: string }[];
+  trainNote: string;
+  trainMicro: string;
 
   /* the punch — pain, urgency, CTA, then the explanation */
   urgencyBefore: string;
@@ -223,6 +228,17 @@ const EN: DirectCopy = {
     "Then next time comes, and the same thing happens.",
   ],
   problemPivot: "You have been managing this for years. And it still hasn\u2019t improved.",
+  trainH: "Train what controls when you finish.",
+  trainSub: "Over 10 days, Metron guides you through:",
+  train: [
+    { label: "Arousal control", body: "learn when you’re getting close and when to slow down." },
+    { label: "Start-stop training", body: "practise building arousal, backing off and regaining control." },
+    { label: "Pelvic-floor training", body: "guided contractions and relaxation exercises for better control." },
+    { label: "Squeeze technique", body: "learn when and how to use it as you get close." },
+    { label: "Sleep & nutrition", body: "simple habits that support better sexual performance." },
+  ],
+  trainNote: "15 minutes a day · 7 guided sessions",
+  trainMicro: "No equipment. No pills. Do it privately from your phone.",
 
   urgencyBefore: "The longer you stay at ",
   urgencyHighlight: "2 or 3 minutes",
@@ -453,6 +469,17 @@ const FR: DirectCopy = {
   ],
   problemPivot:
     "Vous gérez ça depuis des années. Vous ne l'avez jamais vraiment entraîné.",
+  trainH: "Entraînez ce qui contrôle le moment où vous finissez.",
+  trainSub: "En 10 jours, Metron vous guide à travers :",
+  train: [
+    { label: "Contrôle de l’excitation", body: "apprenez à sentir quand vous approchez et quand ralentir." },
+    { label: "Entraînement start-stop", body: "montez l’excitation, redescendez, reprenez le contrôle." },
+    { label: "Plancher pelvien", body: "contractions et relâchements guidés pour un meilleur contrôle." },
+    { label: "Technique du squeeze", body: "apprenez quand et comment l’utiliser quand vous approchez." },
+    { label: "Sommeil et alimentation", body: "des habitudes simples qui soutiennent la performance sexuelle." },
+  ],
+  trainNote: "15 minutes par jour · 7 séances guidées",
+  trainMicro: "Aucun matériel. Aucune pilule. En privé, depuis votre téléphone.",
 
   urgencyBefore: "Plus vous restez à ",
   urgencyHighlight: "2 ou 3 minutes",

@@ -265,6 +265,47 @@ export function StartClient({
             </p>
           </section>
 
+          {/* ── WHAT IS TRAINED ──────────────────────────────────────────
+              Sits directly under "you have never actually trained it",
+              because that line raises the question this answers: trained
+              how. Naming the techniques is a deliberate reversal of the
+              earlier rule that the method stays hidden until purchase —
+              the owner's call, made with a month of funnel data behind it. */}
+          <section className="mt-14 md:mt-20">
+            <div className="rounded-3xl card px-6 py-10 md:px-12 md:py-14">
+              <h2 className="max-w-2xl text-[1.7rem] leading-[1.12] md:text-[2.2rem]">
+                {c.trainH}
+              </h2>
+              <p className="mt-4 text-[1.05rem] leading-relaxed text-mute">{c.trainSub}</p>
+
+              <ul className="mt-8 space-y-5">
+                {c.train.map((x) => (
+                  <li key={x.label} className="flex gap-3.5">
+                    <span aria-hidden className="mt-[3px] shrink-0 text-jade">
+                      <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none">
+                        <path
+                          d="M4 10.5 8.2 14.5 16 5.8"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <p className="text-[1.02rem] leading-relaxed text-mute">
+                      <span className="font-bold text-bone">{x.label}</span> — {x.body}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="metric mt-9 border-t border-ink-700 pt-6 text-[1.05rem] font-bold text-jade">
+                {c.trainNote}
+              </p>
+              <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">{c.trainMicro}</p>
+            </div>
+          </section>
+
           {/* ── THE PUNCH ────────────────────────────────────────────────
               Pain → urgency → CTA → explanation. This sits between the
               recognition and the mechanism because that is the moment it
