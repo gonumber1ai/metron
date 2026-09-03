@@ -45,6 +45,7 @@ export type F3Copy = {
   /* hero */
   h1a: string;
   h1b: string;
+  h1c: string;
   sub: string;
   subHighlight: string;
   benefits: { label: string; body: string }[];
@@ -57,6 +58,9 @@ export type F3Copy = {
   quals: { q: string; options: string[] }[];
   qualPassH: string;
   qualPassBody: string;
+  qualPrivacy: string;
+  vsFooter: string;
+  page2Cta: string;
 
   /* without / with */
   vsH: string;
@@ -126,27 +130,31 @@ const EN: F3Copy = {
   offerEndsLabel: "Special price ends in",
   barCta: "Start for 2 500 XAF",
 
-  h1a: "Last longer.",
-  h1b: "More control.",
-  sub: "A 10-day training programme to help you improve your sexual performance — ",
-  subHighlight: "without pills or herbs.",
+  h1a: "Sexual performance",
+  h1b: "is a skill.",
+  h1c: "You can train it.",
+  sub: "A simple 10-day programme to help you last longer, build control, and enjoy better sex — ",
+  subHighlight: "naturally.",
   benefits: [
-    { label: "Build control", body: "Over your body and your arousal." },
     { label: "Private", body: "No one has to know." },
-    { label: "~15 minutes", body: "A day is all you need." },
+    { label: "~15 min a day", body: "Fits into your day." },
+    { label: "Real progress", body: "You can see and feel it." },
   ],
   cta: "Start the 10-day programme",
   microTrust: ["Private", "Guided", "Track your progress"],
 
   qualH: "Let's not waste your time.",
-  qualSub: "Answer 3 questions and we'll tell you whether Metron is right for you.",
+  qualSub: "Answer 3 quick questions to see if this programme is right for you.",
   quals: [
     { q: "Do you often finish sooner than you'd like during sex?", options: ["Yes", "Sometimes", "No"] },
     { q: "Would you like better control without depending on pills or herbs?", options: ["Yes", "No"] },
     { q: "Can you commit around 15 minutes a day for 10 days?", options: ["Yes", "No"] },
   ],
   qualPassH: "This programme is for you.",
-  qualPassBody: "Keep scrolling to see how Metron works and what the ten days look like.",
+  qualPassBody: "Here is how the programme works.",
+  qualPrivacy: "100% private. No one has to know.",
+  vsFooter: "Men who follow structured training are the ones who see their number move.",
+  page2Cta: "See how the 10 days work",
 
   vsH: "How your sex life could look",
   withoutH: "Without Metron",
@@ -254,27 +262,31 @@ const FR: F3Copy = {
   offerEndsLabel: "Prix spécial se termine dans",
   barCta: "Commencer pour 2 500 XAF",
 
-  h1a: "Tenez plus longtemps.",
-  h1b: "Plus de contrôle.",
-  sub: "Un programme d'entraînement de 10 jours pour améliorer votre performance sexuelle — ",
-  subHighlight: "sans pilules ni plantes.",
+  h1a: "La performance sexuelle",
+  h1b: "est une compétence.",
+  h1c: "Ça s'entraîne.",
+  sub: "Un programme simple de 10 jours pour tenir plus longtemps, prendre le contrôle et mieux profiter du sexe — ",
+  subHighlight: "naturellement.",
   benefits: [
-    { label: "Prenez le contrôle", body: "De votre corps et de votre excitation." },
     { label: "Privé", body: "Personne n'a besoin de le savoir." },
-    { label: "~15 minutes", body: "Par jour, c'est tout." },
+    { label: "~15 min par jour", body: "Ça tient dans votre journée." },
+    { label: "De vrais progrès", body: "Vous les voyez et vous les sentez." },
   ],
   cta: "Commencer le programme de 10 jours",
   microTrust: ["Privé", "Guidé", "Suivez vos progrès"],
 
   qualH: "Ne perdons pas votre temps.",
-  qualSub: "Répondez à 3 questions et on vous dira si Metron est fait pour vous.",
+  qualSub: "Répondez à 3 questions rapides pour voir si ce programme est fait pour vous.",
   quals: [
     { q: "Finissez-vous souvent plus tôt que vous ne le voudriez ?", options: ["Oui", "Parfois", "Non"] },
     { q: "Voulez-vous un meilleur contrôle sans dépendre de pilules ou de plantes ?", options: ["Oui", "Non"] },
     { q: "Pouvez-vous y consacrer environ 15 minutes par jour pendant 10 jours ?", options: ["Oui", "Non"] },
   ],
   qualPassH: "Ce programme est fait pour vous.",
-  qualPassBody: "Continuez à descendre pour voir comment Metron fonctionne et à quoi ressemblent les dix jours.",
+  qualPassBody: "Voici comment le programme fonctionne.",
+  qualPrivacy: "100% privé. Personne n'a besoin de le savoir.",
+  vsFooter: "Les hommes qui suivent un entraînement structuré sont ceux qui voient leur chiffre bouger.",
+  page2Cta: "Voir comment se passent les 10 jours",
 
   vsH: "À quoi votre vie sexuelle pourrait ressembler",
   withoutH: "Sans Metron",
