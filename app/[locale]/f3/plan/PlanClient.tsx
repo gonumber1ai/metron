@@ -8,6 +8,7 @@ import { getDirect } from "@/lib/content/direct";
 import { getMarketing } from "@/lib/content/marketing";
 import { getPrices, type Plan } from "@/lib/payments";
 import { track } from "@/lib/track";
+import { update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 
@@ -38,6 +39,18 @@ export function PlanClient({
   const wasOf = (p: Plan) => prices.find((x) => x.plan === p)?.was ?? "";
 
   useEffect(() => {
+    // Page 2 captures the tag too. A man who lands here directly — from a
+    // shared link, or a second ad pointed at the plan — had no campaign
+    // recorded at all, so his purchase came back untagged.
+    try {
+      const url = new URLSearchParams(window.location.search);
+      const tag = (url.get("c") ?? url.get("utm_campaign") ?? "")
+        .replace(/[^a-zA-Z0-9_-]/g, "")
+        .slice(0, 40);
+      if (tag) update((st) => (st.campaign ? st : { ...st, campaign: tag }), locale);
+    } catch {
+      /* a missing tag must not break the page */
+    }
     track("start_view", "f3_plan", locale);
   }, [locale]);
 
