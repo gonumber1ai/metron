@@ -378,6 +378,6 @@ a[role="button"],
 @media (max-width: 430px) {
   /* Three items across a phone: the mark, the clock, the button. The word
      METRON is the only one that is decoration at this width. */
-  .c-brand span, .c-brand strong { display: none; }
+  .c-brand [data-word] { display: none; }
   .c-bar .c-cta { max-width: 118px; font-size: .68rem; padding-inline: 10px; }
 }

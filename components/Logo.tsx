@@ -67,7 +67,7 @@ export function Logo({
           lost the moment this lockup is copied into an email or a PDF, and the
           wordmark on every piece of brand artwork is capitals. Letter-spacing
           is opened up because caps set tight read as shouting. */}
-      <span className={`${text} ${word} font-bold tracking-[0.08em]`}>METRON</span>
+      <span data-word="1" className={`${text} ${word} font-bold tracking-[0.08em]`}>METRON</span>
     </span>
   );
 }
