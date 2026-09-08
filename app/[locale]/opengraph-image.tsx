@@ -23,7 +23,7 @@ import { ImageResponse } from "next/og";
  */
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Metron";
+export const alt = "Gain Control, Last Longer";
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -36,17 +36,17 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#070D0F",
+          background: "#030303",
           // The ambient pool of light from the app, so the card and the page
           // he lands on look like the same product.
           backgroundImage:
-            "radial-gradient(1000px 520px at 50% -80px, rgba(22,190,146,0.18), transparent 70%)",
+            "radial-gradient(1000px 520px at 50% -80px, rgba(147,228,64,0.16), transparent 70%)",
         }}
       >
         <svg viewBox="0 0 24 24" width="150" height="150" fill="none">
           <path
             d="M3.5 18H10V12H16V6H20.5"
-            stroke="#16BE92"
+            stroke="#93E440"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -56,27 +56,30 @@ export default function OpengraphImage() {
         <div
           style={{
             display: "flex",
-            fontSize: 104,
+            fontSize: 62,
             fontWeight: 800,
-            letterSpacing: "-0.03em",
-            color: "#EEF4F2",
-            marginTop: 28,
+            letterSpacing: "-0.02em",
+            color: "#F4F4F5",
+            marginTop: 26,
+            textTransform: "uppercase",
           }}
         >
-          Metron
+          Gain Control,
         </div>
-
         <div
           style={{
             display: "flex",
-            fontSize: 38,
-            color: "#A2B3B6",
-            marginTop: 14,
-            letterSpacing: "-0.01em",
+            fontSize: 62,
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            color: "#93E440",
+            marginTop: 2,
+            textTransform: "uppercase",
           }}
         >
-          Measure it. Change it.
+          Last Longer
         </div>
+
       </div>
     ),
     size,

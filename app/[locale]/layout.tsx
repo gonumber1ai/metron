@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter } from "next/font/google";
+import { Archivo, Inter, Caveat } from "next/font/google";
 import "../globals.css";
 
 /**
@@ -19,6 +19,15 @@ const display = Archivo({
   subsets: ["latin", "latin-ext"],
   weight: ["600", "700", "800"],
   variable: "--font-archivo",
+  display: "swap",
+});
+
+/* The handwritten notes in the flyer margins. One weight, latin only — it
+   carries five short phrases and nothing else. */
+const script = Caveat({
+  subsets: ["latin"],
+  weight: ["600"],
+  variable: "--font-caveat",
   display: "swap",
 });
 
@@ -82,7 +91,7 @@ export default async function LocaleLayout({
   const lang = isLocale(locale) ? locale : defaultLocale;
 
   return (
-    <html lang={lang} className={`${display.variable} ${body.variable}`}>
+    <html lang={lang} className={`${display.variable} ${body.variable} ${script.variable}`}>
       <body>{children}</body>
     </html>
   );

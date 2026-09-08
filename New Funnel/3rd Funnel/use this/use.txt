@@ -1,0 +1,3 @@
+do not use the hero-editorial but you see how one side is shaded so text can sit ontop use that shading context so images blend in but are not blended 
+aand you see the one titled review you can either use it like that or shade out the text but leave the whole image
+also do not destroy the current design I did with codex. only make so on quiz when they click and answer the next question pops without them having to click next question
