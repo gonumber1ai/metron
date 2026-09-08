@@ -67,6 +67,16 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
     }
   }
 
+  /* The standing links. Decoded here so the table reads as English the
+     moment traffic arrives, rather than as two-letter codes nobody can place
+     a week later. Anything not on this list still uses the typed label. */
+  const KNOWN: Record<string, string> = {
+    fw: "WhatsApp · French",
+    ff: "Facebook · French",
+    ew: "WhatsApp · English",
+    ef: "Facebook · English",
+  };
+
   const keyOf = (r: CampaignRow) => `${r.campaign}::${r.locale}`;
   const spendOf = (r: CampaignRow) => Number(spend[keyOf(r)] ?? "") || 0;
 
@@ -108,7 +118,9 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
             <p className="mt-2 text-[1.25rem] font-bold leading-snug text-bone">
               {best.campaign === "(none)"
                 ? "Untagged traffic"
-                : labels[`${best.campaign}::${best.locale}`] || best.campaign}{" "}
+                : labels[`${best.campaign}::${best.locale}`] ||
+                  KNOWN[best.campaign] ||
+                  best.campaign}{" "}
               <span className="text-faint">({best.locale.toUpperCase()})</span> is winning.
             </p>
             <p className="mt-2 text-[0.95rem] leading-relaxed text-mute">
@@ -185,7 +197,7 @@ export function Ads({ rows }: { rows: CampaignRow[] }) {
                     </td>
                     <td className="py-2.5 pr-4">
                       <input
-                        value={labels[keyOf(r)] ?? ""}
+                        value={labels[keyOf(r)] ?? KNOWN[r.campaign] ?? ""}
                         onChange={(e) => labelFor(keyOf(r), e.target.value)}
                         placeholder="name it"
                         className="w-36 rounded-lg border border-ink-600 bg-ink-850 px-2 py-1 text-[0.85rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
