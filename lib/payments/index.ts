@@ -36,6 +36,8 @@ export type Price = {
    * numbers happen to be the stronger anchors anyway.
    */
   was?: string;
+  /** the former price in minor units, so the server can actually charge it */
+  wasMinor?: number;
 };
 
 /**
@@ -92,7 +94,7 @@ const FCFA = (n: number) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NB)}${
 
 export const priceBook: Record<string, Price[]> = {
   default: [
-    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF), was: FCFA(TEST_XAF_WAS) },
+    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF), was: FCFA(TEST_XAF_WAS), wasMinor: TEST_XAF_WAS },
     { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF), was: FCFA(SPRINT_XAF_WAS) },
     { plan: "test", currency: "USD", amountMinor: TEST_USD, provider: "whop", display: "$15" },
     { plan: "sprint", currency: "USD", amountMinor: SPRINT_USD, provider: "whop", display: "$125" },
@@ -127,6 +129,38 @@ export function getPriceFor(plan: Plan, provider: ProviderId, country = "default
  */
 export function getPrices(country = "default"): Price[] {
   return priceBook[country] ?? priceBook.default;
+}
+
+/* ------------------------------------------------------------------ */
+/* The seven-hour offer                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The clock lives in the browser; the charge is made on the server. This
+ * cookie mirrors the deadline so both read the same time. Without it the page
+ * said 7 500 after expiry and the server charged 2 500 — a discount nobody was
+ * offered, taken by anyone who waited.
+ */
+export const OFFER_COOKIE = "metron_offer_until";
+
+/** True once the stored deadline is in the past. No cookie means he has only
+ *  just arrived, and the offer is live. */
+export function offerExpired(cookieValue: string | undefined): boolean {
+  const until = Number(cookieValue);
+  return Number.isFinite(until) && until > 0 && until <= Date.now();
+}
+
+/**
+ * The same row at what everyone pays.
+ *
+ * Only the 10-day carries an offer. The 30-day is 15 000 whether or not his
+ * clock has run, so it passes through untouched. The struck-through former
+ * price disappears along with the discount — there is nothing to strike once
+ * he is paying it.
+ */
+export function atFullPrice(p: Price): Price {
+  if (p.plan !== "test" || !p.wasMinor || !p.was) return p;
+  return { ...p, amountMinor: p.wasMinor, display: p.was, was: undefined, wasMinor: undefined };
 }
 
 export type CheckoutInput = {

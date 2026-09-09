@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
-import { getPrice, getPriceFor, type Plan, type ProviderId } from "@/lib/payments";
+import { cookies } from "next/headers";
+import {
+  getPrice,
+  getPriceFor,
+  atFullPrice,
+  offerExpired,
+  OFFER_COOKIE,
+  type Plan,
+  type ProviderId,
+} from "@/lib/payments";
 import { initiatePay, isConfigured } from "@/lib/payments/fapshi";
 import * as whop from "@/lib/payments/whop";
 import { recordIntake } from "@/lib/supabase/server";
@@ -45,7 +54,12 @@ export async function POST(req: Request) {
   // when the client did not say — otherwise a man in Cameroon who taps "Card"
   // gets sent to Mobile Money, which is exactly the bug this replaces.
   const requested = body.provider === "whop" || body.provider === "fapshi" ? body.provider : null;
-  const price = (requested && getPriceFor(plan, requested, country)) || getPrice(plan, country);
+  const base = (requested && getPriceFor(plan, requested, country)) || getPrice(plan, country);
+  // His seven hours run on the server's clock too. Once they are up he pays
+  // what everyone pays — the page has already told him so, and charging the
+  // offer price anyway would make the countdown a lie in his favour.
+  const jar = await cookies();
+  const price = offerExpired(jar.get(OFFER_COOKIE)?.value) ? atFullPrice(base) : base;
 
   if (requested && price.provider !== requested) {
     return NextResponse.json({ status: "unavailable", provider: requested });

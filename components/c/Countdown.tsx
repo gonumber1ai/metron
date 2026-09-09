@@ -66,6 +66,15 @@ export function Countdown({
       deadline = Date.now() + WINDOW_MS;
     }
 
+    // Mirror the deadline into a cookie. The checkout prices on the server,
+    // which cannot see localStorage — so without this the page said 7 500
+    // after expiry while the server still charged 2 500.
+    try {
+      document.cookie = `metron_offer_until=${deadline}; path=/; max-age=2592000; SameSite=Lax`;
+    } catch {
+      /* cookies blocked; the page still shows the right price */
+    }
+
     const tick = () => setLeft(Math.max(0, deadline - Date.now()));
     tick();
     const id = window.setInterval(tick, 1000);

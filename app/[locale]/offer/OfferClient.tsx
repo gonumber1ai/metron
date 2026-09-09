@@ -7,7 +7,8 @@ import { getDict } from "@/lib/i18n";
 import { track } from "@/lib/track";
 import { PayPanel } from "@/components/PayPanel";
 import { getMarketing } from "@/lib/content/marketing";
-import { getPrices, type Plan } from "@/lib/payments";
+import { getPrices, atFullPrice, type Plan } from "@/lib/payments";
+import { useOfferExpired } from "@/components/c/Countdown";
 import { load } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
@@ -91,7 +92,12 @@ export function OfferClient({
     track("offer_view", plan, locale);
   }, [locale, geoCountry, plan]);
 
-  const prices = getPrices(country);
+  /* Same seven-hour clock as the challenge page, read from the same key. Once
+     it has run the 10-day is shown — and charged, see the routes — at what
+     everyone pays. The page and the server can no longer disagree. */
+  const expired = useOfferExpired();
+  const prices = getPrices(country).map((p) => (expired ? atFullPrice(p) : p));
+  const offerWas = getPrices(country).find((p) => p.plan === "test")?.display ?? "";
   const forPlan = prices.filter((p) => p.plan === plan);
   const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
   /* Only ever a price this plan was genuinely listed at — see Price.was. */
@@ -164,6 +170,16 @@ export function OfferClient({
           <h1 className="mt-3 text-[1.9rem] leading-[1.1] md:text-[2.3rem]">
             {plan === "test" ? t.checkout.h : planName}
           </h1>
+          {/* Told plainly, not swapped silently. A price that changed with no
+              explanation reads as a mistake or a trick — this says the offer
+              ran out and this is the ordinary price. */}
+          {expired && plan === "test" && (
+            <p className="mt-4 rounded-xl border border-alert/50 border-l-4 bg-alert/[0.08] px-4 py-3 text-[0.95rem] font-semibold leading-relaxed text-bone">
+              {locale === "fr"
+                ? `Votre offre à ${offerWas} a expiré. Vous êtes maintenant au prix que tout le monde paie.`
+                : `Your ${offerWas} offer has expired. You are now at the price everyone pays.`}
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-1">
             <p className="metric text-[2.8rem] font-bold leading-none text-jade md:text-[3.2rem]">
               {priceOf(plan)}

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { atFullPrice, offerExpired, OFFER_COOKIE } from "@/lib/payments";
 import { getPrice, type Plan } from "@/lib/payments";
 import {
   directPay,
@@ -95,7 +97,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "bad_phone" }, { status: 400 });
   }
 
-  const price = getPrice(plan, body.country ?? "CM");
+  const base = getPrice(plan, body.country ?? "CM");
+  // Same clock the page shows. Expired means the 10-day is charged at what
+  // everyone pays, not the offer price the page has already said is gone.
+  const jar = await cookies();
+  const price = offerExpired(jar.get(OFFER_COOKIE)?.value) ? atFullPrice(base) : base;
   if (price.provider !== "fapshi") {
     return NextResponse.json({ status: "unavailable" });
   }
