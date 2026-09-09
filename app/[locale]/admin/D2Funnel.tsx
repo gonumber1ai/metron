@@ -40,13 +40,24 @@ export const D2_LINKS: { tag: string; name: string }[] = [
 /** The six counted columns — everything on a row except its identity. */
 type Counts = Omit<D2Row, "campaign" | "locale">;
 
-const STEPS: { key: keyof Counts; label: string }[] = [
-  { key: "arrived", label: "Arrived" },
-  { key: "passed_quiz", label: "Passed the 3 questions" },
-  { key: "clicked", label: "Pressed a buy button" },
-  { key: "saw_checkout", label: "Reached checkout" },
-  { key: "tried_to_pay", label: "Pressed Pay" },
-  { key: "paid", label: "Paid" },
+/**
+ * The real sequence, and what each step is a share OF.
+ *
+ * The quiz is NOT a gate. The sticky header button and the mobile bottom bar
+ * are live from the moment a man lands, so he can press buy without answering
+ * anything — which is why an earlier version of this table showed 800% and
+ * 164% for "pressed a buy button": it was dividing by the quiz, a step most
+ * buyers never touch. Both the quiz and the first buy press are measured
+ * against `arrived`; only from the buy press onward is the funnel truly
+ * sequential.
+ */
+const STEPS: { key: keyof Counts; label: string; of: keyof Counts | null }[] = [
+  { key: "arrived", label: "Arrived", of: null },
+  { key: "passed_quiz", label: "Answered all 3", of: "arrived" },
+  { key: "clicked", label: "Pressed a buy button", of: "arrived" },
+  { key: "saw_checkout", label: "Reached checkout", of: "clicked" },
+  { key: "tried_to_pay", label: "Pressed Pay", of: "saw_checkout" },
+  { key: "paid", label: "Paid", of: "tried_to_pay" },
 ];
 
 const EMPTY: Omit<D2Row, "campaign" | "locale"> = {
@@ -88,11 +99,15 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
   const anyTraffic = total.arrived > 0;
 
   // Where the funnel loses the most men, across all seven.
+  // Only across steps that genuinely follow one another. The quiz is skippable,
+  // so "arrived → answered all 3" is not a loss and naming it as the biggest
+  // one buries the drop that is actually costing money.
   let worst: { from: string; to: string; lost: number } | null = null;
-  for (let i = 0; i < STEPS.length - 1; i++) {
-    const a = total[STEPS[i].key] as number;
-    const b = total[STEPS[i + 1].key] as number;
-    if (a - b > (worst?.lost ?? 0)) worst = { from: STEPS[i].label, to: STEPS[i + 1].label, lost: a - b };
+  for (const s of STEPS) {
+    if (!s.of || s.key === "passed_quiz") continue;
+    const from = STEPS.find((x) => x.key === s.of)!;
+    const lost = (total[s.of] as number) - (total[s.key] as number);
+    if (lost > (worst?.lost ?? 0)) worst = { from: from.label, to: s.label, lost };
   }
 
   return (
@@ -126,8 +141,10 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
       <section className="rounded-2xl card p-5">
         <h2 className="text-[0.95rem] font-bold text-bone">The seven links</h2>
         <p className="mt-0.5 mb-4 text-[12px] text-faint">
-          One row per ad, always in this order. Counts are people, not taps. Percentages are of
-          the step before.
+          One row per ad, always in this order. Counts are people, not taps. “Answered all 3” and
+          “Pressed a buy button” are shares of Arrived — the quiz is skippable, and the buy button
+          is on screen from the moment he lands. Everything after that is a share of the column
+          before it.
         </p>
 
         <div className="overflow-x-auto">
@@ -149,9 +166,9 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
                       <span className="block font-bold text-bone">{r.name}</span>
                       <span className="metric block text-[11px] text-faint">?c={r.tag}</span>
                     </td>
-                    {STEPS.map((s, i) => {
+                    {STEPS.map((s) => {
                       const v = r[s.key] as number;
-                      const prev = i > 0 ? (r[STEPS[i - 1].key] as number) : null;
+                      const prev = s.of ? (r[s.of] as number) : null;
                       return (
                         <td key={s.key} className="metric py-2.5 pr-4">
                           <span className={s.key === "paid" ? "font-bold text-jade" : "text-bone"}>{v}</span>
@@ -166,9 +183,9 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
               })}
               <tr className="border-t-2 border-ink-600">
                 <td className="py-2.5 pr-4 font-bold text-bone">All seven</td>
-                {STEPS.map((s, i) => {
+                {STEPS.map((s) => {
                   const v = total[s.key] as number;
-                  const prev = i > 0 ? (total[STEPS[i - 1].key] as number) : null;
+                  const prev = s.of ? (total[s.of] as number) : null;
                   return (
                     <td key={s.key} className="metric py-2.5 pr-4 font-bold">
                       <span className={s.key === "paid" ? "text-jade" : "text-bone"}>{v}</span>
