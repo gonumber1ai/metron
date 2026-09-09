@@ -39,11 +39,12 @@ export default async function AdminPage() {
     campaigns: [],
     startRows: [],
     ctaRows: [],
+    d2Rows: [],
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows] =
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows] =
       await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
@@ -56,6 +57,8 @@ export default async function AdminPage() {
          Start tab explains itself when empty. */
       client.from("funnel_start").select("*").limit(50),
       client.from("start_cta_breakdown").select("*").limit(50),
+      /* 012_funnel_d2.sql — the /c page under its seven Facebook links. */
+      client.from("funnel_d2").select("*").limit(50),
     ]);
 
     snap.funnel = funnel.data ?? [];
@@ -65,6 +68,7 @@ export default async function AdminPage() {
     snap.campaigns = campaigns.data ?? [];
     snap.startRows = startRows.data ?? [];
     snap.ctaRows = ctaRows.data ?? [];
+    snap.d2Rows = d2Rows.data ?? [];
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.

@@ -6,6 +6,7 @@ import { Customers, type ActivityRow } from "./Customers";
 import { Broadcast } from "./Broadcast";
 import { Ads, type CampaignRow } from "./Ads";
 import { StartFunnel, type StartRow, type CtaRow } from "./StartFunnel";
+import { D2Funnel, type D2Row } from "./D2Funnel";
 
 export type Snapshot = {
   connected: boolean;
@@ -18,6 +19,7 @@ export type Snapshot = {
   campaigns: CampaignRow[];
   startRows: StartRow[];
   ctaRows: CtaRow[];
+  d2Rows: D2Row[];
   conversations: {
     ref: string;
     last_body: string;
@@ -48,7 +50,7 @@ function money(n: number, currency: string): string {
     : `${n.toLocaleString("fr-FR")} FCFA`;
 }
 
-type Tab = "overview" | "ads" | "start" | "customers" | "leads" | "write";
+type Tab = "overview" | "ads" | "start" | "d2" | "customers" | "leads" | "write";
 
 export function Dashboard({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("overview");
@@ -175,6 +177,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                    is whether the man answered nine questions or read a page. */
                 ["ads", "Quiz funnel"],
                 ["start", "Direct funnel"],
+                ["d2", "Direct funnel 2"],
                 ["customers", `Customers${paid ? ` (${paid})` : ""}`],
                 ["leads", `Leads${snap.recent.length ? ` (${snap.recent.length})` : ""}`],
                 ["write", "Write to people"],
@@ -273,6 +276,10 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
 
           {tab === "start" && (
             <StartFunnel rows={snap.startRows} cta={snap.ctaRows} />
+          )}
+
+          {tab === "d2" && (
+            <D2Funnel rows={snap.d2Rows} />
           )}
 
           {/* ---------------------------------------------------- broadcast */}
