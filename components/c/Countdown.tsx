@@ -33,12 +33,15 @@ export function Countdown({
   mins,
   secs,
   compact = false,
+  expiredLabel = "OFFER EXPIRED",
 }: {
   label: string;
   hrs: string;
   mins: string;
   secs: string;
   compact?: boolean;
+  /** shown in place of `label` once the clock has run out */
+  expiredLabel?: string;
 }) {
   const [left, setLeft] = useState<number | null>(null);
 
@@ -69,7 +72,12 @@ export function Countdown({
     return () => window.clearInterval(id);
   }, []);
 
-  if (left === null || left <= 0) return null;
+  // Null only while localStorage is still being read. Once the clock has run
+  // out it stays on screen at 00:00:00 with the label switched to "expired" —
+  // a timer that simply vanishes looks like a bug, and a visitor who watched
+  // it count down deserves to see it hit zero rather than wonder where it went.
+  if (left === null) return null;
+  const expired = left <= 0;
 
   const h = Math.floor(left / 3_600_000);
   const m = Math.floor((left % 3_600_000) / 60_000);
@@ -97,7 +105,7 @@ export function Countdown({
       <div>
         {!compact && (
           <p className="text-[9.5px] font-bold uppercase leading-none tracking-[0.1em] text-white/70">
-            {label}
+            {expired ? expiredLabel : label}
           </p>
         )}
         <div className="flex items-end gap-1.5">
