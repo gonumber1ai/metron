@@ -479,6 +479,9 @@ function MomoPanel({
 
   // MoMo prompts sit on the handset until he types a PIN, so this waits a
   // genuinely long time — up to about two minutes — before calling it dead.
+  /* One `pay_pushed` per checkout, however many times we poll. */
+  const pushed = useRef(false);
+
   async function poll(transId: string, ref: string) {
     if (stop.current) return;
     try {
@@ -490,6 +493,19 @@ function MomoPanel({
       const data = (await res.json()) as { paid?: boolean; status?: string; plan?: Plan };
 
       if (stop.current) return;
+
+      /* The moment he actually submits Fapshi's form.
+         We cannot see inside their iframe — different origin — so until now
+         the funnel could not tell "reached the checkout" from "tried to pay",
+         and neither could their dashboard: initiate-pay runs the instant he
+         lands here, so a transaction exists at CREATED before he has touched
+         anything. Any other status means a prompt went to a handset.
+         That is the real attempt, and it is the number that says whether a
+         man is refusing to pay or failing to. Fired once. */
+      if (!pushed.current && data.status && data.status !== "CREATED" && data.status !== "UNKNOWN") {
+        pushed.current = true;
+        track("pay_pushed", plan, locale);
+      }
 
       if (data.paid) {
         update((s) => ({

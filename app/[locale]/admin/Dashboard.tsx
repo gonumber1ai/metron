@@ -33,6 +33,7 @@ export type Snapshot = {
 const STEP_LABEL: Record<string, string> = {
   quiz_start: "Started the quiz",
   quiz_complete: "Finished the quiz",
+  pay_pushed: "Sent a payment prompt to his phone",
   result_view: "Saw their result",
   offer_view: "Opened the offer",
   checkout_started: "Started checkout",

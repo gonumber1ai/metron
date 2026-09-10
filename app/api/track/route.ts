@@ -18,6 +18,9 @@ const ALLOWED = new Set([
   "quiz_start",
   "quiz_answer",
   "quiz_complete",
+  /* He submitted Fapshi's own form and a prompt reached his handset. The
+     only step between reaching the checkout and paying that we can see. */
+  "pay_pushed",
   "result_view",
   "offer_view",
   "login_view",
