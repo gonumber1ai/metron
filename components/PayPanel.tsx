@@ -253,6 +253,16 @@ export function PayPanel({
   );
 }
 
+/* The three labels Fapshi's hosted form shows, and what they mean.
+   Kept out of the dictionary on purpose: this is not our copy being
+   translated, it is a glossary FOR a third party's English form, so it only
+   exists in the French build and has no English counterpart to sit beside. */
+const FRAME_KEY: readonly (readonly [string, string])[] = [
+  ["Full name", "votre nom — n'importe lequel, on ne le vérifie pas"],
+  ["Email address", "votre adresse e-mail"],
+  ["Payment number", "votre numéro MTN ou Orange"],
+];
+
 /* ------------------------------------------------------------------ MoMo */
 
 function MomoPanel({
@@ -505,6 +515,28 @@ function MomoPanel({
   if (state === "embedded" && frameUrl) {
     return (
       <div className="overflow-hidden rounded-2xl border border-ink-600 bg-white">
+        {/* Fapshi's form is English and stays English: their API takes no
+            language parameter, and it is their page on their origin, so there
+            is nothing of theirs we are allowed to reach into. A francophone
+            buyer therefore meets three English labels on the last screen
+            before his money moves. This is the next best thing — the same
+            three words in French, on our side of the boundary, above the
+            frame so he reads them before he hits the fields. Delete this the
+            day direct-pay is approved and the frame goes away. */}
+        {locale === "fr" && (
+          <div className="border-b border-ink-600 bg-ink-900 px-4 py-3">
+            <p className="text-[0.8rem] text-faint">
+              Le formulaire ci-dessous est en anglais&nbsp;:
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {FRAME_KEY.map(([label, fr]) => (
+                <li key={label} className="text-[0.8rem] text-faint">
+                  <span className="font-semibold text-white">{label}</span> = {fr}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <iframe
           src={frameUrl}
           title={t.momo}
