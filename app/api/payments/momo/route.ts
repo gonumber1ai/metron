@@ -189,22 +189,18 @@ export async function POST(req: Request) {
       email: email || undefined,
       message,
     });
-    /* Ask Fapshi's hosted page for the buyer's language.
-       It renders in English inside a French funnel otherwise, which is the
-       last screen before he pays and the worst place to change language on
-       him. Sent as query parameters rather than in the initiate-pay body:
-       Fapshi validates the fields it knows and rejects the ones it does not,
-       whereas an unrecognised query parameter is simply ignored. Several
-       spellings because their checkout is not documented for this — whichever
-       one it reads wins, and the rest cost nothing.
-       If it still comes back English, it is a Fapshi-side setting and worth
-       asking their support to switch on the account. */
-    const hosted = new URL(result.link);
-    for (const k of ["lang", "locale", "language"]) hosted.searchParams.set(k, locale);
+    /* TESTED, DOES NOT WORK: there is no way to ask Fapshi's hosted page for
+       French. initiate-pay accepts amount, email, redirectUrl, userId,
+       externalId and message — nothing else — and appending lang / locale /
+       language to the returned link is simply ignored. Their page renders in
+       English inside our French funnel, on the last screen before he pays.
+       The fix is not on this line. It is direct-pay, which replaces their page
+       with our own form in his language; see the block above, waiting on
+       Fapshi approving the account for it. Do not re-guess parameter names. */
 
     return NextResponse.json({
       status: "redirect",
-      url: hosted.toString(),
+      url: result.link,
       transId: result.transId,
       mode: "hosted",
       // Only useful to us, and it names why the in-house path was skipped.
