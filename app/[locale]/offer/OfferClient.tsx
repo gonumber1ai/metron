@@ -162,14 +162,11 @@ export function OfferClient({
         </header>
 
         <main className="mx-auto max-w-xl px-5 py-10 md:py-14">
-          {/* ── WHAT HE IS BUYING ────────────────────────────────────────
-              Stated, not offered. No choice to make here. */}
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
-            {planName}
-          </p>
-          <h1 className="mt-3 text-[1.9rem] leading-[1.1] md:text-[2.3rem]">
-            {plan === "test" ? t.checkout.h : planName}
-          </h1>
+          {/* The plan name, the headline, the price and the "finalise your
+              payment below" line all stood here. He has just read a whole
+              sales page and pressed a button that named the price — repeating
+              it is another screen between him and paying. Fapshi's own
+              checkout states the amount again before he confirms. */}
           {/* Told plainly, not swapped silently. A price that changed with no
               explanation reads as a mistake or a trick — this says the offer
               ran out and this is the ordinary price. */}
@@ -180,23 +177,6 @@ export function OfferClient({
                 : `Your ${offerWas} offer has expired. You are now at the price everyone pays.`}
             </p>
           )}
-          <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-1">
-            <p className="metric text-[2.8rem] font-bold leading-none text-jade md:text-[3.2rem]">
-              {priceOf(plan)}
-            </p>
-            {/* The real former price, struck. Muted rather than red: a red
-                slash is the visual signature of every guru discount on the
-                internet, and this page is trying to be the serious option in
-                a category the buyer already suspects. */}
-            {wasOf(plan) && (
-              <p className="metric text-[1.3rem] font-bold leading-none text-faint line-through decoration-2">
-                {wasOf(plan)}
-              </p>
-            )}
-          </div>
-          <p className="mt-4 text-[0.98rem] leading-relaxed text-mute">
-            {t.checkout.sub}
-          </p>
 
           {/* Where he is in the process. Three steps, first one live. */}
           <ol className="mt-7 flex items-center gap-2.5">
@@ -263,41 +243,22 @@ export function OfferClient({
           {/* Guarantee and privacy, once each and compressed. Both were
               already made on the sales page; restating them at length here
               reads as anxiety rather than reassurance. */}
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <section className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4">
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
-                {t.checkout.guaranteeH}
-              </h2>
-              <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">
-                {t.checkout.guaranteeShort}
-              </p>
-            </section>
-            <section className="rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4">
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
-                {t.checkout.privacyH}
-              </h2>
-              <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">
-                {t.checkout.privacyShort}
-              </p>
-            </section>
-          </div>
+          {/* Guarantee only. The privacy card said the same thing the sales
+              page already says twice, and its reassurance is not what is in
+              doubt at the moment he is entering a PIN — the refund is. */}
+          <section className="mt-5 rounded-2xl border border-ink-600 bg-ink-850 px-5 py-4">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">
+              {t.checkout.guaranteeH}
+            </h2>
+            <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">
+              {t.checkout.guaranteeShort}
+            </p>
+          </section>
 
-          {/* ── THE SPRINT, AS A FUTURE ──────────────────────────────────
-              Below the payment and deliberately quiet: no card, no accent,
-              no button. It anchors the value of what he is paying today and
-              answers "what is this leading to" without asking him to weigh a
-              69,000 decision at the moment he is entering a PIN. */}
-          {plan === "test" && (
-            <section className="mt-8 border-t border-ink-700 pt-6">
-              <h2 className="text-[0.98rem] font-bold text-bone">
-                {t.checkout.afterTenH}
-              </h2>
-              <p className="mt-2.5 text-[0.92rem] leading-relaxed text-mute">{afterTen}</p>
-              <p className="mt-2.5 text-[0.92rem] font-bold leading-relaxed text-bone">
-                {t.checkout.afterTenNote}
-              </p>
-            </section>
-          )}
+          {/* The 30-day section stood here. The sales page already anchors it
+              at 15 000 and tells him to earn it with ten days first; raising
+              it again at the PIN screen introduces a second decision at the
+              exact moment he is making the first one. */}
 
           {/* --------------------------------------------- fallback capture */}
           {status === "fallback" && (
@@ -342,9 +303,9 @@ export function OfferClient({
             </section>
           )}
 
-          <footer className="mt-10 border-t border-ink-700 pt-6">
-            <p className="text-[11.5px] leading-relaxed text-faint">{m.disclaimer}</p>
-          </footer>
+          {/* The medical notice is on the sales page he came from, in the app
+              on Day 0, and in the confirmation email. It does not need to be
+              the last thing he reads before entering a PIN. */}
         </main>
       </div>
     </>

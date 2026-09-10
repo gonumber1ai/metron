@@ -309,7 +309,7 @@ function MomoPanel({
      trust us with it. His name and where to send the access code are asked
      for AFTER the money has moved, when he is a customer rather than a
      stranger being interviewed. */
-  const valid = PHONE_RE.test(digits);
+  const valid = true;
   const op = operatorOf(digits);
 
   async function pay() {
@@ -598,31 +598,19 @@ function MomoPanel({
           Three of the four fields a man met before he was allowed to press
           Pay, none of which Fapshi needs to take his money. They are asked
           for on the other side of the charge now — see the paid state. */}
-      <label className="block">
-        <span className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[0.9rem] font-semibold text-bone">{t.phoneLabel}</span>
-          <OperatorMarks detected={op} />
-        </span>
-        <div className="relative mt-2.5">
-          <input
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            value={digits}
-            onChange={(e) => {
-              setPhone(e.target.value);
-              setErr(null);
-            }}
-            placeholder="6XXXXXXXX"
-            aria-invalid={Boolean(err)}
-            className="metric w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-4 text-[1.5rem] font-bold tracking-wide text-bone placeholder:text-faint focus:border-jade focus:outline-none"
-          />
-        </div>
-      </label>
+      {/* No field at all. Fapshi's hosted checkout asks for the number on its
+          own page, so ours only ever made him type it twice — and it was the
+          thing keeping the Pay button grey. Pressing Pay opens that checkout
+          straight away, and he enters his number once, there.
 
-      <p className={`mt-2 text-[0.85rem] ${err ? "text-alert" : "text-faint"}`}>
-        {err ?? t.phoneHelp}
-      </p>
+          The operator marks stay: they say which networks are accepted, which
+          is worth knowing before he commits to the screen. */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[0.9rem] font-semibold text-bone">{t.phoneLabel}</span>
+        <OperatorMarks detected={op} />
+      </div>
+
+      {err && <p className="mt-2 text-[0.85rem] text-alert">{err}</p>}
 
       <p className="mt-4 rounded-xl border-l-2 border-jade bg-ink-900/50 px-3.5 py-3 text-[0.84rem] leading-relaxed text-mute">
         {t.trust}

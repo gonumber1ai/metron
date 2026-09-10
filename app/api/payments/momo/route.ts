@@ -93,7 +93,12 @@ export async function POST(req: Request) {
   if (!ref) {
     return NextResponse.json({ status: "error", message: "missing ref" }, { status: 400 });
   }
-  if (!PHONE_RE.test(phone)) {
+  /* Optional now. Fapshi's own hosted checkout asks for the number itself, so
+     collecting it here as well made a man type it twice — once on our form and
+     again on theirs. It is only needed for direct-pay, which pushes the prompt
+     straight to his handset; without it we go to the hosted page, which is
+     where he enters it once. A number that IS given still has to be real. */
+  if (phone && !PHONE_RE.test(phone)) {
     return NextResponse.json({ status: "bad_phone" }, { status: 400 });
   }
 
@@ -131,7 +136,8 @@ export async function POST(req: Request) {
 
   /* ---------------------------------------------- 1. charge the handset */
 
-  if (directPayAllowed()) {
+  // No number, no handset to push to — straight to the hosted page.
+  if (phone && directPayAllowed()) {
     try {
       // `medium` is optional for Fapshi, but naming the network removes any
       // ambiguity about which rail the prompt should go down.
