@@ -7,7 +7,7 @@ export type D2Row = {
   passed_quiz: number;
   clicked: number;
   saw_checkout: number;
-  tried_to_pay: number;
+  pushed: number;
   paid: number;
 };
 
@@ -60,12 +60,20 @@ const STEPS: { key: keyof Counts; label: string; of: keyof Counts | null }[] = [
   { key: "passed_quiz", label: "Said yes", of: "arrived" },
   { key: "clicked", label: "Pressed a buy button", of: "arrived" },
   { key: "saw_checkout", label: "Reached checkout", of: "clicked" },
-  { key: "tried_to_pay", label: "Pressed Pay", of: "saw_checkout" },
-  { key: "paid", label: "Paid", of: "tried_to_pay" },
+  /* The column that decides whether the price is the problem.
+     "Pressed Pay" used to sit here, counting pay_attempt — but the checkout
+     now opens Fapshi on arrival, so that event fires before he has typed
+     anything and the step became an exact copy of the one before it. This
+     one fires when the transaction leaves CREATED, which means a USSD prompt
+     reached a handset. Reached checkout but never pushed is a man refusing
+     to pay; pushed but never paid is a man failing to. Only the second is
+     about money he does not have. */
+  { key: "pushed", label: "Sent a payment prompt", of: "saw_checkout" },
+  { key: "paid", label: "Paid", of: "pushed" },
 ];
 
 const EMPTY: Omit<D2Row, "campaign" | "locale"> = {
-  arrived: 0, passed_quiz: 0, clicked: 0, saw_checkout: 0, tried_to_pay: 0, paid: 0,
+  arrived: 0, passed_quiz: 0, clicked: 0, saw_checkout: 0, pushed: 0, paid: 0,
 };
 
 function pct(n: number, d: number): string {
