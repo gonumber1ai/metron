@@ -669,6 +669,25 @@ export const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+/**
+ * The filmed ones, in order. The first is the one the page leads with.
+ *
+ * Deliberately not a slot: a video is not evidence of one thing the way a
+ * measurement story is, and the page shows it high up regardless of which
+ * rail its card also sits in.
+ */
+export function getVideos(locale: string) {
+  const lang = locale === "fr" ? "fr" : "en";
+  return TESTIMONIALS.filter((t) => t.video).map((t) => ({
+    id: t.id,
+    country: t.country,
+    name: t.name,
+    plan: t.plan,
+    quote: t.quote[lang],
+    video: t.video,
+  }));
+}
+
 /** Everything cleared for one position on the page, in order. */
 export function getTestimonials(locale: string, slot: Slot) {
   const lang = locale === "fr" ? "fr" : "en";

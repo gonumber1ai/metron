@@ -535,3 +535,15 @@ a[role="button"],
   background: transparent; color: #fff; font-size: 15px; cursor: pointer;
 }
 .c-vid-close:hover { border-color: var(--color-lime); color: var(--color-lime); }
+
+/* The filmed testimonial at full size, under the one question. */
+.c-spot { margin: 20px auto 0; max-width: 800px; }
+.c-spot-play { aspect-ratio: 16 / 9; border: 1px solid rgb(156 234 76 / .35); border-radius: 18px; }
+.c-spot-play img { opacity: .82; }
+.c-spot-play .c-rail-play-mark { width: 72px; height: 72px; font-size: 24px; }
+.c-spot-play small { right: 12px; bottom: 12px; padding: 5px 12px; font-size: 12px; }
+.c-spot-quote { margin: 16px auto 0; max-width: 640px; color: rgb(255 255 255 / .88); font-size: 1.02rem; line-height: 1.6; text-align: center; }
+.c-spot-by { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; }
+.c-spot-by strong { color: #fff; font-size: .9rem; }
+.c-spot-by small { color: rgb(255 255 255 / .5); font-size: .78rem; }
+@media (max-width: 768px) { .c-spot-play .c-rail-play-mark { width: 58px; height: 58px; font-size: 19px; } }

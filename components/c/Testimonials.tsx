@@ -112,6 +112,82 @@ function VideoModal({
   );
 }
 
+/**
+ * The same video, but the size the only piece of filmed proof deserves.
+ *
+ * It sits directly under the one question, on the first screen, because a
+ * card two-thirds down a page is not proof anybody sees — and a face saying
+ * it is the strongest asset this funnel has. Still click-to-play: prominence
+ * is not the same argument as autoplay, and the reasons against starting a
+ * video by itself on this page have not changed.
+ *
+ * The poster tries maxresdefault first — it is 1280x720 and does not exist
+ * for every upload — and falls back to hqdefault, which always does.
+ */
+export function VideoSpot({
+  card,
+  locale,
+  heading,
+  playLabel,
+  closeLabel,
+  planLabels,
+}: {
+  card?: Card;
+  locale: string;
+  heading?: string;
+  playLabel: string;
+  closeLabel: string;
+  planLabels: { "10": string; "30": string };
+}) {
+  const [open, setOpen] = useState(false);
+  if (!card?.video) return null;
+  const id = card.video.youtube;
+
+  return (
+    <section className="c-spot">
+      {heading && <p className="c-kicker c-rail-head">{heading}</p>}
+
+      <button
+        type="button"
+        className="c-rail-play c-spot-play"
+        onClick={() => setOpen(true)}
+        aria-label={playLabel}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
+          alt=""
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (!img.dataset.fallback) {
+              img.dataset.fallback = "1";
+              img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+            }
+          }}
+        />
+        <span aria-hidden className="c-rail-play-mark">▶</span>
+        <small>{playLabel}</small>
+      </button>
+
+      <blockquote className="c-spot-quote">“{card.quote}”</blockquote>
+      <p className="c-spot-by">
+        {flagOf(card.country) && <span aria-hidden>{flagOf(card.country)}</span>}
+        <strong>{card.name}</strong>
+        <small>{planLabels[card.plan]}</small>
+      </p>
+
+      {open && (
+        <VideoModal
+          card={card}
+          locale={locale}
+          closeLabel={closeLabel}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </section>
+  );
+}
+
 export function Testimonials({
   items,
   heading,
