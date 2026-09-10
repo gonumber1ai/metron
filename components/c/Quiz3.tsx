@@ -36,13 +36,16 @@ import { useEffect, useRef, useState } from "react";
 export function Quiz3({
   quals,
   ofLabel,
+  kicker,
   privateNote,
   onDone,
 }: {
   quals: { q: string; options: string[] }[];
   /** "Question {n} of {total}" */
   ofLabel: string;
-  privateNote: string;
+  /** Single-question mode only, where a count would say nothing. */
+  kicker?: string;
+  privateNote?: string;
   onDone: () => void;
 }) {
   const [i, setI] = useState(0);
@@ -107,14 +110,29 @@ export function Quiz3({
         </>
       )}
 
-      {/* Empty when the headline above has already asked it. */}
+      {/* The one question announcing itself. It sat in the hero as a grey
+          lede with four benefit tiles and a script line between it and the
+          only button that answers it — a question you have to scroll away
+          from to answer is not a question, it is a caption. */}
+      {single && kicker && (
+        <p className="text-center text-[12px] font-bold uppercase tracking-[0.14em] text-lime">
+          {kicker}
+        </p>
+      )}
+
       {q.q && (
-        <h3 className="mx-auto mt-3 max-w-lg text-center text-[1.3rem] font-bold leading-snug text-white md:text-[1.55rem]">
+        <h3
+          className={`mx-auto max-w-lg text-center font-bold leading-snug text-white ${
+            single
+              ? "mt-3 text-[1.5rem] md:text-[1.9rem]"
+              : "mt-3 text-[1.3rem] md:text-[1.55rem]"
+          }`}
+        >
           {q.q}
         </h3>
       )}
 
-      <div className={`mx-auto max-w-lg space-y-3 ${single ? "" : "mt-7"}`}>
+      <div className={`mx-auto max-w-lg space-y-3 ${single ? "mt-6" : "mt-7"}`}>
         {q.options.map((o) => {
           const on = chosen === o;
           return (
@@ -125,12 +143,14 @@ export function Quiz3({
               onClick={() => choose(o)}
               className={
                 single
-                  ? /* The only way forward, so it reads as the button it is
-                       rather than as one row of a list with nothing under it. */
-                    `flex w-full items-center justify-center rounded-xl border px-5 py-4 text-center text-[1.1rem] font-bold transition-colors ${
-                      on
-                        ? "border-lime bg-lime text-black"
-                        : "border-lime bg-lime/10 text-white hover:bg-lime/20"
+                  ? /* Solid lime, black text, same as every other button on
+                       this page that takes a man somewhere. It was a lime
+                       tint at 10% on a near-black card, which is a shade of
+                       dark green — technically visible, and nothing you would
+                       ever reach for. This is the only way past this screen;
+                       it has to look like the way past this screen. */
+                    `flex w-full items-center justify-center rounded-xl px-5 py-4 text-center text-[1.15rem] font-bold transition-transform ${
+                      on ? "scale-[0.98] bg-lime text-black" : "btn-lime text-black"
                     }`
                   : `flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-[1rem] font-medium transition-colors ${
                       on
@@ -156,6 +176,7 @@ export function Quiz3({
       </div>
 
 
+      {privateNote && (
       <p className="mt-7 flex items-center justify-center gap-2 text-[12.5px] text-white/50">
         <span aria-hidden className="text-lime">
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
@@ -169,6 +190,7 @@ export function Quiz3({
         </span>
         {privateNote}
       </p>
+      )}
     </div>
   );
 }
