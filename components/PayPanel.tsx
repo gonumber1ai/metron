@@ -57,6 +57,8 @@ const T = {
     phoneLabel: "Your Mobile Money number",
     phoneHelp: "9 digits, starts with 6. MTN or Orange.",
     badPhone: "That is not a valid number. 9 digits, starting with 6.",
+    needName: "Add a name first — any name works, we never check it.",
+    needContact: "Add an email or a WhatsApp number, so we can send your access code.",
     pay: (a: string) => `Pay ${a}`,
     charging: "Sending the request…",
     awaitingH: "Check your phone now",
@@ -92,6 +94,8 @@ const T = {
     phoneLabel: "Votre numéro Mobile Money",
     phoneHelp: "9 chiffres, commence par 6. MTN ou Orange.",
     badPhone: "Ce numéro n'est pas valide. 9 chiffres, commençant par 6.",
+    needName: "Mettez d'abord un nom — n'importe lequel, on ne le vérifie jamais.",
+    needContact: "Mettez un email ou un numéro WhatsApp, pour recevoir votre code d'accès.",
     pay: (a: string) => `Payer ${a}`,
     charging: "Envoi de la demande…",
     awaitingH: "Regardez votre téléphone",
@@ -295,7 +299,20 @@ function MomoPanel({
   async function pay() {
     setErr(null);
     if (!valid) {
-      setErr(t.badPhone);
+      /* The button is no longer disabled, so this is where a man finds out
+         what is missing — and it has to name the right field. It used to say
+         the phone number was invalid whatever the actual gap was, which is
+         useless advice to someone whose number is fine and whose name is
+         blank.
+
+         Tracked too. While the button was disabled, pay_attempt could only
+         fire from a fully valid form, so "0 pressed Pay out of 66" could not
+         tell us whether nobody wanted to pay or nobody could. This is that
+         missing number. */
+      track("pay_blocked", plan, locale);
+      if (!PHONE_RE.test(digits)) setErr(t.badPhone);
+      else if (name.trim().length < 2) setErr(t.needName);
+      else setErr(t.needContact);
       return;
     }
     setState("charging");
@@ -594,8 +611,12 @@ function MomoPanel({
       <button
         type="button"
         onClick={pay}
-        disabled={!valid}
-        className="mt-4 w-full rounded-2xl btn-go py-5 text-[1.05rem] font-bold disabled:opacity-40"
+        /* Never disabled. A grey button that will not respond and does not say
+           why is the worst thing that can sit at the end of a checkout: 66 men
+           reached this page and not one pressed Pay, because for most of them
+           it could not be pressed. Pressing it now always does something —
+           either it charges, or it tells him exactly which field is missing. */
+        className="mt-4 w-full rounded-2xl btn-go py-5 text-[1.05rem] font-bold"
       >
         {t.pay(price.display)}
       </button>

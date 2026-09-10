@@ -29,6 +29,9 @@ const ALLOWED = new Set([
   "start_view",
   "start_cta",
   "pay_attempt",
+  /* He pressed Pay with something missing. Separates "nobody wanted to buy"
+     from "nobody could" — the distinction the disabled button was hiding. */
+  "pay_blocked",
 ]);
 
 export async function POST(req: Request) {
