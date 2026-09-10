@@ -6,7 +6,7 @@ import { Customers, type ActivityRow } from "./Customers";
 import { Broadcast } from "./Broadcast";
 import { Ads, type CampaignRow } from "./Ads";
 import { StartFunnel, type StartRow, type CtaRow } from "./StartFunnel";
-import { D2Funnel, type D2Row } from "./D2Funnel";
+import { D2Funnel, type D2Row, type D2DailyRow } from "./D2Funnel";
 
 export type Snapshot = {
   connected: boolean;
@@ -20,6 +20,7 @@ export type Snapshot = {
   startRows: StartRow[];
   ctaRows: CtaRow[];
   d2Rows: D2Row[];
+  d2Daily: D2DailyRow[];
   conversations: {
     ref: string;
     last_body: string;
@@ -280,7 +281,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
           )}
 
           {tab === "d2" && (
-            <D2Funnel rows={snap.d2Rows} />
+            <D2Funnel rows={snap.d2Rows} daily={snap.d2Daily} />
           )}
 
           {/* ---------------------------------------------------- broadcast */}

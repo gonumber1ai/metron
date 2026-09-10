@@ -1,10 +1,12 @@
 -- ===========================================================================
--- Metron — migration 013: split the last step of the /c funnel in two
+-- Metron — migration 013
+--   1. split the last step of the /c funnel in two
+--   2. add a day-by-day version of it
 --
 -- SELF-CONTAINED. Supersedes 012_funnel_d2.sql — running this file alone is
 -- enough, whether or not 012 was ever run.
 --
--- ── WHAT CHANGED AND WHY ──────────────────────────────────────────────────
+-- ── 1. WHAT CHANGED AND WHY ───────────────────────────────────────────────
 -- `tried_to_pay` counted pay_attempt, which used to mean a man pressed a Pay
 -- button on our own form. That form is gone: the checkout now opens Fapshi
 -- the instant he arrives, so pay_attempt fires on arrival and the column had
@@ -67,3 +69,57 @@ left join public.payments p
   on p.ref = e.ref and p.status = 'paid'
 group by coalesce(e.campaign, '(none)'), e.locale
 order by arrived desc;
+
+
+-- ===========================================================================
+-- 2. THE SAME FUNNEL, ONE ROW PER DAY
+--
+-- ── A MAN BELONGS TO THE DAY HE ARRIVED, NOT THE DAY HE ACTED ─────────────
+-- The obvious way to do this is to date each event and group by that. It is
+-- wrong here: a man who arrives Monday night and pays Tuesday morning would
+-- be an arrival on Monday and a payment on Tuesday, so Monday reads as a day
+-- that sold nothing and Tuesday as a day that sold to nobody. Both false, and
+-- the error grows exactly when it matters — around a change you are trying to
+-- read the effect of.
+--
+-- So each ref is stamped with the day of its FIRST landing on /c and every
+-- step it later takes is counted on that day. A row then answers the only
+-- question worth asking: of the men who arrived on this day, how far did they
+-- get. Each ref appears on exactly one day, so the days add up to the totals
+-- in funnel_d2 above.
+--
+-- ── THE CLOCK IS DOUALA'S ─────────────────────────────────────────────────
+-- created_at is UTC. Cameroon is UTC+1, so anything after 23:00 local lands
+-- on the wrong day if you date it in UTC — which is a real part of the
+-- evening, and the evening is when this traffic buys.
+-- ===========================================================================
+
+drop view if exists public.funnel_d2_daily;
+create view public.funnel_d2_daily as
+with cohort as (
+  select
+    ref,
+    (min(created_at) at time zone 'Africa/Douala')::date as day
+  from public.events
+  where name = 'start_view' and detail = 'c'
+  group by ref
+)
+select
+  c.day,
+  coalesce(e.campaign, '(none)')                                           as campaign,
+  e.locale,
+  count(distinct e.ref) filter (where e.name = 'start_view'
+                                  and e.detail = 'c')                      as arrived,
+  count(distinct e.ref) filter (where e.name = 'quiz_complete'
+                                  and e.detail = 'c')                      as passed_quiz,
+  count(distinct e.ref) filter (where e.name = 'start_cta'
+                                  and e.detail like 'c\_%')                as clicked,
+  count(distinct e.ref) filter (where e.name = 'offer_view')               as saw_checkout,
+  count(distinct e.ref) filter (where e.name = 'pay_pushed')               as pushed,
+  count(distinct p.ref)                                                    as paid
+from public.events e
+join cohort c on c.ref = e.ref
+left join public.payments p
+  on p.ref = e.ref and p.status = 'paid'
+group by c.day, coalesce(e.campaign, '(none)'), e.locale
+order by c.day desc, arrived desc;

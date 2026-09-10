@@ -40,11 +40,12 @@ export default async function AdminPage() {
     startRows: [],
     ctaRows: [],
     d2Rows: [],
+    d2Daily: [],
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows] =
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily] =
       await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
@@ -59,6 +60,10 @@ export default async function AdminPage() {
       client.from("start_cta_breakdown").select("*").limit(50),
       /* 012_funnel_d2.sql — the /c page under its seven Facebook links. */
       client.from("funnel_d2").select("*").limit(50),
+      /* 013 — the same funnel by the day a man first landed. Missing
+         until that file is run, and an empty list simply hides the
+         section rather than breaking the page. */
+      client.from("funnel_d2_daily").select("*").limit(400),
     ]);
 
     snap.funnel = funnel.data ?? [];
@@ -69,6 +74,7 @@ export default async function AdminPage() {
     snap.startRows = startRows.data ?? [];
     snap.ctaRows = ctaRows.data ?? [];
     snap.d2Rows = d2Rows.data ?? [];
+    snap.d2Daily = d2Daily.data ?? [];
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.

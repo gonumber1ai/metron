@@ -1,5 +1,8 @@
 "use client";
 
+/** One day of the same funnel: the men who FIRST landed on /c that day. */
+export type D2DailyRow = D2Row & { day: string };
+
 export type D2Row = {
   campaign: string;
   locale: string;
@@ -80,7 +83,7 @@ function pct(n: number, d: number): string {
   return d > 0 ? `${Math.round((n / d) * 100)}%` : "—";
 }
 
-export function D2Funnel({ rows }: { rows: D2Row[] }) {
+export function D2Funnel({ rows, daily = [] }: { rows: D2Row[]; daily?: D2DailyRow[] }) {
   // Fold every locale for a tag into one row. The links are all French, but
   // a man who switches language mid-visit must not become a second row.
   const byTag = new Map<string, Omit<D2Row, "campaign" | "locale">>();
@@ -121,6 +124,24 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
     const lost = (total[s.of] as number) - (total[s.key] as number);
     if (lost > (worst?.lost ?? 0)) worst = { from: from.label, to: s.label, lost };
   }
+
+  /* One row per day, campaigns and locales folded, newest first — plus which
+     link carried that day, because "arrivals fell" and "fb3 was paused" look
+     identical in a total. Each ref is stamped with the day it first landed,
+     so a man who arrives at night and pays in the morning stays on the day
+     that won him and the days still sum to the table above. */
+  const byDay = new Map<string, Counts & { top: string; topArrived: number }>();
+  for (const r of daily) {
+    const cur = byDay.get(r.day) ?? { ...EMPTY, top: "—", topArrived: 0 };
+    for (const st of STEPS) cur[st.key] = (cur[st.key] as number) + Number(r[st.key] ?? 0);
+    const n = Number(r.arrived ?? 0);
+    if (n > cur.topArrived) {
+      cur.topArrived = n;
+      cur.top = D2_LINKS.find((l) => l.tag === r.campaign)?.name ?? (r.campaign === "(none)" ? "untagged" : r.campaign);
+    }
+    byDay.set(r.day, cur);
+  }
+  const days = [...byDay.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 
   return (
     <div className="mt-6 space-y-6">
@@ -222,6 +243,52 @@ export function D2Funnel({ rows }: { rows: D2Row[] }) {
           </p>
         )}
       </section>
+
+      {/* ------------------------------------------------------ day by day */}
+      {days.length > 0 && (
+        <section className="rounded-2xl card p-5">
+          <h2 className="text-[0.95rem] font-bold text-bone">Day by day</h2>
+          <p className="mt-0.5 mb-4 text-[12px] leading-relaxed text-faint">
+            A man counts on the day he first landed, not the day he acted — so a visit at
+            11pm that pays the next morning stays on the night that won him, and these days
+            add up to the totals above. Dates are Douala time.
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[860px] text-left text-[0.88rem]">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wide text-faint">
+                  <th className="pb-2 pr-4 font-bold">Day</th>
+                  {STEPS.map((s) => (
+                    <th key={s.key} className="pb-2 pr-4 font-bold">{s.label}</th>
+                  ))}
+                  <th className="pb-2 pr-4 font-bold">Led by</th>
+                </tr>
+              </thead>
+              <tbody>
+                {days.map(([day, r]) => (
+                  <tr key={day} className="border-t border-ink-700">
+                    <td className="metric py-2.5 pr-4 font-bold text-bone">{day}</td>
+                    {STEPS.map((s) => {
+                      const v = r[s.key] as number;
+                      const prev = s.of ? (r[s.of] as number) : null;
+                      return (
+                        <td key={s.key} className="metric py-2.5 pr-4">
+                          <span className={s.key === "paid" ? "font-bold text-jade" : "text-bone"}>{v}</span>
+                          {prev !== null && (
+                            <span className="ml-1.5 text-[11px] text-faint">{pct(v, prev)}</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="py-2.5 pr-4 text-[12px] text-faint">{r.top}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
