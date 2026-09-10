@@ -53,7 +53,11 @@ type Counts = Omit<D2Row, "campaign" | "locale">;
  */
 const STEPS: { key: keyof Counts; label: string; of: keyof Counts | null }[] = [
   { key: "arrived", label: "Arrived", of: null },
-  { key: "passed_quiz", label: "Answered all 3", of: "arrived" },
+  /* Was "Answered all 3". The /c page asks one question now — a commitment,
+     not a qualification — so the count is men who pressed "Yes I can". The
+     event behind it is unchanged (quiz_complete, fired on the same callback),
+     which is why the numbers either side of this change are still comparable. */
+  { key: "passed_quiz", label: "Said yes", of: "arrived" },
   { key: "clicked", label: "Pressed a buy button", of: "arrived" },
   { key: "saw_checkout", label: "Reached checkout", of: "clicked" },
   { key: "tried_to_pay", label: "Pressed Pay", of: "saw_checkout" },
