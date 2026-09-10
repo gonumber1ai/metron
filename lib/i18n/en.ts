@@ -113,7 +113,7 @@ export const en = {
     sub: "Complete your payment below. Your access details are sent the moment it clears.",
     steps: ["Payment", "Access", "Day 1"],
     afterH: "After payment",
-    after: ["Your access details arrive by email", "Open Metron", "Take your day-one measurement"],
+    after: ["Your access details arrive by email", "Log in to Metron", "Take your day-one measurement"],
     guaranteeH: "10-day result guarantee",
     guaranteeShort:
       "Complete the programme and both measurements. If you are not lasting longer, contact us and we refund you.",

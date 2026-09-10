@@ -178,10 +178,30 @@ export function OfferClient({
             </p>
           )}
 
-          {/* "Après le paiement — 1 vos accès arrivent, 2 ouvrez Metron,
-              3 prenez votre mesure" stood here. Told already on the page he
-              came from, and this screen exists to be passed through, not
-              read. */}
+          {/* Where he is in the process. Three steps, first one live. */}
+          <ol className="mt-7 flex items-center gap-2.5">
+            {t.checkout.steps.map((s, i) => (
+              <li key={s} className="flex flex-1 items-center gap-2.5">
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-bold ${
+                    i === 0 ? "bg-jade text-[#04140C]" : "bg-ink-700 text-faint"
+                  }`}
+                >
+                  {i + 1}
+                </span>
+                <span
+                  className={`text-[12.5px] font-bold ${
+                    i === 0 ? "text-bone" : "text-faint"
+                  }`}
+                >
+                  {s}
+                </span>
+                {i < t.checkout.steps.length - 1 && (
+                  <span aria-hidden className="h-px flex-1 bg-ink-700" />
+                )}
+              </li>
+            ))}
+          </ol>
 
           {/* ── PAYMENT ──────────────────────────────────────────────────
               Untouched. Both rails, embedded — he never leaves the site,
@@ -214,7 +234,19 @@ export function OfferClient({
                   >
                     {i + 1}
                   </span>
-                  {s}
+                  {/* Step two is the way in, so it is the link. A man who pays
+                      on his laptop and opens the app on his phone needs it to
+                      be a thing he can press, not a sentence. */}
+                  {i === 1 ? (
+                    <Link
+                      href={`/${locale}/login`}
+                      className="font-bold text-jade underline decoration-jade/40 underline-offset-4 hover:decoration-jade"
+                    >
+                      {s}
+                    </Link>
+                  ) : (
+                    s
+                  )}
                 </li>
               ))}
             </ol>

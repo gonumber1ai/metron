@@ -110,7 +110,7 @@ export const fr = {
     afterH: "Après le paiement",
     after: [
       "Vos accès arrivent par e-mail",
-      "Ouvrez Metron",
+      "Connectez-vous à Metron",
       "Prenez votre mesure du premier jour",
     ],
     guaranteeH: "Garantie résultat 10 jours",
