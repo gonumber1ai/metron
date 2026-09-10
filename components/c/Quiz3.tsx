@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * The three questions, one screen at a time: numbered dots across the top,
- * "Question 1 of 3", the question, options with a radio on the right.
+ * The qualifying questions, one screen at a time: numbered dots across the
+ * top, "Question 1 of 3", the question, options with a radio on the right.
+ *
+ * ── IT IS DOWN TO ONE ─────────────────────────────────────────────────────
+ * The /c page now passes a single question — a commitment, not a diagnosis —
+ * and every piece of multi-step furniture hides itself when the list is one
+ * long. The name is stale and the three-question path still works; nothing
+ * here assumes a count.
  *
  * ── ANSWERING ADVANCES ────────────────────────────────────────────────────
  * There is no Next button. Tapping an answer selects it and moves on by
@@ -64,38 +70,51 @@ export function Quiz3({
   }
 
   const q = quals[i];
+  /* Cut to one, the furniture of a multi-step form becomes a lie: dots that
+     chart no progress, "Question 1 of 1", and a radio circle, which is the
+     grammar of choosing between alternatives when there are none. All three
+     are hidden rather than removed — the component still takes a list, and
+     three questions would render exactly as they did before. */
+  const single = quals.length === 1;
 
   return (
     <div className="rounded-3xl border border-white/10 bg-coal-800/90 p-6 backdrop-blur md:p-10">
-      {/* step dots */}
-      <div className="mx-auto flex max-w-sm items-center">
-        {quals.map((_, n) => (
-          <span key={n} className="flex flex-1 items-center last:flex-none">
-            <span
-              className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold ${
-                n <= i ? "bg-lime text-black" : "bg-white/15 text-white/60"
-              }`}
-            >
-              {n + 1}
-            </span>
-            {n < quals.length - 1 && (
-              <span
-                className={`mx-2 h-px flex-1 ${n < i ? "bg-lime" : "bg-white/15"}`}
-              />
-            )}
-          </span>
-        ))}
-      </div>
+      {!single && (
+        <>
+          {/* step dots */}
+          <div className="mx-auto flex max-w-sm items-center">
+            {quals.map((_, n) => (
+              <span key={n} className="flex flex-1 items-center last:flex-none">
+                <span
+                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold ${
+                    n <= i ? "bg-lime text-black" : "bg-white/15 text-white/60"
+                  }`}
+                >
+                  {n + 1}
+                </span>
+                {n < quals.length - 1 && (
+                  <span
+                    className={`mx-2 h-px flex-1 ${n < i ? "bg-lime" : "bg-white/15"}`}
+                  />
+                )}
+              </span>
+            ))}
+          </div>
 
-      <p className="mt-7 text-center text-[12px] font-bold uppercase tracking-[0.14em] text-lime">
-        {ofLabel.replace("{n}", String(i + 1)).replace("{total}", String(quals.length))}
-      </p>
+          <p className="mt-7 text-center text-[12px] font-bold uppercase tracking-[0.14em] text-lime">
+            {ofLabel.replace("{n}", String(i + 1)).replace("{total}", String(quals.length))}
+          </p>
+        </>
+      )}
 
-      <h3 className="mx-auto mt-3 max-w-lg text-center text-[1.3rem] font-bold leading-snug text-white md:text-[1.55rem]">
-        {q.q}
-      </h3>
+      {/* Empty when the headline above has already asked it. */}
+      {q.q && (
+        <h3 className="mx-auto mt-3 max-w-lg text-center text-[1.3rem] font-bold leading-snug text-white md:text-[1.55rem]">
+          {q.q}
+        </h3>
+      )}
 
-      <div className="mx-auto mt-7 max-w-lg space-y-3">
+      <div className={`mx-auto max-w-lg space-y-3 ${single ? "" : "mt-7"}`}>
         {q.options.map((o) => {
           const on = chosen === o;
           return (
@@ -104,21 +123,33 @@ export function Quiz3({
               type="button"
               aria-pressed={on}
               onClick={() => choose(o)}
-              className={`flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-[1rem] font-medium transition-colors ${
-                on
-                  ? "border-lime bg-lime/10 text-white"
-                  : "border-white/15 bg-black/40 text-white/85 hover:border-white/30"
-              }`}
+              className={
+                single
+                  ? /* The only way forward, so it reads as the button it is
+                       rather than as one row of a list with nothing under it. */
+                    `flex w-full items-center justify-center rounded-xl border px-5 py-4 text-center text-[1.1rem] font-bold transition-colors ${
+                      on
+                        ? "border-lime bg-lime text-black"
+                        : "border-lime bg-lime/10 text-white hover:bg-lime/20"
+                    }`
+                  : `flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-[1rem] font-medium transition-colors ${
+                      on
+                        ? "border-lime bg-lime/10 text-white"
+                        : "border-white/15 bg-black/40 text-white/85 hover:border-white/30"
+                    }`
+              }
             >
               {o}
-              <span
-                aria-hidden
-                className={`grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full border-2 ${
-                  on ? "border-lime" : "border-white/25"
-                }`}
-              >
-                {on && <span className="h-[11px] w-[11px] rounded-full bg-lime" />}
-              </span>
+              {!single && (
+                <span
+                  aria-hidden
+                  className={`grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full border-2 ${
+                    on ? "border-lime" : "border-white/25"
+                  }`}
+                >
+                  {on && <span className="h-[11px] w-[11px] rounded-full bg-lime" />}
+                </span>
+              )}
             </button>
           );
         })}
