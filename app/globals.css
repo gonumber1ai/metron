@@ -329,7 +329,7 @@ a[role="button"],
 .c-bar { position: sticky; top: 0; z-index: 40; background: rgb(3 3 3 / .94); border-bottom: 1px solid rgb(255 255 255 / .12); backdrop-filter: blur(18px); }
 .c-bar-inner { max-width: 1100px; margin: 0 auto; padding: 9px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .c-brand { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .c-brand small { font-size: 8px; font-weight: 800; letter-spacing: .1em; color: rgb(255 255 255 / .7); white-space: nowrap; }
-.c-cta { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 10px; border-radius: 999px; padding: 12px 21px; color: #06140a; font-size: 12px; font-weight: 900; letter-spacing: -.02em; text-align: center; }
+.c-cta { display: inline-flex; flex-direction: column; min-height: 44px; align-items: center; justify-content: center; gap: 2px; border-radius: 999px; padding: 12px 21px; color: #06140a; font-size: 12px; font-weight: 900; letter-spacing: -.02em; text-align: center; }
 .c-bar .c-cta { min-height: 38px; padding: 8px 16px; font-size: 10px; }
 .c-photo { position: relative; overflow: hidden; isolation: isolate; border: 1px solid rgb(255 255 255 / .1); border-radius: 22px; }
 .c-photo-image { object-fit: cover; object-position: 62% 42%; z-index: -2; }
@@ -471,3 +471,11 @@ a[role="button"],
 .c-more-toggle span.up { transform: rotate(180deg); }
 .c-more-grid { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 768px) { .c-more-grid { grid-template-columns: 1fr; } }
+
+/* The price, inside the button that charges it. Smaller and a shade lighter
+   than the verb so it reads as the terms rather than as the instruction —
+   but on the same lime, in the same box, impossible to press without having
+   seen. */
+.c-cta-label { display: block; }
+.c-cta-price { display: block; font-size: .92em; font-weight: 800; opacity: .74; letter-spacing: 0; }
+.c-bar .c-cta, .c-mobile-buy .c-cta { line-height: 1.15; }
