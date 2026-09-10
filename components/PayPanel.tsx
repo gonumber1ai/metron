@@ -261,6 +261,10 @@ const FRAME_KEY: readonly (readonly [string, string])[] = [
   ["Full name", "votre nom — n'importe lequel, on ne le vérifie pas"],
   ["Email address", "votre adresse e-mail"],
   ["Payment number", "votre numéro MTN ou Orange"],
+  // The button. Last thing he presses, and the one word of the four he cannot
+  // afford to hesitate over, so it belongs in the list even though it is not
+  // a field.
+  ["Pay with Momo Or OM", "payer avec MTN MoMo ou Orange Money"],
 ];
 
 /* ------------------------------------------------------------------ MoMo */
@@ -525,8 +529,14 @@ function MomoPanel({
             day direct-pay is approved and the frame goes away. */}
         {locale === "fr" && (
           <div className="border-b border-ink-600 bg-ink-900 px-4 py-3">
+            {/* Naming Fapshi is not an apology for the English, it is the
+                reason the English is there — and in a market where the
+                default assumption is that a stranger asking for MoMo is a
+                scam, handing the money to a processor men already know is
+                worth more than the sentence costs. */}
             <p className="text-[0.8rem] text-faint">
-              Le formulaire ci-dessous est en anglais&nbsp;:
+              Paiement traité par <span className="font-semibold text-white">Fapshi</span>. Son
+              formulaire est en anglais&nbsp;:
             </p>
             <ul className="mt-1.5 space-y-1">
               {FRAME_KEY.map(([label, fr]) => (
