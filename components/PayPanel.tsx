@@ -258,8 +258,10 @@ export function PayPanel({
    translated, it is a glossary FOR a third party's English form, so it only
    exists in the French build and has no English counterpart to sit beside. */
 const FRAME_KEY: readonly (readonly [string, string])[] = [
-  ["Full name", "votre nom — n'importe lequel, on ne le vérifie pas"],
-  ["Email address", "votre adresse e-mail"],
+  // Terse on purpose: this now sets on one line above the form, so every
+  // word costs vertical space in the place we are trying to save it.
+  ["Full name", "votre nom (n'importe lequel)"],
+  ["Email address", "votre e-mail"],
   ["Payment number", "votre numéro MTN ou Orange"],
   // The button. Last thing he presses, and the one word of the four he cannot
   // afford to hesitate over, so it belongs in the list even though it is not
@@ -355,6 +357,32 @@ function MomoPanel({
     // Once, on mount. pay() reads current state itself.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* Bring the form up under the header the moment it exists.
+     Trimming the padding above it only bought back pixels; the header, the
+     three steps and the rail tabs still sit between a man and the first
+     field, and on a phone that is a scroll he has to think to perform. So
+     when the frame opens we move it to him instead. The target is the
+     wrapper, not the iframe, so the French key travels with it and is not
+     the thing scrolled off the top. */
+  const frameBox = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (state !== "embedded") return;
+    const el = frameBox.current;
+    if (!el) return;
+    // One frame later, so the wrapper has been laid out and measures true.
+    const id = requestAnimationFrame(() => {
+      const HEADER = 64; // the sticky bar — stop just below it, not under it
+      const top = el.getBoundingClientRect().top + window.scrollY - HEADER;
+      try {
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      } catch {
+        /* a browser without the options form still gets the right position */
+        window.scrollTo(0, Math.max(0, top));
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [state]);
 
   async function pay() {
     setErr(null);
@@ -518,7 +546,10 @@ function MomoPanel({
 
   if (state === "embedded" && frameUrl) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-ink-600 bg-white">
+      <div
+        ref={frameBox}
+        className="overflow-hidden rounded-2xl border border-ink-600 bg-white"
+      >
         {/* Fapshi's form is English and stays English: their API takes no
             language parameter, and it is their page on their origin, so there
             is nothing of theirs we are allowed to reach into. A francophone
@@ -528,23 +559,27 @@ function MomoPanel({
             frame so he reads them before he hits the fields. Delete this the
             day direct-pay is approved and the frame goes away. */}
         {locale === "fr" && (
-          <div className="border-b border-ink-600 bg-ink-900 px-4 py-3">
+          <div className="border-b border-ink-600 bg-ink-900 px-4 py-2.5">
             {/* Naming Fapshi is not an apology for the English, it is the
                 reason the English is there — and in a market where the
                 default assumption is that a stranger asking for MoMo is a
                 scam, handing the money to a processor men already know is
                 worth more than the sentence costs. */}
-            <p className="text-[0.8rem] text-faint">
-              Paiement traité par <span className="font-semibold text-white">Fapshi</span>. Son
+            <p className="text-[0.78rem] leading-snug text-faint">
+              Paiement traité par <span className="font-semibold text-white">Fapshi</span>, dont le
               formulaire est en anglais&nbsp;:
             </p>
-            <ul className="mt-1.5 space-y-1">
-              {FRAME_KEY.map(([label, fr]) => (
-                <li key={label} className="text-[0.8rem] text-faint">
+            {/* One flowing line rather than a stacked list. Every row here is
+                a row of the payment form pushed further down the screen, and
+                this is a key to glance at, not a thing to read. */}
+            <p className="mt-1 text-[0.78rem] leading-snug text-faint">
+              {FRAME_KEY.map(([label, fr], i) => (
+                <span key={label}>
+                  {i > 0 && <span aria-hidden> · </span>}
                   <span className="font-semibold text-white">{label}</span> = {fr}
-                </li>
+                </span>
               ))}
-            </ul>
+            </p>
           </div>
         )}
         <iframe

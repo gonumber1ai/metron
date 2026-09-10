@@ -161,7 +161,12 @@ export function OfferClient({
           </div>
         </header>
 
-        <main className="mx-auto max-w-xl px-5 py-10 md:py-14">
+        {/* Tight at the top on a phone. Everything above the payment is
+            orientation — the steps, the expiry notice — and orientation is
+            worth pixels only while it is not the reason the form is below
+            the fold. Desktop keeps its air; there the fold is not the
+            problem. */}
+        <main className="mx-auto max-w-xl px-5 py-5 md:py-12">
           {/* The plan name, the headline, the price and the "finalise your
               payment below" line all stood here. He has just read a whole
               sales page and pressed a button that named the price — repeating
@@ -179,7 +184,7 @@ export function OfferClient({
           )}
 
           {/* Where he is in the process. Three steps, first one live. */}
-          <ol className="mt-7 flex items-center gap-2.5">
+          <ol className="mt-5 flex items-center gap-2.5">
             {t.checkout.steps.map((s, i) => (
               <li key={s} className="flex flex-1 items-center gap-2.5">
                 <span
@@ -208,7 +213,7 @@ export function OfferClient({
               which matters more than usual on a page about something he is
               embarrassed by. MoMo pushes a USSD prompt to his handset;
               cards render inline. */}
-          <section className="mt-8">
+          <section className="mt-6">
             <PayPanel
               locale={locale}
               plan={plan}
