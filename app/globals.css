@@ -387,3 +387,59 @@ a[role="button"],
   .c-brand [data-word] { display: none; }
   .c-bar .c-cta { max-width: 118px; font-size: .68rem; padding-inline: 10px; }
 }
+
+/* ── TESTIMONIAL RAIL ──────────────────────────────────────────────────────
+   Three across on a desktop, one on a phone with the next one showing at the
+   edge — the peek is the only thing that tells a man there are more without
+   a line of copy asking him to swipe. Snapping, momentum and rubber-banding
+   are the browser's; nothing here is positioned by script. */
+.c-rail { margin: 26px auto 0; max-width: 1100px; }
+.c-rail-head { margin: 0 0 14px; }
+.c-rail-track {
+  display: flex; gap: 14px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+.c-rail-track::-webkit-scrollbar { display: none; }
+.c-rail-track:focus-visible { outline: 2px solid var(--color-lime); outline-offset: 4px; border-radius: 18px; }
+.c-rail-card {
+  scroll-snap-align: start; flex: 0 0 calc((100% - 28px) / 3);
+  display: flex; flex-direction: column;
+  border: 1px solid rgb(156 234 76 / .22); border-radius: 18px;
+  background: linear-gradient(135deg, #071107, #030303 65%);
+  padding: 20px 20px 18px;
+}
+.c-rail-stars { margin: 0; color: var(--color-lime); font-size: .82rem; letter-spacing: .16em; }
+/* Two to four sentences by design. A card that has to be read in full before
+   the next one arrives cannot be a paragraph. */
+.c-rail-quote {
+  margin: 11px 0 0; flex: 1;
+  color: rgb(255 255 255 / .88); font-size: .94rem; line-height: 1.55;
+}
+.c-rail-by { margin-top: 15px; display: grid; gap: 2px; }
+.c-rail-by strong { display: flex; align-items: center; gap: 7px; color: #fff; font-size: .88rem; }
+.c-rail-flag { font-size: 1.05rem; line-height: 1; }
+.c-rail-by small { color: rgb(255 255 255 / .5); font-size: .74rem; }
+
+.c-rail-nav { margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+.c-rail-nav > button {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border: 1px solid rgb(255 255 255 / .18); border-radius: 50%;
+  background: transparent; color: rgb(255 255 255 / .7);
+  font-size: 1.2rem; line-height: 1; cursor: pointer;
+}
+.c-rail-nav > button:hover { border-color: var(--color-lime); color: var(--color-lime); }
+.c-rail-dots { display: flex; align-items: center; gap: 7px; }
+.c-rail-dots button {
+  width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%;
+  background: rgb(255 255 255 / .25); cursor: pointer;
+  transition: width .18s ease, background-color .18s ease;
+}
+.c-rail-dots button.on { width: 20px; border-radius: 4px; background: var(--color-lime); }
+
+@media (max-width: 900px) { .c-rail-card { flex-basis: calc((100% - 14px) / 2); } }
+@media (max-width: 768px) {
+  /* 84% leaves the next card's edge showing. That sliver is the instruction. */
+  .c-rail-card { flex-basis: 84%; }
+}
