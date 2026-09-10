@@ -31,9 +31,86 @@ export type Card = {
   name: string;
   plan: "10" | "30";
   quote: string;
+  video?: { youtube: string };
 };
 
 const ROTATE_MS = 4500;
+
+/**
+ * A filmed testimonial, and nothing loads until he asks for it.
+ *
+ * ── WHY IT IS NOT AN IFRAME UNTIL HE PRESSES PLAY ─────────────────────────
+ * A YouTube embed talks to Google the moment the page renders — cookies, and
+ * a request that ties this page to whoever is signed in on that phone. On a
+ * page about lasting longer in bed, that is not a privacy footnote, it is the
+ * product promise broken before he has even watched anything. So the card
+ * shows a still frame and a play triangle; the iframe is created on the tap
+ * and not before. Men who never tap cost Google nothing and cost him no data,
+ * which on a Douala connection is the difference between a page that loads
+ * and one that does not.
+ *
+ * nocookie.com for the same reason, once he has chosen. `autoplay=1` is
+ * honest here — the tap IS the gesture, so it plays with sound the way he
+ * expects, rather than muted like an advert he did not ask for.
+ */
+function VideoModal({
+  card,
+  locale,
+  onClose,
+  closeLabel,
+}: {
+  card: Card;
+  locale: string;
+  onClose: () => void;
+  closeLabel: string;
+}) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", esc);
+    // The page behind must not scroll under the video.
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", esc);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  const p = new URLSearchParams({
+    autoplay: "1",
+    playsinline: "1",
+    rel: "0",
+    modestbranding: "1",
+    // Force the caption track on and pick his language. Harmless if the
+    // subtitles are burned into the picture; essential if they are a track,
+    // because an American speaking English to a francophone with the captions
+    // switched off is ten seconds of nothing.
+    cc_load_policy: "1",
+    cc_lang_pref: locale === "fr" ? "fr" : "en",
+    hl: locale === "fr" ? "fr" : "en",
+  });
+
+  return (
+    <div className="c-vid-back" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="c-vid-box" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="c-vid-close" onClick={onClose} aria-label={closeLabel}>
+          ✕
+        </button>
+        <div className="c-vid-frame">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(card.video!.youtube)}?${p}`}
+            title={card.name}
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+        <p className="c-vid-quote">“{card.quote}”</p>
+      </div>
+    </div>
+  );
+}
 
 export function Testimonials({
   items,
@@ -41,8 +118,15 @@ export function Testimonials({
   planLabels,
   prevLabel,
   nextLabel,
+  locale,
+  playLabel,
+  closeLabel,
 }: {
   items: Card[];
+  locale: string;
+  /** on the play button, and read out by a screen reader */
+  playLabel: string;
+  closeLabel: string;
   /** Optional lead-in above the rail. */
   heading?: string;
   /** What "10" and "30" are called in this language. */
@@ -52,6 +136,7 @@ export function Testimonials({
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [playing, setPlaying] = useState<Card | null>(null);
   // Set the moment he touches it, and never cleared. Once a man has taken
   // hold of the rail it is his; resuming under his hands would be the exact
   // behaviour this is trying to avoid.
@@ -92,7 +177,7 @@ export function Testimonials({
     if (still?.matches) return;
 
     const id = window.setInterval(() => {
-      if (held.current) return;
+      if (held.current || playing) return;
       const el = track.current;
       if (!el) return;
       // Only while it is on screen. A rail that has been paging itself in a
@@ -106,7 +191,7 @@ export function Testimonials({
       });
     }, ROTATE_MS);
     return () => window.clearInterval(id);
-  }, [items.length, scrollToCard]);
+  }, [items.length, scrollToCard, playing]);
 
   if (items.length === 0) return null;
 
@@ -134,9 +219,32 @@ export function Testimonials({
             className="c-rail-card"
             aria-label={`${n + 1} / ${items.length}`}
           >
-            <p aria-label="5 / 5" className="c-rail-stars">
-              ★★★★★
-            </p>
+            {t.video ? (
+              /* A still frame from YouTube's own thumbnail host — one image,
+                 no cookies, and lazy, so it costs nothing above the fold. */
+              <button
+                type="button"
+                className="c-rail-play"
+                onClick={() => {
+                  hold();
+                  setPlaying(t);
+                }}
+                aria-label={playLabel}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`https://i.ytimg.com/vi/${t.video.youtube}/hqdefault.jpg`}
+                  alt=""
+                  loading="lazy"
+                />
+                <span aria-hidden className="c-rail-play-mark">▶</span>
+                <small>{playLabel}</small>
+              </button>
+            ) : (
+              <p aria-label="5 / 5" className="c-rail-stars">
+                ★★★★★
+              </p>
+            )}
             <blockquote className="c-rail-quote">“{t.quote}”</blockquote>
             <footer className="c-rail-by">
               <strong>
@@ -193,6 +301,15 @@ export function Testimonials({
             ›
           </button>
         </div>
+      )}
+
+      {playing && (
+        <VideoModal
+          card={playing}
+          locale={locale}
+          closeLabel={closeLabel}
+          onClose={() => setPlaying(null)}
+        />
       )}
     </section>
   );

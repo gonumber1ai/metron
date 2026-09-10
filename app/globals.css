@@ -492,3 +492,46 @@ a[role="button"],
 .c-bar-login:hover { border-color: var(--color-lime); color: var(--color-lime); }
 /* No fixed buy bar to clear until there is one. */
 .c-page:not(:has(.c-mobile-buy)) { padding-bottom: 0; }
+
+/* ── FILMED TESTIMONIAL ────────────────────────────────────────────────────
+   A still frame and a triangle. The iframe does not exist until he presses
+   it, so a man who never watches sends nothing to Google and spends nothing
+   on data — which on this page is the product promise, not a nicety. */
+.c-rail-play {
+  position: relative; display: block; width: 100%; padding: 0;
+  border: 0; border-radius: 12px; overflow: hidden; background: #000;
+  aspect-ratio: 16 / 9; cursor: pointer; min-height: 0;
+}
+.c-rail-play img { width: 100%; height: 100%; object-fit: cover; opacity: .72; transition: opacity .2s ease; }
+.c-rail-play:hover img { opacity: .9; }
+.c-rail-play-mark {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: grid; place-items: center; width: 52px; height: 52px;
+  border-radius: 50%; background: var(--color-lime); color: #06140a;
+  font-size: 17px; padding-left: 4px;
+}
+.c-rail-play small {
+  position: absolute; right: 8px; bottom: 8px;
+  padding: 3px 9px; border-radius: 999px; background: rgb(0 0 0 / .72);
+  color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+}
+
+.c-vid-back {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center; padding: 18px;
+  background: rgb(0 0 0 / .88); backdrop-filter: blur(6px);
+}
+.c-vid-box { position: relative; width: 100%; max-width: 860px; }
+.c-vid-frame {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden;
+  border: 1px solid rgb(156 234 76 / .3); border-radius: 14px; background: #000;
+}
+.c-vid-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.c-vid-quote { margin: 14px 0 0; color: rgb(255 255 255 / .8); font-size: .92rem; line-height: 1.55; text-align: center; }
+.c-vid-close {
+  position: absolute; top: -44px; right: 0;
+  display: grid; place-items: center; width: 36px; height: 36px; min-height: 36px;
+  border: 1px solid rgb(255 255 255 / .28); border-radius: 50%;
+  background: transparent; color: #fff; font-size: 15px; cursor: pointer;
+}
+.c-vid-close:hover { border-color: var(--color-lime); color: var(--color-lime); }
