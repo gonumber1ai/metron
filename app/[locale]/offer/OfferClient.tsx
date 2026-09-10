@@ -178,30 +178,10 @@ export function OfferClient({
             </p>
           )}
 
-          {/* Where he is in the process. Three steps, first one live. */}
-          <ol className="mt-7 flex items-center gap-2.5">
-            {t.checkout.steps.map((s, i) => (
-              <li key={s} className="flex flex-1 items-center gap-2.5">
-                <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-bold ${
-                    i === 0 ? "bg-jade text-[#04140C]" : "bg-ink-700 text-faint"
-                  }`}
-                >
-                  {i + 1}
-                </span>
-                <span
-                  className={`text-[12.5px] font-bold ${
-                    i === 0 ? "text-bone" : "text-faint"
-                  }`}
-                >
-                  {s}
-                </span>
-                {i < t.checkout.steps.length - 1 && (
-                  <span aria-hidden className="h-px flex-1 bg-ink-700" />
-                )}
-              </li>
-            ))}
-          </ol>
+          {/* "Après le paiement — 1 vos accès arrivent, 2 ouvrez Metron,
+              3 prenez votre mesure" stood here. Told already on the page he
+              came from, and this screen exists to be passed through, not
+              read. */}
 
           {/* ── PAYMENT ──────────────────────────────────────────────────
               Untouched. Both rails, embedded — he never leaves the site,

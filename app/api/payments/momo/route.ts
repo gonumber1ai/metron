@@ -65,6 +65,8 @@ export async function POST(req: Request) {
     country?: string;
     ref?: string;
     phone?: string;
+    /** false when `phone` is the client's placeholder — gates direct-pay */
+    hasRealPhone?: boolean;
     locale?: string;
     name?: string;
     email?: string;
@@ -136,8 +138,13 @@ export async function POST(req: Request) {
 
   /* ---------------------------------------------- 1. charge the handset */
 
-  // No number, no handset to push to — straight to the hosted page.
-  if (phone && directPayAllowed()) {
+  /* Only when he typed a real number.
+     The client sends a placeholder when he did not, purely to satisfy Fapshi's
+     format check on initiate-pay. direct-pay is different: it rings whatever
+     handset it is handed, so calling it with a placeholder would push live
+     payment prompts at a line nobody chose. hasRealPhone is what separates
+     them, and without it this rail is skipped. */
+  if (body.hasRealPhone === true && phone && directPayAllowed()) {
     try {
       // `medium` is optional for Fapshi, but naming the network removes any
       // ambiguity about which rail the prompt should go down.

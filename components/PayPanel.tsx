@@ -310,7 +310,37 @@ function MomoPanel({
      for AFTER the money has moved, when he is a customer rather than a
      stranger being interviewed. */
   const valid = true;
+
+  /* The number sent when he has not given one.
+     Fapshi's hosted checkout asks for his real number on its own page, so this
+     only ever has to satisfy the API's format check — 9 digits starting with
+     6 — and be a line nobody owns. Seven zeros is not an assignable
+     subscriber number on any Cameroonian network.
+     It is used for initiate-pay ONLY. direct-pay pushes a live payment prompt
+     to whatever handset it is given, so it is never called with this; see the
+     route, which skips that rail entirely when no real number was typed. */
+  const PLACEHOLDER_PHONE = "670000000";
   const op = operatorOf(digits);
+
+  /* Arriving with ?go=1 starts the payment on sight.
+     The checkout is not a page to read — everything on it was said on the
+     sales page he just pressed a button on, and a screen in between is a
+     screen to reconsider on. He presses "commencer le défi" and the Fapshi
+     checkout is what opens.
+     Ref'd so a re-render cannot fire it twice. */
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (autoStarted.current) return;
+    try {
+      if (new URLSearchParams(window.location.search).get("go") !== "1") return;
+    } catch {
+      return;
+    }
+    autoStarted.current = true;
+    void pay();
+    // Once, on mount. pay() reads current state itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function pay() {
     setErr(null);
@@ -350,7 +380,11 @@ function MomoPanel({
           plan,
           country,
           ref,
-          phone: digits,
+          /* Empty means "no real number" — the route skips direct-pay and goes
+             straight to the hosted checkout, where he types his own. The
+             placeholder only rides along to satisfy Fapshi's format check. */
+          phone: digits || PLACEHOLDER_PHONE,
+          hasRealPhone: Boolean(digits),
           locale,
           name: name.trim(),
           email: email.trim(),
