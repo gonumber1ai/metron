@@ -479,3 +479,16 @@ a[role="button"],
 .c-cta-label { display: block; }
 .c-cta-price { display: block; font-size: .92em; font-weight: 800; opacity: .74; letter-spacing: 0; }
 .c-bar .c-cta, .c-mobile-buy .c-cta { line-height: 1.15; }
+
+/* Before the gate the bar carries a way back in and nothing else. A timer and
+   a buy button aimed at a man who has not yet been told what the product is
+   are pressure without an offer behind it — and pressing that button was how
+   men were meeting the price for the first time on Fapshi's payment form. */
+.c-bar-login {
+  display: inline-flex; align-items: center; min-height: 38px;
+  padding: 8px 18px; border: 1px solid rgb(255 255 255 / .22); border-radius: 999px;
+  color: rgb(255 255 255 / .82); font-size: 12px; font-weight: 800; letter-spacing: -.01em;
+}
+.c-bar-login:hover { border-color: var(--color-lime); color: var(--color-lime); }
+/* No fixed buy bar to clear until there is one. */
+.c-page:not(:has(.c-mobile-buy)) { padding-bottom: 0; }
