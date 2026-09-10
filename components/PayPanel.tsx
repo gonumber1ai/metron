@@ -59,6 +59,10 @@ const T = {
     badPhone: "That is not a valid number. 9 digits, starting with 6.",
     needName: "Add a name first — any name works, we never check it.",
     needContact: "Add an email or a WhatsApp number, so we can send your access code.",
+    whereToSend: "Where should we send your access code? An email or a WhatsApp number — it is the only way back in on another phone.",
+    contactPlaceholder: "Email or WhatsApp number",
+    sendCode: "Send it",
+    codeSent: "Sent. Keep it — it is how you get back in on any other phone.",
     pay: (a: string) => `Pay ${a}`,
     charging: "Sending the request…",
     awaitingH: "Check your phone now",
@@ -96,6 +100,10 @@ const T = {
     badPhone: "Ce numéro n'est pas valide. 9 chiffres, commençant par 6.",
     needName: "Mettez d'abord un nom — n'importe lequel, on ne le vérifie jamais.",
     needContact: "Mettez un email ou un numéro WhatsApp, pour recevoir votre code d'accès.",
+    whereToSend: "Où envoyer votre code d'accès ? Un email ou un numéro WhatsApp — c'est le seul moyen de revenir depuis un autre téléphone.",
+    contactPlaceholder: "Email ou numéro WhatsApp",
+    sendCode: "Envoyer",
+    codeSent: "Envoyé. Gardez-le — c'est comme ça que vous revenez depuis n'importe quel téléphone.",
     pay: (a: string) => `Payer ${a}`,
     charging: "Envoi de la demande…",
     awaitingH: "Regardez votre téléphone",
@@ -268,6 +276,10 @@ function MomoPanel({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [wa, setWa] = useState("");
+  /* Asked after the charge, not before it. */
+  const [contact, setContact] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sentCode, setSentCode] = useState(false);
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
   // poll() is kicked off in the same tick as setFrameUrl, so reading the state
   // there would see the previous render's null and pick the short timeout.
@@ -292,8 +304,12 @@ function MomoPanel({
      is paying with, because the phone with the money in it is often not the
      phone he actually reads. */
   const waOk = waDigits.length >= 8;
-  const valid =
-    PHONE_RE.test(digits) && name.trim().length >= 2 && (emailOk || waOk);
+  /* One field. Fapshi cannot charge a wallet without its number, so this is
+     the floor — everything else was us asking before he had any reason to
+     trust us with it. His name and where to send the access code are asked
+     for AFTER the money has moved, when he is a customer rather than a
+     stranger being interviewed. */
+  const valid = PHONE_RE.test(digits);
   const op = operatorOf(digits);
 
   async function pay() {
@@ -310,9 +326,7 @@ function MomoPanel({
          tell us whether nobody wanted to pay or nobody could. This is that
          missing number. */
       track("pay_blocked", plan, locale);
-      if (!PHONE_RE.test(digits)) setErr(t.badPhone);
-      else if (name.trim().length < 2) setErr(t.needName);
-      else setErr(t.needContact);
+      setErr(t.badPhone);
       return;
     }
     setState("charging");
@@ -472,10 +486,67 @@ function MomoPanel({
   }
 
   if (state === "paid") {
+    /* Where the access code goes, asked once the money has moved.
+       He has paid, so he is no longer weighing whether to trust us with an
+       address — and the code is the thing he needs, which makes the ask his
+       problem to solve rather than ours. Skippable: he already has access on
+       this device, and the code is on screen for him to write down. */
     return (
-      <div className="rounded-2xl border border-jade bg-jade-050 p-6 text-center">
-        <h3 className="text-[1.2rem] font-bold text-jade">{t.paidH}</h3>
-        <p className="mt-2 text-[0.95rem] text-mute">{t.opening}</p>
+      <div className="rounded-2xl border border-jade bg-jade-050 p-6">
+        <h3 className="text-center text-[1.2rem] font-bold text-jade">{t.paidH}</h3>
+
+        {sentCode ? (
+          <p className="mt-3 text-center text-[0.95rem] leading-relaxed text-bone">
+            {t.codeSent}
+          </p>
+        ) : (
+          <>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-bone">{t.whereToSend}</p>
+            <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+              <input
+                type="text"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="off"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder={t.contactPlaceholder}
+                className="min-w-0 flex-1 rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={sending || contact.trim().length < 4}
+                onClick={async () => {
+                  setSending(true);
+                  try {
+                    await fetch("/api/access", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        ref: load(locale).ref,
+                        contact: contact.trim(),
+                        locale,
+                      }),
+                    });
+                    setSentCode(true);
+                  } catch {
+                    /* He is already inside on this device; a failed send is
+                       not a reason to block the screen. */
+                    setSentCode(true);
+                  }
+                  setSending(false);
+                }}
+                className="shrink-0 rounded-xl btn-go px-6 py-3.5 text-[1rem] font-bold disabled:opacity-40"
+              >
+                {t.sendCode}
+              </button>
+            </div>
+          </>
+        )}
+
+        <p className="mt-4 border-t border-jade/25 pt-4 text-center text-[0.9rem] text-mute">
+          {t.opening}
+        </p>
       </div>
     );
   }
@@ -523,62 +594,11 @@ function MomoPanel({
 
   return (
     <div className="rounded-2xl card p-5">
+      {/* Name, email and WhatsApp used to stand here, ahead of the payment.
+          Three of the four fields a man met before he was allowed to press
+          Pay, none of which Fapshi needs to take his money. They are asked
+          for on the other side of the charge now — see the paid state. */}
       <label className="block">
-        <span className="text-[0.9rem] font-semibold text-bone">{t.nameLabel}</span>
-        <input
-          type="text"
-          autoComplete="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t.namePlaceholder}
-          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
-        />
-        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">
-          {t.nameHelp}
-        </span>
-      </label>
-
-      <label className="mt-4 block">
-        <span className="flex items-baseline justify-between gap-3">
-          <span className="text-[0.9rem] font-semibold text-bone">{t.emailLabel}</span>
-          <span className="text-[0.78rem] text-faint">{t.emailOptional}</span>
-        </span>
-        <input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          autoCapitalize="off"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
-        />
-        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">{t.emailHelp}</span>
-      </label>
-
-      {/* The way out for a man with no email. It is a separate number from the
-          Mobile Money one on purpose: the phone holding the money is often not
-          the phone he reads. */}
-      <label className="mt-4 block">
-        <span className="text-[0.9rem] font-semibold text-bone">{t.waLabel}</span>
-        <input
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={wa}
-          onChange={(e) => setWa(e.target.value)}
-          placeholder="+237 6XX XXX XXX"
-          className="mt-2 w-full rounded-xl border-2 border-ink-600 bg-ink-900 px-4 py-3.5 text-[1rem] text-bone placeholder:text-faint focus:border-jade focus:outline-none"
-        />
-        <span className="mt-1.5 block text-[0.82rem] leading-snug text-faint">{t.waHelp}</span>
-      </label>
-
-      {/* Only once he has filled the rest — a rule stated before he has done
-          anything reads as a demand rather than as help. */}
-      {name.trim().length >= 2 && PHONE_RE.test(digits) && !emailOk && !waOk && (
-        <p className="mt-3 text-[0.85rem] leading-snug text-amber">{t.needOne}</p>
-      )}
-
-      <label className="mt-4 block">
         <span className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-[0.9rem] font-semibold text-bone">{t.phoneLabel}</span>
           <OperatorMarks detected={op} />
