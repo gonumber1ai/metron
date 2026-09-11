@@ -21,6 +21,10 @@ const ALLOWED = new Set([
   /* He submitted Fapshi's own form and a prompt reached his handset. The
      only step between reaching the checkout and paying that we can see. */
   "pay_pushed",
+  /* Fapshi's frame finished loading on his phone. The step between "the
+     page around the frame rendered" and "he pushed", which were otherwise
+     indistinguishable from a frame that never came up. */
+  "checkout_form",
   "result_view",
   "offer_view",
   "login_view",

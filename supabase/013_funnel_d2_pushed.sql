@@ -33,8 +33,9 @@
 --   arrived      landed on the page            start_view, detail 'c'
 --   passed_quiz  said yes to the one question  quiz_complete, detail 'c'
 --   clicked      pressed any buy button        start_cta, detail 'c_*'
---   saw_checkout reached /offer                offer_view
---   pushed       a prompt reached his handset  pay_pushed
+--   saw_checkout reached /offer from /c        offer_view, after a start_cta c_*
+--   form_shown   Fapshi's frame loaded         checkout_form
+--   pushed       a USSD reached his handset    pay_pushed
 --   paid         money moved                   payments.status = 'paid'
 --
 -- Scoped to refs that fired start_view with detail 'c', so traffic from
@@ -58,7 +59,18 @@ select
                                   and e.detail = 'c')                      as passed_quiz,
   count(distinct e.ref) filter (where e.name = 'start_cta'
                                   and e.detail like 'c\_%')                as clicked,
-  count(distinct e.ref) filter (where e.name = 'offer_view')               as saw_checkout,
+  -- Only men who got there FROM this page. offer_view fires on /offer however
+  -- he arrived, and a ref that once landed on /c and later reached /offer
+  -- from another funnel was being counted here — which is how a day showed
+  -- four men reaching a checkout that three had pressed a button for.
+  count(distinct e.ref) filter (where e.name = 'offer_view'
+                                  and e.ref in (select ref from public.events
+                                                where name = 'start_cta'
+                                                  and detail like 'c\_%'))   as saw_checkout,
+  -- Fapshi's frame finished loading on his phone. Without this, a man whose
+  -- frame never came up and a man who saw it and walked away were the same
+  -- row.
+  count(distinct e.ref) filter (where e.name = 'checkout_form')            as form_shown,
   count(distinct e.ref) filter (where e.name = 'pay_pushed')               as pushed,
   count(distinct p.ref)                                                    as paid,
   min(e.created_at)                                                        as first_seen,
@@ -114,7 +126,18 @@ select
                                   and e.detail = 'c')                      as passed_quiz,
   count(distinct e.ref) filter (where e.name = 'start_cta'
                                   and e.detail like 'c\_%')                as clicked,
-  count(distinct e.ref) filter (where e.name = 'offer_view')               as saw_checkout,
+  -- Only men who got there FROM this page. offer_view fires on /offer however
+  -- he arrived, and a ref that once landed on /c and later reached /offer
+  -- from another funnel was being counted here — which is how a day showed
+  -- four men reaching a checkout that three had pressed a button for.
+  count(distinct e.ref) filter (where e.name = 'offer_view'
+                                  and e.ref in (select ref from public.events
+                                                where name = 'start_cta'
+                                                  and detail like 'c\_%'))   as saw_checkout,
+  -- Fapshi's frame finished loading on his phone. Without this, a man whose
+  -- frame never came up and a man who saw it and walked away were the same
+  -- row.
+  count(distinct e.ref) filter (where e.name = 'checkout_form')            as form_shown,
   count(distinct e.ref) filter (where e.name = 'pay_pushed')               as pushed,
   count(distinct p.ref)                                                    as paid
 from public.events e

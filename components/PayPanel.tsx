@@ -471,6 +471,8 @@ function MomoPanel({
   // genuinely long time — up to about two minutes — before calling it dead.
   /* One `pay_pushed` per checkout, however many times we poll. */
   const pushed = useRef(false);
+  /* One `checkout_form` per checkout — their frame can reload itself. */
+  const shown = useRef(false);
 
   async function poll(transId: string, ref: string) {
     if (stop.current) return;
@@ -511,10 +513,21 @@ function MomoPanel({
 
       if (data.status === "FAILED" || data.status === "EXPIRED") return setState("failed");
 
-      // A hosted page is filled in by hand, so it deserves longer than a USSD
-      // prompt that only needs a PIN.
-      const limit = hosted.current ? 100 : 40;
-      if (tries.current < limit) {
+      /* A hosted page is filled in by hand, so it deserves longer than a USSD
+         prompt that only needs a PIN — and it must never be taken away.
+         It used to be: after 100 polls the state flipped to "timeout", which
+         does not render the frame, so a man who spent six minutes on their
+         form (found his phone, topped up, came back) watched it vanish and
+         was told to try again. And polling stopped with it, so if he did
+         push at minute seven nothing here would ever know.
+         Now the frame stays for as long as the page is open; after five
+         minutes we simply ask less often. */
+      if (hosted.current) {
+        tries.current += 1;
+        window.setTimeout(() => poll(transId, ref), tries.current < 100 ? 3000 : 10000);
+        return;
+      }
+      if (tries.current < 40) {
         tries.current += 1;
         window.setTimeout(() => poll(transId, ref), 3000);
       } else {
@@ -569,7 +582,24 @@ function MomoPanel({
         <iframe
           src={frameUrl}
           title={t.momo}
-          className="h-[620px] w-full border-0"
+          /* Tall enough that their Pay button is on screen without a scroll
+             INSIDE the box. At 620px it was not: the desktop screenshot of
+             this frame already showed Fapshi's own scrollbar, and on a phone
+             their fields stack and the button sits well below a nested fold
+             that Android will scroll and a man will not know to. He filled
+             three fields, saw no button, and left. Sized to the viewport, so
+             the whole form is the whole screen. */
+          className="h-[min(900px,calc(100dvh-140px))] min-h-[640px] w-full border-0"
+          /* Fires for a cross-origin frame too — we cannot read the document
+             but we are told when it loaded. Until this, "reached checkout"
+             meant "the page around the frame rendered", and a man whose frame
+             never came up looked identical to one who saw it and refused. */
+          onLoad={() => {
+            if (!shown.current) {
+              shown.current = true;
+              track("checkout_form", plan, locale);
+            }
+          }}
           // Their page needs forms and scripts; everything else stays off.
           sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"
         />

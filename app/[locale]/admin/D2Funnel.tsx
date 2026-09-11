@@ -10,6 +10,7 @@ export type D2Row = {
   passed_quiz: number;
   clicked: number;
   saw_checkout: number;
+  form_shown: number;
   pushed: number;
   paid: number;
 };
@@ -71,12 +72,17 @@ const STEPS: { key: keyof Counts; label: string; of: keyof Counts | null }[] = [
      reached a handset. Reached checkout but never pushed is a man refusing
      to pay; pushed but never paid is a man failing to. Only the second is
      about money he does not have. */
-  { key: "pushed", label: "USSD sent to his phone", of: "saw_checkout" },
+  /* Their frame actually loaded on his phone. "Reached checkout" only says
+     the page around it rendered; this says the form did. A gap between the
+     two is the frame failing on real handsets, and no amount of copy above
+     it will fix that. */
+  { key: "form_shown", label: "Payment form loaded", of: "saw_checkout" },
+  { key: "pushed", label: "USSD sent to his phone", of: "form_shown" },
   { key: "paid", label: "Paid", of: "pushed" },
 ];
 
 const EMPTY: Omit<D2Row, "campaign" | "locale"> = {
-  arrived: 0, passed_quiz: 0, clicked: 0, saw_checkout: 0, pushed: 0, paid: 0,
+  arrived: 0, passed_quiz: 0, clicked: 0, saw_checkout: 0, form_shown: 0, pushed: 0, paid: 0,
 };
 
 function pct(n: number, d: number): string {
