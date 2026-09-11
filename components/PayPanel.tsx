@@ -78,6 +78,9 @@ const T = {
     unavailable: "Payment is not connected yet. Message us and we will open your access.",
     embeddedNote:
       "Complete the payment above. This page will move on by itself the moment it clears — do not close it.",
+    secureH: "🔒 100% secure payment · MTN MoMo & Orange Money",
+    secureP:
+      "Enter your MoMo/OM number and approve the prompt on your phone — your access opens automatically.",
     timeoutH: "We did not hear back",
     timeoutP:
       "The request was sent but no PIN came back, so nothing was charged. If you missed the prompt on your phone, just try again.",
@@ -120,6 +123,9 @@ const T = {
       "Le paiement n'est pas encore branché. Écrivez-nous et on vous ouvre l'accès.",
     embeddedNote:
       "Terminez le paiement ci-dessus. Cette page continuera d'elle-même dès que c'est validé — ne la fermez pas.",
+    secureH: "🔒 Paiement 100% sécurisé · MTN MoMo & Orange Money",
+    secureP:
+      "Entrez votre numéro MoMo/OM et validez la notification sur votre téléphone pour recevoir automatiquement votre code d'accès.",
     timeoutH: "Pas de réponse",
     timeoutP:
       "La demande est partie mais aucun code n'est revenu, donc rien n'a été débité. Si vous avez raté la demande sur votre téléphone, réessayez.",
@@ -252,22 +258,6 @@ export function PayPanel({
     </div>
   );
 }
-
-/* The three labels Fapshi's hosted form shows, and what they mean.
-   Kept out of the dictionary on purpose: this is not our copy being
-   translated, it is a glossary FOR a third party's English form, so it only
-   exists in the French build and has no English counterpart to sit beside. */
-const FRAME_KEY: readonly (readonly [string, string])[] = [
-  // Terse on purpose: this now sets on one line above the form, so every
-  // word costs vertical space in the place we are trying to save it.
-  ["Full name", "votre nom (n'importe lequel)"],
-  ["Email address", "votre e-mail"],
-  ["Payment number", "votre numéro MTN ou Orange"],
-  // The button. Last thing he presses, and the one word of the four he cannot
-  // afford to hesitate over, so it belongs in the list even though it is not
-  // a field.
-  ["Pay with Momo Or OM", "payer avec MTN MoMo ou Orange Money"],
-];
 
 /* ------------------------------------------------------------------ MoMo */
 
@@ -566,38 +556,16 @@ function MomoPanel({
         ref={frameBox}
         className="overflow-hidden rounded-2xl border border-ink-600 bg-white"
       >
-        {/* Fapshi's form is English and stays English: their API takes no
-            language parameter, and it is their page on their origin, so there
-            is nothing of theirs we are allowed to reach into. A francophone
-            buyer therefore meets three English labels on the last screen
-            before his money moves. This is the next best thing — the same
-            three words in French, on our side of the boundary, above the
-            frame so he reads them before he hits the fields. Delete this the
-            day direct-pay is approved and the frame goes away. */}
-        {locale === "fr" && (
-          <div className="border-b border-ink-600 bg-ink-900 px-4 py-2.5">
-            {/* Naming Fapshi is not an apology for the English, it is the
-                reason the English is there — and in a market where the
-                default assumption is that a stranger asking for MoMo is a
-                scam, handing the money to a processor men already know is
-                worth more than the sentence costs. */}
-            <p className="text-[0.78rem] leading-snug text-faint">
-              Paiement traité par <span className="font-semibold text-white">Fapshi</span>, dont le
-              formulaire est en anglais&nbsp;:
-            </p>
-            {/* One flowing line rather than a stacked list. Every row here is
-                a row of the payment form pushed further down the screen, and
-                this is a key to glance at, not a thing to read. */}
-            <p className="mt-1 text-[0.78rem] leading-snug text-faint">
-              {FRAME_KEY.map(([label, fr], i) => (
-                <span key={label}>
-                  {i > 0 && <span aria-hidden> · </span>}
-                  <span className="font-semibold text-white">{label}</span> = {fr}
-                </span>
-              ))}
-            </p>
-          </div>
-        )}
+        {/* What happens when he presses their button, in his language, above
+            the frame. This replaced a glossary translating Fapshi's four
+            English labels one by one — accurate, and it read as an apology.
+            "Full name" and "Momo" need no translating in Douala; what a man
+            at this screen does not know is what happens after he taps, and
+            that is the only thing this says. */}
+        <div className="border-b border-ink-600 bg-ink-900 px-4 py-3">
+          <p className="text-[0.84rem] font-bold text-white">{t.secureH}</p>
+          <p className="mt-1 text-[0.8rem] leading-snug text-faint">{t.secureP}</p>
+        </div>
         <iframe
           src={frameUrl}
           title={t.momo}
