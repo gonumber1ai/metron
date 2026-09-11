@@ -71,7 +71,7 @@ const STEPS: { key: keyof Counts; label: string; of: keyof Counts | null }[] = [
      reached a handset. Reached checkout but never pushed is a man refusing
      to pay; pushed but never paid is a man failing to. Only the second is
      about money he does not have. */
-  { key: "pushed", label: "Sent a payment prompt", of: "saw_checkout" },
+  { key: "pushed", label: "USSD sent to his phone", of: "saw_checkout" },
   { key: "paid", label: "Paid", of: "pushed" },
 ];
 

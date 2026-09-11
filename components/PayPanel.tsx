@@ -67,7 +67,7 @@ const T = {
     charging: "Sending the request…",
     awaitingH: "Check your phone now",
     awaitingP:
-      "A prompt has been sent to your handset. Enter your Mobile Money PIN to approve. Keep this page open.",
+      "A USSD code has been sent to your phone. Enter your Mobile Money PIN to confirm. Keep this page open.",
     stillWaiting: "Still waiting for your PIN…",
     failedH: "Payment did not go through",
     failedP: "Nothing was charged. Check your balance and try again.",
@@ -80,10 +80,10 @@ const T = {
       "Complete the payment above. This page will move on by itself the moment it clears — do not close it.",
     secureH: "🔒 100% secure payment · MTN MoMo & Orange Money",
     secureP:
-      "Enter your MoMo/OM number and approve the prompt on your phone — your access opens automatically.",
+      "Enter your MoMo/OM number and confirm with your USSD code on your phone — your access opens automatically.",
     timeoutH: "We did not hear back",
     timeoutP:
-      "The request was sent but no PIN came back, so nothing was charged. If you missed the prompt on your phone, just try again.",
+      "The USSD was sent but no PIN came back, so nothing was charged. If you missed it on your phone, just try again.",
   },
   fr: {
     momo: "Mobile Money",
@@ -111,7 +111,7 @@ const T = {
     charging: "Envoi de la demande…",
     awaitingH: "Regardez votre téléphone",
     awaitingP:
-      "Une demande a été envoyée sur votre combiné. Entrez votre code Mobile Money pour valider. Gardez cette page ouverte.",
+      "Un code USSD a été envoyé sur votre téléphone. Entrez votre code Mobile Money pour valider. Gardez cette page ouverte.",
     stillWaiting: "En attente de votre code…",
     failedH: "Le paiement n'est pas passé",
     failedP: "Rien n'a été débité. Vérifiez votre solde et réessayez.",
@@ -125,10 +125,10 @@ const T = {
       "Terminez le paiement ci-dessus. Cette page continuera d'elle-même dès que c'est validé — ne la fermez pas.",
     secureH: "🔒 Paiement 100% sécurisé · MTN MoMo & Orange Money",
     secureP:
-      "Entrez votre numéro MoMo/OM et validez la notification sur votre téléphone pour recevoir automatiquement votre code d'accès.",
+      "Entrez votre numéro MoMo/OM et validez avec votre code USSD sur votre téléphone pour recevoir automatiquement votre code d'accès.",
     timeoutH: "Pas de réponse",
     timeoutP:
-      "La demande est partie mais aucun code n'est revenu, donc rien n'a été débité. Si vous avez raté la demande sur votre téléphone, réessayez.",
+      "Le USSD est parti mais aucun code n'est revenu, donc rien n'a été débité. Si vous l'avez raté sur votre téléphone, réessayez.",
   },
 };
 
