@@ -125,7 +125,7 @@ const T = {
       "Terminez le paiement ci-dessus. Cette page continuera d'elle-même dès que c'est validé — ne la fermez pas.",
     secureH: "🔒 Paiement 100% sécurisé · MTN MoMo & Orange Money",
     secureP:
-      "Entrez votre numéro MoMo/OM et validez avec votre code USSD sur votre téléphone pour recevoir automatiquement votre code d'accès.",
+      "Entrez votre numéro MoMo/OM et validez le code USSD sur votre téléphone pour recevoir automatiquement votre code d'accès.",
     timeoutH: "Pas de réponse",
     timeoutP:
       "Le USSD est parti mais aucun code n'est revenu, donc rien n'a été débité. Si vous l'avez raté sur votre téléphone, réessayez.",
