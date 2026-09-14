@@ -44,7 +44,7 @@ export function LearnPanel({ days, signups }: { days: LearnDayRow[]; signups: Le
         <p className="text-[11px] font-bold uppercase tracking-wide text-faint">Learn test · bootcamp signups</p>
         {total.arrived === 0 ? (
           <p className="mt-2 text-[1.05rem] leading-relaxed text-mute">
-            No one has arrived yet. Send traffic to <span className="metric">/fr/learn?c=YOURTAG</span> and this fills in.
+            No one has arrived yet. Send traffic to <span className="metric">/en/learn?c=YOURTAG</span> and this fills in.
           </p>
         ) : (
           <p className="mt-2 text-[1.25rem] font-bold leading-snug text-bone">
@@ -57,7 +57,7 @@ export function LearnPanel({ days, signups }: { days: LearnDayRow[]; signups: Le
         <section className="rounded-2xl card p-5">
           <h2 className="text-[0.95rem] font-bold text-bone">Day by day</h2>
           <p className="mt-0.5 mb-4 text-[12px] text-faint">
-            A visitor counts on the day they first landed. Dates are Douala time.
+            A visitor counts on the day they first landed. Dates are Sydney time.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] text-left text-[0.88rem]">
@@ -101,7 +101,7 @@ export function LearnPanel({ days, signups }: { days: LearnDayRow[]; signups: Le
                 <tr className="text-[11px] uppercase tracking-wide text-faint">
                   <th className="pb-2 pr-4 font-bold">When</th>
                   <th className="pb-2 pr-4 font-bold">Name</th>
-                  <th className="pb-2 pr-4 font-bold">WhatsApp</th>
+                  <th className="pb-2 pr-4 font-bold">Mobile</th>
                   <th className="pb-2 pr-4 font-bold">Email</th>
                   <th className="pb-2 pr-4 font-bold">Link</th>
                 </tr>
@@ -115,12 +115,18 @@ export function LearnPanel({ days, signups }: { days: LearnDayRow[]; signups: Le
                     <td className="py-2.5 pr-4 font-bold text-bone">{s.name}</td>
                     <td className="metric py-2.5 pr-4">
                       <a
-                        href={`https://wa.me/237${s.phone}`}
-                        target="_blank"
-                        rel="noreferrer"
+                        href={`tel:+61${s.phone}`}
                         className="text-jade underline decoration-jade/40 underline-offset-4 hover:decoration-jade"
                       >
-                        {s.phone}
+                        0{s.phone}
+                      </a>
+                      <a
+                        href={`https://wa.me/61${s.phone}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ml-2 text-[11px] text-faint underline underline-offset-4 hover:text-bone"
+                      >
+                        WhatsApp
                       </a>
                     </td>
                     <td className="py-2.5 pr-4 text-mute">{s.email}</td>

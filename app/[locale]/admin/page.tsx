@@ -66,9 +66,22 @@ export default async function AdminPage() {
          until that file is run, and an empty list simply hides the
          section rather than breaking the page. */
       client.from("funnel_d2_daily").select("*").limit(400),
-      /* 014 — the bootcamp signup page. */
-      client.from("learn_daily").select("*").limit(400),
-      client.from("learn_signups").select("*").limit(500),
+      /* The bootcamp page. Raw rows, not a view — the day table is folded
+         in code below, so there is no migration to run before the tab
+         works. Views earn their place when a query is heavy or shared;
+         this is neither. */
+      client
+        .from("events")
+        .select("ref, name, detail, campaign, created_at")
+        .or("and(name.eq.start_view,detail.eq.learn),name.eq.learn_signup")
+        .order("created_at", { ascending: true })
+        .limit(5000),
+      client
+        .from("leads")
+        .select("name, phone, contact, locale, ref, created_at")
+        .eq("plan", "learn")
+        .order("created_at", { ascending: false })
+        .limit(500),
     ]);
 
     snap.funnel = funnel.data ?? [];
@@ -80,8 +93,45 @@ export default async function AdminPage() {
     snap.ctaRows = ctaRows.data ?? [];
     snap.d2Rows = d2Rows.data ?? [];
     snap.d2Daily = d2Daily.data ?? [];
-    snap.learnDays = learnDays.data ?? [];
-    snap.learnSignups = learnSignups.data ?? [];
+    {
+      /* A visitor belongs to the day they FIRST landed, Sydney time, and
+         every later step counts on that day — same rule as the sales
+         funnels, so a signup at 1am does not orphan the arrival that won it. */
+      type Ev = { ref: string; name: string; detail: string | null; campaign: string | null; created_at: string };
+      const evs = (learnDays.data ?? []) as Ev[];
+      const dayOf = (iso: string) =>
+        new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+      const first = new Map<string, { day: string; campaign: string }>();
+      for (const e of evs) {
+        if (e.name === "start_view" && e.detail === "learn" && !first.has(e.ref)) {
+          first.set(e.ref, { day: dayOf(e.created_at), campaign: e.campaign ?? "(none)" });
+        }
+      }
+      const cell = new Map<string, { day: string; campaign: string; arrived: Set<string>; signed: Set<string> }>();
+      for (const e of evs) {
+        const f = first.get(e.ref);
+        if (!f) continue;
+        const k = `${f.day}|${f.campaign}`;
+        const c = cell.get(k) ?? { day: f.day, campaign: f.campaign, arrived: new Set(), signed: new Set() };
+        if (e.name === "start_view") c.arrived.add(e.ref);
+        if (e.name === "learn_signup") c.signed.add(e.ref);
+        cell.set(k, c);
+      }
+      snap.learnDays = [...cell.values()].map((c) => ({
+        day: c.day, campaign: c.campaign, arrived: c.arrived.size, signed_up: c.signed.size,
+      }));
+
+      type Ld = { name: string | null; phone: string | null; contact: string | null; locale: string; ref: string | null; created_at: string };
+      snap.learnSignups = ((learnSignups.data ?? []) as Ld[]).map((l) => ({
+        name: l.name ?? "",
+        phone: l.phone ?? "",
+        email: l.contact ?? "",
+        locale: l.locale,
+        ref: l.ref,
+        signed_at: new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(l.created_at)).replace(",", ""),
+        campaign: l.ref ? first.get(l.ref)?.campaign ?? null : null,
+      }));
+    }
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.

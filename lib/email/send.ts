@@ -333,8 +333,10 @@ export async function sendBroadcast(opts: {
 export async function sendAdminAlert(input: {
   subject: string;
   lines: string[];
+  /** somewhere other than ADMIN_EMAIL, for alerts that belong to a different product */
+  to?: string;
 }): Promise<boolean> {
-  const to = process.env.ADMIN_EMAIL;
+  const to = input.to || process.env.ADMIN_EMAIL;
   if (!to) return false;
   const body = input.lines.join("\n");
   const html = `<pre style="font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;">${body
