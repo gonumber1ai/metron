@@ -7,6 +7,7 @@ import { Broadcast } from "./Broadcast";
 import { Ads, type CampaignRow } from "./Ads";
 import { StartFunnel, type StartRow, type CtaRow } from "./StartFunnel";
 import { D2Funnel, type D2Row, type D2DailyRow } from "./D2Funnel";
+import { LearnPanel, type LearnDayRow, type LearnSignup } from "./LearnPanel";
 
 export type Snapshot = {
   connected: boolean;
@@ -21,6 +22,8 @@ export type Snapshot = {
   ctaRows: CtaRow[];
   d2Rows: D2Row[];
   d2Daily: D2DailyRow[];
+  learnDays: LearnDayRow[];
+  learnSignups: LearnSignup[];
   conversations: {
     ref: string;
     last_body: string;
@@ -52,7 +55,7 @@ function money(n: number, currency: string): string {
     : `${n.toLocaleString("fr-FR")} FCFA`;
 }
 
-type Tab = "overview" | "ads" | "start" | "d2" | "customers" | "leads" | "write";
+type Tab = "overview" | "ads" | "start" | "d2" | "learn" | "customers" | "leads" | "write";
 
 export function Dashboard({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("overview");
@@ -180,6 +183,7 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
                 ["ads", "Quiz funnel"],
                 ["start", "Direct funnel"],
                 ["d2", "Direct funnel 2"],
+                ["learn", `Learn test${snap.learnSignups.length ? ` (${snap.learnSignups.length})` : ""}`],
                 ["customers", `Customers${paid ? ` (${paid})` : ""}`],
                 ["leads", `Leads${snap.recent.length ? ` (${snap.recent.length})` : ""}`],
                 ["write", "Write to people"],
@@ -282,6 +286,10 @@ export function Dashboard({ snap }: { snap: Snapshot }) {
 
           {tab === "d2" && (
             <D2Funnel rows={snap.d2Rows} daily={snap.d2Daily} />
+          )}
+
+          {tab === "learn" && (
+            <LearnPanel days={snap.learnDays} signups={snap.learnSignups} />
           )}
 
           {/* ---------------------------------------------------- broadcast */}

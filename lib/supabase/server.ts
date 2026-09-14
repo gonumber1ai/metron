@@ -506,6 +506,47 @@ export async function readThread(ref: string): Promise<
 }
 
 /** Capture a lead. Never throws — losing the lead is bad, breaking the page is worse. */
+/**
+ * A bootcamp signup. Same table as the sales leads, kept apart by
+ * plan = 'learn', and upserted on ref so a man who submits twice from the
+ * same phone is one row with his latest details rather than a unique-index
+ * error on the second try.
+ */
+export async function recordLearnLead(input: {
+  name: string;
+  phone: string;
+  email: string;
+  locale: string;
+  ref?: string;
+  campaign?: string;
+}): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  try {
+    const row = {
+      contact: input.email,
+      name: input.name,
+      phone: input.phone,
+      plan: "learn",
+      stage: "signup",
+      locale: input.locale,
+      ref: input.ref ?? null,
+      updated_at: new Date().toISOString(),
+    };
+    const q = input.ref
+      ? client.from("leads").upsert(row, { onConflict: "ref" })
+      : client.from("leads").insert(row);
+    const { error } = await q;
+    if (error) {
+      console.error("[supabase] recordLearnLead", error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function recordLead(input: {
   contact: string;
   ref?: string;

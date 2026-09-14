@@ -41,11 +41,13 @@ export default async function AdminPage() {
     ctaRows: [],
     d2Rows: [],
     d2Daily: [],
+    learnDays: [],
+    learnSignups: [],
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily] =
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily, learnDays, learnSignups] =
       await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
@@ -64,6 +66,9 @@ export default async function AdminPage() {
          until that file is run, and an empty list simply hides the
          section rather than breaking the page. */
       client.from("funnel_d2_daily").select("*").limit(400),
+      /* 014 — the bootcamp signup page. */
+      client.from("learn_daily").select("*").limit(400),
+      client.from("learn_signups").select("*").limit(500),
     ]);
 
     snap.funnel = funnel.data ?? [];
@@ -75,6 +80,8 @@ export default async function AdminPage() {
     snap.ctaRows = ctaRows.data ?? [];
     snap.d2Rows = d2Rows.data ?? [];
     snap.d2Daily = d2Daily.data ?? [];
+    snap.learnDays = learnDays.data ?? [];
+    snap.learnSignups = learnSignups.data ?? [];
     // Not filtered by stage. The Customers tab reads the `activity` view,
     // which is gated on stage = 'paid', so a message from anybody else was
     // stored and then shown nowhere.
