@@ -547,3 +547,50 @@ a[role="button"],
 .c-spot-by strong { color: #fff; font-size: .9rem; }
 .c-spot-by small { color: rgb(255 255 255 / .5); font-size: .78rem; }
 @media (max-width: 768px) { .c-spot-play .c-rail-play-mark { width: 58px; height: 58px; font-size: 19px; } }
+
+/* ── GOLD FUNNELS ──────────────────────────────────────────────────────────
+   The four priced funnels wear gold on black. Everything inside .f-gold that
+   asked for lime gets gold instead — the buttons, the clock, the kickers,
+   the rule under the headline — because the palette is four CSS variables
+   and this is where they are reassigned. Nothing else on the site changes. */
+.f-gold {
+  --color-lime: #d4af37;
+  --color-lime-300: #f1d27a;
+  --color-lime-600: #a8862a;
+  --color-lime-050: #1a1608;
+}
+.f-badge {
+  display: inline-flex; align-items: center; margin-bottom: 14px;
+  padding: 7px 16px; border: 1px solid var(--color-lime); border-radius: 999px;
+  color: var(--color-lime); font-size: 11.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+}
+.f-gold .c-heading > em {
+  font-style: normal; display: block;
+  background: linear-gradient(180deg, #f6dc8c 0%, #d4af37 55%, #b08d2b 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* Under the one question: three facts a man wants before pressing anything. */
+.f-strip {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px;
+  margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .1);
+}
+.f-strip span { display: inline-flex; align-items: center; gap: 7px; color: rgb(255 255 255 / .82); font-size: .86rem; font-weight: 600; }
+.f-strip span b { color: var(--color-lime); font-weight: 700; }
+.f-strip svg { width: 18px; height: 18px; color: var(--color-lime); }
+/* Video and quote side by side where there is room. */
+.f-spot { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: center; }
+@media (min-width: 720px) { .f-spot { grid-template-columns: 5fr 6fr; gap: 28px; } .f-spot .c-spot-quote { text-align: left; margin: 0; } .f-spot .c-spot-by { justify-content: flex-start; } }
+/* Three facts under the video. */
+.f-trust { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 22px auto 0; max-width: 1100px; padding: 18px; border: 1px solid rgb(255 255 255 / .1); border-radius: 18px; background: rgb(0 0 0 / .45); }
+@media (min-width: 720px) { .f-trust { grid-template-columns: repeat(3, 1fr); } }
+.f-trust div { display: flex; gap: 12px; align-items: flex-start; }
+.f-trust svg { flex: none; width: 26px; height: 26px; color: var(--color-lime); }
+.f-trust strong { display: block; color: #fff; font-size: .95rem; }
+.f-trust small { display: block; color: rgb(255 255 255 / .6); font-size: .82rem; }
+
+/* The last-chance popup. */
+.c-lc { width: 100%; max-width: 480px; padding: 26px 22px; border: 1px solid var(--color-lime); border-radius: 22px; background: radial-gradient(600px 260px at 70% -20%, rgb(212 175 55 / .18), transparent 65%), #070705; }
+.c-lc-h { margin: 10px 0 0; font-size: 1.55rem; font-weight: 900; line-height: 1.1; text-transform: uppercase; color: #fff; }
+.c-lc-p { margin: 12px 0 18px; color: rgb(255 255 255 / .78); font-size: .95rem; line-height: 1.55; }
+.c-lc-no { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 0; background: transparent; color: rgb(255 255 255 / .5); font-size: .85rem; cursor: pointer; }
+.c-lc-no:hover { color: #fff; }

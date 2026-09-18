@@ -5,6 +5,7 @@ import { sendPurchaseConfirmation, sendAdminAlert, looksLikeEmail } from "@/lib/
 import { contactForRef } from "@/lib/supabase/server";
 import { recordPayment, recordIntake } from "@/lib/supabase/server";
 import { issue, cookieName, cookieOptions } from "@/lib/entitlement";
+import { getOffer, markPaid } from "@/lib/offers";
 
 export const runtime = "nodejs";
 
@@ -119,6 +120,11 @@ export async function POST(req: Request) {
   }
 
   void recordIntake({ ref, locale: body.locale ?? "en", plan, stage: "paid", provider: "fapshi" });
+  /* Attribute the money to his funnel and close his clock. A row that was
+     `recovering` — he came back through the last-chance link — becomes
+     `recovered`, which is how the admin counts what the popup earned. */
+  const offer = await getOffer(ref);
+  void markPaid(ref, offer?.status === "recovering");
   void recordPayment({
     ref,
     provider: "fapshi",
@@ -126,6 +132,7 @@ export async function POST(req: Request) {
     plan,
     currency: "XAF",
     amountMinor: tx!.amount ?? 0,
+    funnel: offer?.funnel.id,
   });
 
   void (async () => {

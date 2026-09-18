@@ -55,23 +55,32 @@ export async function recordPayment(input: {
   plan: Plan;
   currency: string;
   amountMinor: number;
+  /** which of the four funnels sold it — see lib/funnels */
+  funnel?: string;
 }): Promise<boolean> {
   const client = db();
   if (!client) return false;
   try {
-    const { error } = await client.from("payments").upsert(
-      {
-        ref: input.ref,
-        provider: input.provider,
-        provider_txn: input.providerTxn,
-        plan: input.plan,
-        currency: input.currency,
-        amount_minor: input.amountMinor,
-        status: "paid",
-      },
-      { onConflict: "provider,provider_txn" },
-    );
+    const row: Record<string, unknown> = {
+      ref: input.ref,
+      provider: input.provider,
+      provider_txn: input.providerTxn,
+      plan: input.plan,
+      currency: input.currency,
+      amount_minor: input.amountMinor,
+      status: "paid",
+    };
+    // provider + provider_txn is the unique key: the same transaction reported
+    // twice — the poll and the webhook, or a webhook retried — is one row.
+    const { error } = await client
+      .from("payments")
+      .upsert(input.funnel ? { ...row, funnel: input.funnel } : row, { onConflict: "provider,provider_txn" });
     if (error) {
+      // Migration 015 not run: no funnel column yet. Record the money anyway.
+      if (input.funnel && /column|schema cache|funnel/i.test(error.message)) {
+        const again = await client.from("payments").upsert(row, { onConflict: "provider,provider_txn" });
+        if (!again.error) return true;
+      }
       console.error("[supabase] recordPayment", error.message);
       return false;
     }

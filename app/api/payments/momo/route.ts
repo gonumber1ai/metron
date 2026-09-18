@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { atFullPrice, offerExpired, OFFER_COOKIE } from "@/lib/payments";
 import { getPrice, type Plan } from "@/lib/payments";
+import { getOffer, priceFor, markRecovering } from "@/lib/offers";
+import { FUNNEL_COOKIE, isFunnelId, FUNNELS } from "@/lib/funnels";
 import {
   directPay,
   initiatePay,
@@ -73,6 +75,10 @@ export async function POST(req: Request) {
     whatsapp?: string;
     /** the scored assessment, so the admin view shows who this man is */
     quiz?: unknown;
+    /** which of the four funnels; falls back to the cookie */
+    funnel?: string;
+    /** he came through the last-chance link */
+    lc?: boolean;
   };
   try {
     body = await req.json();
@@ -104,11 +110,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "bad_phone" }, { status: 400 });
   }
 
-  const base = getPrice(plan, body.country ?? "CM");
-  // Same clock the page shows. Expired means the 10-day is charged at what
-  // everyone pays, not the offer price the page has already said is gone.
   const jar = await cookies();
-  const price = offerExpired(jar.get(OFFER_COOKIE)?.value) ? atFullPrice(base) : base;
+
+  /* ── which funnel, and what he pays ─────────────────────────────────────
+     The server's offer row is the authority. It knows when his clock started,
+     whether it has run, and whether he is inside the recovery window with a
+     last-chance link in hand. The cookie clock only remains for a man who
+     landed on the old /c page and has no row. */
+  const funnelId = isFunnelId(body.funnel)
+    ? body.funnel
+    : isFunnelId(jar.get(FUNNEL_COOKIE)?.value)
+      ? (jar.get(FUNNEL_COOKIE)!.value as keyof typeof FUNNELS)
+      : null;
+  const offer = await getOffer(ref);
+  const tier = offer?.funnel.tier ?? (funnelId ? FUNNELS[funnelId].tier : null);
+  const base = getPrice(plan, body.country ?? "CM", tier);
+  let price = base;
+  let priceReason: "offer" | "full" | "lastchance" = "offer";
+  if (offer) {
+    const p = priceFor(offer, body.lc === true);
+    priceReason = p.reason;
+    if (plan === "test") price = p.reason === "full" ? atFullPrice(base) : base;
+    if (p.reason === "lastchance") void markRecovering(ref);
+  } else if (offerExpired(jar.get(OFFER_COOKIE)?.value)) {
+    price = atFullPrice(base);
+    priceReason = "full";
+  }
   if (price.provider !== "fapshi") {
     return NextResponse.json({ status: "unavailable" });
   }
@@ -135,6 +162,7 @@ export async function POST(req: Request) {
     stage: "checkout_started",
     quiz: body.quiz,
   });
+  console.log(`[momo] ref=${ref} funnel=${offer?.funnel.id ?? funnelId ?? "-"} price=${price.amountMinor} (${priceReason})`);
 
   /* ---------------------------------------------- 1. charge the handset */
 
