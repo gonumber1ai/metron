@@ -64,6 +64,8 @@ const ALLOWED = new Set([
   "last_chance_dismissed",
   "recovery_sent",
   "recovery_clicked",
+  /* He pressed play on a testimonial video; detail = which, cta = where. */
+  "video_play",
 ]);
 
 export async function POST(req: Request) {

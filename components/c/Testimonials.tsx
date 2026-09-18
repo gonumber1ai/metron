@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flagOf } from "@/lib/content/testimonials";
+import { track as trackEvent } from "@/lib/track";
 
 /**
  * The testimonial rail.
@@ -151,7 +152,13 @@ export function VideoSpot({
       <button
         type="button"
         className="c-rail-play c-spot-play"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          /* One per press, with which video. YouTube counts views on its
+             side; this is the count that lines up with the rest of the
+             funnel — the same man, the same session, on his timeline. */
+          trackEvent("video_play", card.id, locale, { cta: "video_spot" });
+          setOpen(true);
+        }}
         aria-label={playLabel}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -307,6 +314,7 @@ export function Testimonials({
                 className="c-rail-play"
                 onClick={() => {
                   hold();
+                  trackEvent("video_play", t.id, locale, { cta: "video_card" });
                   setPlaying(t);
                 }}
                 aria-label={playLabel}

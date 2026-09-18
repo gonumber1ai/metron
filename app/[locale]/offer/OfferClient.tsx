@@ -76,7 +76,7 @@ export function OfferClient({
     if (!go) return;
     try {
       const saved = JSON.parse(window.localStorage.getItem(DELIVERY_KEY) ?? "null");
-      if (saved && /^6\d{8}$/.test(saved.phone)) {
+      if (saved && saved.choice && (saved.choice !== "whatsapp" || /^6\d{8}$/.test(saved.phone))) {
         setGiven(saved);
         setStage("pay");
         return;
@@ -284,40 +284,6 @@ export function OfferClient({
                 lc={lc}
               />
             )}
-          </section>
-
-          {/* ── AFTER PAYMENT ────────────────────────────────────────────
-              Removes the "what actually happens when I hand over money"
-              hesitation, which is the last one standing at this point. */}
-          <section className="mt-8 rounded-2xl border border-ink-600 bg-ink-850 px-5 py-5">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-faint">
-              {t.checkout.afterH}
-            </h2>
-            <ol className="mt-4 space-y-2.5">
-              {t.checkout.after.map((s, i) => (
-                <li key={s} className="flex gap-3 text-[0.95rem] leading-snug text-bone">
-                  <span
-                    aria-hidden
-                    className="metric shrink-0 text-[0.95rem] font-bold text-jade"
-                  >
-                    {i + 1}
-                  </span>
-                  {/* Step two is the way in, so it is the link. A man who pays
-                      on his laptop and opens the app on his phone needs it to
-                      be a thing he can press, not a sentence. */}
-                  {i === 1 ? (
-                    <Link
-                      href={`/${locale}/login`}
-                      className="font-bold text-jade underline decoration-jade/40 underline-offset-4 hover:decoration-jade"
-                    >
-                      {s}
-                    </Link>
-                  ) : (
-                    s
-                  )}
-                </li>
-              ))}
-            </ol>
           </section>
 
           {/* Guarantee and privacy, once each and compressed. Both were

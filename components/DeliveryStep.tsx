@@ -18,14 +18,11 @@ import { tapped } from "@/lib/track";
  * selected and the other two are one tap away — he can read the three and
  * press Continue without deciding anything.
  *
- * ── WHY THE NUMBER IS ASKED HERE ──────────────────────────────────────────
- * A hundred men reached the checkout this week and we could not contact one
- * of them. The number is asked before the money, framed as where to send the
- * programme rather than as a form field, and it does three jobs at once: it
- * is a lead if he stops at the payment form, it is where his daily session
- * goes if he chose WhatsApp, and it is the number the USSD prompt will go to
- * the day Fapshi approve direct-pay — at which point their form disappears
- * and this screen IS the checkout.
+ * ── THE NUMBER IS ASKED ONLY FOR WHATSAPP ────────────────────────────────
+ * It is where the daily session goes, so that choice cannot proceed without
+ * it. The other two do not need it and do not ask. When it is given it is
+ * also passed to the payment route as a real number, so the day Fapshi
+ * approve direct-pay the USSD goes straight to it.
  *
  * The 30-day is in-app only, so for that plan the other two are not offered.
  */
@@ -41,8 +38,8 @@ const COPY = {
     h: "Your programme, your way.",
     options: {
       app: {
-        name: "In your private space",
-        body: "Open the moment you pay. Your measurements, your days, your progress — all in one place, behind a PIN.",
+        name: "In the Metron app",
+        body: "Daily reminders, your progress measured in a tap, and the programme laid out day by day. Opens the moment you pay.",
         tag: "Recommended",
       },
       download: {
@@ -56,9 +53,9 @@ const COPY = {
         tag: "",
       },
     },
-    sprintNote: "The 30-day programme runs in your private space.",
+    sprintNote: "The 30-day programme runs in the Metron app.",
     phoneLabel: "Your WhatsApp number",
-    phoneHelp: "Where your access goes. 9 digits, starts with 6.",
+    phoneHelp: "Where each day's session will arrive. 9 digits, starts with 6.",
     badPhone: "That doesn't look right — 9 digits, starting with 6.",
     cta: (price: string) => `Continue to payment · ${price}`,
     secure: "Your statement shows METRON. Nothing else.",
@@ -68,8 +65,8 @@ const COPY = {
     h: "Votre programme, à votre façon.",
     options: {
       app: {
-        name: "Dans votre espace privé",
-        body: "Ouvert dès le paiement. Vos mesures, vos jours, votre progression — tout au même endroit, derrière un code PIN.",
+        name: "Dans l'application Metron",
+        body: "Des rappels chaque jour, votre progression mesurée en un geste, et le programme jour par jour. Ouvert dès le paiement.",
         tag: "Recommandé",
       },
       download: {
@@ -83,9 +80,9 @@ const COPY = {
         tag: "",
       },
     },
-    sprintNote: "Le programme de 30 jours se suit dans votre espace privé.",
+    sprintNote: "Le programme de 30 jours se suit dans l'application Metron.",
     phoneLabel: "Votre numéro WhatsApp",
-    phoneHelp: "C'est là qu'arrive votre accès. 9 chiffres, commence par 6.",
+    phoneHelp: "C'est là qu'arrivera votre séance chaque jour. 9 chiffres, commence par 6.",
     badPhone: "Ce numéro ne semble pas correct — 9 chiffres, commençant par 6.",
     cta: (price: string) => `Continuer vers le paiement · ${price}`,
     secure: "Votre relevé affiche METRON. Rien d'autre.",
@@ -112,13 +109,19 @@ export function DeliveryStep({
 
   const options: Delivery[] = plan === "sprint" ? ["app"] : ["app", "download", "whatsapp"];
 
+  /* The number is asked only when it is what the choice needs: WhatsApp
+     delivery has nowhere to go without one. The other two do not need it,
+     so they do not ask — a field a man cannot see the reason for is the
+     kind he abandons on. */
+  const needsPhone = choice === "whatsapp";
+
   function go(e: React.FormEvent) {
     e.preventDefault();
-    if (!PHONE_RE.test(digits)) return setErr(t.badPhone);
+    if (needsPhone && !PHONE_RE.test(digits)) return setErr(t.badPhone);
     setErr(null);
     setGoing(true);
     tapped("deliver_continue", locale, choice);
-    onContinue(choice, digits);
+    onContinue(choice, needsPhone ? digits : "");
   }
 
   return (
@@ -166,6 +169,7 @@ export function DeliveryStep({
       </div>
       {plan === "sprint" && <p className="mt-2 text-[0.85rem] text-faint">{t.sprintNote}</p>}
 
+      {needsPhone && (
       <label className="mt-6 block">
         <span className="mb-1.5 block text-[12px] font-bold uppercase tracking-wide text-mute">
           {t.phoneLabel}
@@ -181,6 +185,7 @@ export function DeliveryStep({
         />
         <span className="mt-1.5 block text-[12px] text-faint">{t.phoneHelp}</span>
       </label>
+      )}
 
       {err && (
         <p className="mt-3 rounded-xl border border-alert/50 bg-alert/[0.08] px-4 py-3 text-[0.9rem] text-bone">

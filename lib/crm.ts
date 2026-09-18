@@ -93,6 +93,8 @@ export type FunnelStats = {
   recoveredRevenue: number;
   messagesSent: number;
   recoveryEligible: number;
+  /** men who pressed play on a video at least once */
+  videoPlays: number;
 };
 
 const looksEmail = (v: string | null | undefined) => !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -245,6 +247,7 @@ export function fold(input: {
       recoveredRevenue: recCs.reduce((a, c) => a + c.paidMinor, 0),
       messagesSent: cs.reduce((a, c) => a + c.recovery.email + c.recovery.whatsapp, 0),
       recoveryEligible: cnt((c) => c.status === "recovery_eligible"),
+      videoPlays: evc("video_play"),
     };
   };
   const funnels: FunnelStats[] = [

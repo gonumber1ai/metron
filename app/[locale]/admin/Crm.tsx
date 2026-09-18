@@ -119,10 +119,10 @@ export function Crm({
           steps follow one another, and of Visitors where they do not.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1180px] text-left text-[0.86rem]">
+          <table className="w-full min-w-[1260px] text-left text-[0.86rem]">
             <thead>
               <tr className="text-[11px] uppercase tracking-wide text-faint">
-                {["Funnel", "Visitors", "Sessions", "Returned", "Said yes", "Buy click", "Checkout", "Form", "USSD", "Paid", "Revenue", "Leads", "Popup", "Popup→click", "Recovered", "Msgs"].map((h) => (
+                {["Funnel", "Visitors", "Sessions", "Returned", "Video", "Said yes", "Buy click", "Checkout", "Form", "USSD", "Paid", "Revenue", "Leads", "Popup", "Popup→click", "Recovered", "Msgs"].map((h) => (
                   <th key={h} className="pb-2 pr-3 font-bold">{h}</th>
                 ))}
               </tr>
@@ -142,6 +142,7 @@ export function Crm({
                     {cell(f.visitors)}
                     {cell(f.sessions)}
                     {cell(f.returned, f.visitors)}
+                    {cell(f.videoPlays, f.visitors)}
                     {cell(f.saidYes, f.visitors)}
                     {cell(f.buyClicks, f.visitors)}
                     {cell(f.checkout, f.buyClicks)}
