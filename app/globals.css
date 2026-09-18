@@ -594,3 +594,13 @@ a[role="button"],
 .c-lc-p { margin: 12px 0 18px; color: rgb(255 255 255 / .78); font-size: .95rem; line-height: 1.55; }
 .c-lc-no { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 0; background: transparent; color: rgb(255 255 255 / .5); font-size: .85rem; cursor: pointer; }
 .c-lc-no:hover { color: #fff; }
+
+.f-gold .c-heading .f-sub { display: block; font-size: .62em; letter-spacing: .04em; color: #fff; }
+.f-gold .c-quiz > div { border-color: rgb(212 175 55 / .4); background: linear-gradient(135deg, #14110a, #030303 65%); }
+.f-spot .c-spot-text { min-width: 0; }
+/* Gradient text and the hero's text-shadow do not mix: the shadow paints
+   through the transparent fill and turns gold into mud. Shadow off on the
+   gold line only; a drop-shadow on the box does the lifting instead. */
+.f-gold .c-heading > em { text-shadow: none; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 10px rgb(0 0 0 / .7)); }
+/* The mark follows the page. It is jade elsewhere; here it is gold. */
+.f-gold .c-brand .text-jade { color: var(--color-lime); }

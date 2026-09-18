@@ -131,6 +131,7 @@ export function VideoSpot({
   playLabel,
   closeLabel,
   planLabels,
+  className = "",
 }: {
   card?: Card;
   locale: string;
@@ -138,15 +139,15 @@ export function VideoSpot({
   playLabel: string;
   closeLabel: string;
   planLabels: { "10": string; "30": string };
+  /** extra classes on the section — the funnels pass f-spot for the side-by-side layout */
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
   if (!card?.video) return null;
   const id = card.video.youtube;
 
   return (
-    <section className="c-spot">
-      {heading && <p className="c-kicker c-rail-head">{heading}</p>}
-
+    <section className={`c-spot ${className}`}>
       <button
         type="button"
         className="c-rail-play c-spot-play"
@@ -169,12 +170,15 @@ export function VideoSpot({
         <small>{playLabel}</small>
       </button>
 
-      <blockquote className="c-spot-quote">“{card.quote}”</blockquote>
-      <p className="c-spot-by">
-        {flagOf(card.country) && <span aria-hidden>{flagOf(card.country)}</span>}
-        <strong>{card.name}</strong>
-        <small>{planLabels[card.plan]}</small>
-      </p>
+      <div className="c-spot-text">
+        {heading && <p className="c-kicker c-rail-head">{heading}</p>}
+        <blockquote className="c-spot-quote">“{card.quote}”</blockquote>
+        <p className="c-spot-by">
+          {flagOf(card.country) && <span aria-hidden>{flagOf(card.country)}</span>}
+          <strong>{card.name}</strong>
+          <small>{planLabels[card.plan]}</small>
+        </p>
+      </div>
 
       {open && (
         <VideoModal

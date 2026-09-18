@@ -38,6 +38,7 @@ export function Quiz3({
   ofLabel,
   kicker,
   privateNote,
+  footer,
   onDone,
 }: {
   quals: { q: string; options: string[] }[];
@@ -46,6 +47,8 @@ export function Quiz3({
   /** Single-question mode only, where a count would say nothing. */
   kicker?: string;
   privateNote?: string;
+  /** Rendered inside the card, under the answer — the funnels put a fact strip here. */
+  footer?: React.ReactNode;
   onDone: () => void;
 }) {
   const [i, setI] = useState(0);
@@ -176,6 +179,7 @@ export function Quiz3({
       </div>
 
 
+      {footer}
       {privateNote && (
       <p className="mt-7 flex items-center justify-center gap-2 text-[12.5px] text-white/50">
         <span aria-hidden className="text-lime">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Plan } from "@/lib/payments";
 import { Spinner } from "./Pending";
+import { tapped } from "@/lib/track";
 
 /**
  * "How do you want to receive it?" — the screen between the buy button and
@@ -116,6 +117,7 @@ export function DeliveryStep({
     if (!PHONE_RE.test(digits)) return setErr(t.badPhone);
     setErr(null);
     setGoing(true);
+    tapped("deliver_continue", locale, choice);
     onContinue(choice, digits);
   }
 
@@ -194,7 +196,6 @@ export function DeliveryStep({
         {going && <Spinner />}
         {t.cta(price)}
       </button>
-      <p className="mt-3 text-center text-[0.85rem] text-faint">{t.secure}</p>
     </form>
   );
 }

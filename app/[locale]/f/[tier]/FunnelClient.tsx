@@ -1,0 +1,196 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { getPrices, type Plan } from "@/lib/payments";
+import { getDirect } from "@/lib/content/direct";
+import { getMarketing } from "@/lib/content/marketing";
+import { track, tapped, enterFunnel } from "@/lib/track";
+import { update } from "@/lib/store";
+import { Clock } from "@/components/f/Clock";
+import { useOffer } from "@/components/f/useOffer";
+import { LastChance } from "@/components/f/LastChance";
+import type { Funnel } from "@/lib/funnels";
+import { Quiz3 } from "@/components/c/Quiz3";
+import { Testimonials, VideoSpot } from "@/components/c/Testimonials";
+import { MoreTestimonials } from "@/components/c/MoreTestimonials";
+import { getTestimonials, getVideos } from "@/lib/content/testimonials";
+import { MetaPixel } from "@/components/MetaPixel";
+import { Logo } from "@/components/Logo";
+
+/** He has answered the one question at least once, on this device. */
+const PASSED_KEY = "metron.c.passed";
+
+type Pair = [string, string];
+type Copy = {
+  quiz: { q: string; options: string[] }[];
+  l: Record<string, string>;
+  units: [string, string, string];
+  benefits: [string, string, string][];
+  trust: [string, string, string][];
+  pillars: [string, string, string][];
+  timeline: Pair[];
+  without: string[];
+  with: string[];
+  proofPoints: [string, string][];
+  includes: [string, string][];
+};
+const EN: Copy = {
+  /* One question, and the hero asks it — see heroSub. The card below holds
+     only the answer, which is why `q` is empty: printing the question twice on
+     one screen is what happens when a headline and a form are written apart
+     from each other.
+     The other two questions are gone rather than moved. They diagnosed him,
+     and 420 men arriving against 34 finishing said he was not there to be
+     diagnosed. What is left is not a quiz, it is a commitment: he says he can
+     find fifteen minutes, and everything after this is addressed to a man who
+     has already said yes. */
+  quiz: [{ q: "Can you commit 15 minutes a day for the next 10 days to make it happen?", options: ["Yes I can"] }],
+  l: { tagline: "LONGER LASTING SEX", cta: "START 10-DAY CHALLENGE", timer: "SPECIAL OFFER ENDS IN", expired: "OFFER EXPIRED", expiredNotice: "Your {offer} offer has expired. You are now at the price everyone pays: {full}.", heroA: "10 DAYS", heroB: "TO LAST LONGER", heroC: "AND CONSISTENTLY", heroSub: "", askKicker: "ONLY ONE QUESTION:", ctaShort: "START NOW", login: "Log in", stripSecure: "Secure payment", stripAccess: "Instant access", railJourney: "MEASURED, TRAINED, MEASURED AGAIN", railMindset: "WHAT ELSE CHANGED", railPartner: "WHAT THEIR PARTNERS SAY", railProof: "MORE FROM MEN WHO DID IT", railProgression: "WHY THEY CARRIED ON", moreLabel: "MORE METRON EXPERIENCES", plan10: "10-Day Challenge", plan30: "30-Day Program", railPrev: "Previous", railNext: "Next", playLabel: "Watch (10 sec)", closeLabel: "Close", videoHead: "A CLIENT. TEN SECONDS.", question: "QUESTION {n} OF {total}", next: "NEXT QUESTION", goodKicker: "BASED ON YOUR ANSWERS", goodA: "YOU'RE A", goodB: "GOOD FIT", goodSub: "You don't need pills or complicated routines.", gymA: "METRON IS LIKE A GYM", gymB: "FOR YOUR SEXUAL PERFORMANCE.", gymBody: "But no heavy lifting. No two-hour sessions. No forever. Just a simple, private plan you can follow in about 15 minutes a day.", trainingKicker: "HOW METRON WORKS", trainingA: "REAL TRAINING", trainingB: "FOR REAL RESULTS.", trainingSub: "You don't build physical control by wishing for it. You train it.", planKicker: "THE 10-DAY CHALLENGE", planA: "A SIMPLE PLAN.", planB: "REAL RESULTS.", planSub: "Start with 10 days. Measure the difference yourself.", diffKicker: "THE DIFFERENCE", diffA: "SAME YOU.", diffB: "A BETTER EXPERIENCE.", proofKicker: "PROOF", proofA: "PRIVATE. SIMPLE.", proofB: "REAL RESULTS.", costKicker: "THE COST OF", costA: "NOT STARTING", costB: "IS HIGHER THAN YOU THINK.", getA: "10 DAYS TO A", getB: "LONGER LASTING YOU", getC: "AND A HAPPIER SEX LIFE.", closeA: "READY FOR", closeB: "YOUR RESULTS?", closeSub: "Your 10-day challenge is reserved at {price} for the next 7 hours.", closeSubExpired: "Your reserved price has expired. The 10-day challenge is {price} — the price everyone pays.", nextKicker: "AFTER YOUR 10 DAYS", nextA: "THE MAIN PROGRAM IS", nextB: "THE 30-DAY PROGRAM.", nextPriceNote: "30-DAY PROGRAM", nextSub: "This is the one that changes it for good. It holds the time you gained and moves it out of your own hands and into real sex.", next1: "Everything in the 10-day challenge, continued and loaded heavier", next2: "The partner phase — control on your own and control with her are two different skills", next3: "What to say to her, so it never feels like a clinic", next4: "Food, sleep and strength work that support the rest", nextNote: "But we are not asking you for that today. Start with the 10-day challenge at {price}, measure on day 10, and let your own number tell you whether this works. Almost every man who sees it move goes on to the 30 days." , script: "A Better You in Bed", bonusDay: "DAY 10", bonusWord: "BONUS", bonusH: "How to make her come first", bonusBody: "Know her arousal point for a more satisfying experience for both of you.", diffSub: "It’s not about being someone else. It’s about getting better at what matters.", withoutH: "WITHOUT METRON", withH: "WITH METRON", proofSub: "Simple. No pills. No herbs. 15 minutes a day. Measured.", reviewA: "REAL MEN.", reviewB: "REAL RESULTS.", costSub: "The longer you stay at a particular duration, the harder it becomes to change it.", costBody1: "If you’re unhappy with your sexual performance, waiting another month doesn’t make you last longer.", costBold: "Training does.", costBody2: "{price} shouldn’t be the reason you spend another month unhappy with your sex life.", closeNote: "You can either keep wondering if you can improve — or spend the next 10 days finding out." },
+
+  units: ["HRS", "MINS", "SECS"],
+  benefits: [["phone", "On your phone.", "Anywhere, any time."], ["leaf", "No pills.", "No herbs."], ["clock", "Just 15 minutes", "a day."], ["chart", "Real results.", "Naturally."]],
+  trust: [["chart", "Measurable", "Day 1 → Day 10, your own number."], ["leaf", "No pills. No herbs.", "Just training."], ["phone", "Works on any device", "Train from your phone."]],
+  pillars: [["01", "Awareness", "Measure how long you last on day 1, so you know your starting point."], ["02", "Breathing", "How you breathe has a direct impact on your stamina and control."], ["03", "Pelvic-floor control", "Build control over the muscles that can make you finish sooner than you wanted."], ["04", "Arousal management", "Learn to recognise when you are close, then train your body to stay in control for longer."], ["05", "Practical exercises", "Simple exercises combining it all — no more than 15 minutes a day."], ["06", "Progress tracking", "Track every training day and measure again at the end to see the difference."]],
+  timeline: [["DAY 1", "Complete your baseline measurement."], ["DAYS 2–9", "Follow your daily training."], ["DAY 10", "Repeat the measurement. See what changed."]],
+  without: ["Guessing what to do", "Inconsistent control", "Frustration", "Relying on quick fixes", "Wondering if things will improve"],
+  with: ["A structured daily routine", "Practical control techniques", "Better awareness", "Increased confidence", "Measurable progress"],
+  proofPoints: [["heart", "Last longer"], ["chart", "More confidence"], ["check", "Measurable progress"]],
+  includes: [["bolt", "Daily lessons"], ["eye", "Practical guides"], ["chart", "Progress tracker"], ["heart", "Lifetime access"]],
+};
+const FR: Copy = { quiz: [{ q: "Pouvez-vous consacrer 15 minutes par jour pendant les 10 prochains jours pour y arriver ?", options: ["Oui, je peux"] }], l: { ...EN.l, tagline: "DU SEXE QUI DURE PLUS LONGTEMPS", cta: "COMMENCER LE DÉFI 10 JOURS", timer: "OFFRE SPÉCIALE SE TERMINE DANS", expired: "OFFRE EXPIRÉE", expiredNotice: "Votre offre à {offer} a expiré. Vous êtes maintenant au prix que tout le monde paie : {full}.", heroA: "10 JOURS", heroB: "POUR TENIR PLUS LONGTEMPS", heroC: "ET DE FAÇON CONSTANTE", heroSub: "", askKicker: "UNE SEULE QUESTION :", ctaShort: "COMMENCER", login: "Se connecter", stripSecure: "Paiement sécurisé", stripAccess: "Accès immédiat", railJourney: "MESURÉ, ENTRAÎNÉ, REMESURÉ", railMindset: "CE QUI A CHANGÉ D’AUTRE", railPartner: "CE QU’EN DISENT LEURS PARTENAIRES", railProof: "D’AUTRES HOMMES QUI L’ONT FAIT", railProgression: "POURQUOI ILS ONT CONTINUÉ", moreLabel: "PLUS D’EXPÉRIENCES METRON", plan10: "Défi 10 jours", plan30: "Programme 30 jours", railPrev: "Précédent", railNext: "Suivant", playLabel: "Regarder (10 s)", closeLabel: "Fermer", videoHead: "UN CLIENT. DIX SECONDES.", question: "QUESTION {n} SUR {total}", next: "QUESTION SUIVANTE", goodKicker: "D'APRÈS VOS RÉPONSES", goodA: "VOUS ÊTES", goodB: "UN BON PROFIL", goodSub: "Vous n'avez besoin ni de pilules ni de routines compliquées.", gymA: "METRON, C'EST COMME UNE SALLE", gymB: "POUR VOTRE PERFORMANCE SEXUELLE.", gymBody: "Pas de charges lourdes. Pas de séances de deux heures. Juste un plan privé et simple, environ 15 minutes par jour.", trainingKicker: "COMMENT METRON FONCTIONNE", trainingA: "UN VRAI ENTRAÎNEMENT", trainingB: "POUR DE VRAIS RÉSULTATS.", trainingSub: "On ne construit pas le contrôle physique en le souhaitant. On l'entraîne.", planKicker: "LE DÉFI DE 10 JOURS", planA: "UN PLAN SIMPLE.", planB: "DE VRAIS RÉSULTATS.", planSub: "Commencez par 10 jours. Mesurez vous-même la différence.", diffKicker: "LA DIFFÉRENCE", diffA: "LE MÊME VOUS.", diffB: "UNE MEILLEURE EXPÉRIENCE.", proofKicker: "LA PREUVE", proofA: "PRIVÉ. SIMPLE.", proofB: "DE VRAIS RÉSULTATS.", costKicker: "LE COÛT DE", costA: "NE PAS COMMENCER", costB: "EST PLUS ÉLEVÉ QUE VOUS NE PENSEZ.", getA: "10 JOURS POUR", getB: "TENIR PLUS LONGTEMPS", getC: "ET UNE VIE SEXUELLE PLUS HEUREUSE.", closeA: "PRÊT POUR", closeB: "VOS RÉSULTATS ?", closeSub: "Votre défi de 10 jours est réservé à {price} pour les 7 prochaines heures.", closeSubExpired: "Votre prix réservé a expiré. Le défi de 10 jours est à {price} — le prix que tout le monde paie.", nextKicker: "APRÈS VOS 10 JOURS", nextA: "LE PROGRAMME PRINCIPAL,", nextB: "C’EST CELUI DE 30 JOURS.", nextPriceNote: "PROGRAMME DE 30 JOURS", nextSub: "C’est celui qui change les choses pour de bon. Il consolide le temps gagné et le fait sortir de vos propres mains pour aller dans de vrais rapports.", next1: "Tout ce qu'il y a dans le défi de 10 jours, poursuivi et intensifié", next2: "La phase avec partenaire — se contrôler seul et se contrôler avec elle sont deux compétences différentes", next3: "Quoi lui dire, pour que ça ne ressemble jamais à une consultation", next4: "Alimentation, sommeil et travail de force pour soutenir le reste", nextNote: "Mais on ne vous demande pas ça aujourd'hui. Commencez par le défi de 10 jours à {price}, mesurez au jour 10, et laissez votre propre chiffre vous dire si ça marche. Presque tous les hommes qui le voient bouger enchaînent avec les 30 jours." , script: "Un Meilleur Vous au Lit", bonusDay: "JOUR 10", bonusWord: "BONUS", bonusH: "Comment la faire jouir en premier", bonusBody: "Connaissez son point d’excitation pour une expérience plus satisfaisante pour vous deux.", diffSub: "Il ne s’agit pas de devenir quelqu’un d’autre. Il s’agit de progresser là où ça compte.", withoutH: "SANS METRON", withH: "AVEC METRON", proofSub: "Simple. Pas de pilules. Pas de plantes. 15 minutes par jour. Mesuré.", reviewA: "DE VRAIS HOMMES.", reviewB: "DE VRAIS RÉSULTATS.", costSub: "Plus vous restez à une certaine durée, plus il devient difficile de la changer.", costBody1: "Si vous n’êtes pas satisfait de votre performance sexuelle, attendre un mois de plus ne vous fera pas tenir plus longtemps.", costBold: "L’entraînement, oui.", costBody2: "{price} ne devrait pas être la raison pour laquelle vous passez encore un mois insatisfait de votre vie sexuelle.", closeNote: "Vous pouvez continuer à vous demander si vous pouvez progresser — ou passer les 10 prochains jours à le découvrir." } ,
+  units: ["H", "MIN", "SEC"],
+  benefits: [["phone", "Sur votre téléphone.", "Où que vous soyez."], ["leaf", "Pas de pilules.", "Pas de plantes."], ["clock", "Juste 15 minutes", "par jour."], ["chart", "De vrais résultats.", "Naturellement."]],
+  trust: [["chart", "Mesurable", "Jour 1 → Jour 10, votre propre chiffre."], ["leaf", "Pas de pilules. Pas de plantes.", "Juste de l’entraînement."], ["phone", "Sur n’importe quel appareil", "Entraînez-vous depuis votre téléphone."]],
+  pillars: [["01", "La conscience", "Mesurez combien de temps vous tenez au jour 1, pour connaître votre point de départ."], ["02", "La respiration", "Votre façon de respirer a un impact direct sur votre endurance et votre contrôle."], ["03", "Le plancher pelvien", "Prenez le contrôle des muscles qui peuvent vous faire finir plus tôt que vous ne le vouliez."], ["04", "La gestion de l’excitation", "Apprenez à reconnaître quand vous approchez, puis entraînez votre corps à garder le contrôle plus longtemps."], ["05", "Les exercices pratiques", "Des exercices simples qui combinent tout — pas plus de 15 minutes par jour."], ["06", "Le suivi des progrès", "Suivez chaque jour d’entraînement et mesurez à nouveau à la fin pour voir la différence."]],
+  timeline: [["JOUR 1", "Faites votre mesure de départ."], ["JOURS 2–9", "Suivez votre entraînement quotidien."], ["JOUR 10", "Refaites la mesure. Voyez ce qui a changé."]],
+  without: ["Vous devinez quoi faire", "Un contrôle irrégulier", "De la frustration", "Vous comptez sur des solutions rapides", "Vous vous demandez si ça s’améliorera"],
+  with: ["Une routine quotidienne structurée", "Des techniques de contrôle concrètes", "Une meilleure conscience", "Plus de confiance", "Des progrès mesurables"],
+  proofPoints: [["heart", "Tenir plus longtemps"], ["chart", "Plus de confiance"], ["check", "Des progrès mesurables"]],
+  includes: [["bolt", "Leçons quotidiennes"], ["eye", "Guides pratiques"], ["chart", "Suivi de progression"], ["heart", "Accès à vie"]],
+};
+
+type IconName = "lock" | "leaf" | "clock" | "chart" | "check" | "cross" | "phone" | "heart" | "eye" | "bolt";
+function Icon({ name, className = "h-5 w-5" }: { name: IconName; className?: string }) { const d: Record<IconName, string> = { lock: "M7 10V7a5 5 0 0 1 10 0v3M5.5 10h13v10h-13z", leaf: "M5 19c0-7 5-12 14-13 0 9-5 14-12 14H5v-1Zm2 0 8-8", clock: "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", chart: "M5 19V10m5 9V5m5 14v-7m5 7V8", check: "M4 12.5 9 17.5 20 6.5", cross: "M6 6l12 12M18 6 6 18", phone: "M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm3 15h2", heart: "M12 20s-7-4.4-7-9.3A4 4 0 0 1 12 8a4 4 0 0 1 7 2.7C19 15.6 12 20 12 20Z", eye: "M2 12s3.5-6 10-6 10 6-3.5 6-10 6-10-6-10-6Zm10 2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z", bolt: "M13 2 5 13h6l-1 9 8-11h-6l1-9Z" }; return <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden><path d={d[name]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>; }
+
+/**
+ * One of the four priced funnels — see lib/funnels. Same page for all four;
+ * the tier sets the three prices and the language sets the copy. Derived
+ * from the /c page and kept in step with it by hand: the design there is the
+ * one that converts, and this only adds what the mockup asked for — the
+ * badge, the gold, the fact strip under the question, the video beside its
+ * quote — and takes out every line of privacy copy.
+ *
+ * ── WHY THE PRIVACY COPY IS GONE ─────────────────────────────────────────
+ * The page said "nobody has to know" five separate times, and then the first
+ * real action asked for his name, email and number. Said once it answers a
+ * question; said five times it tells him he has something to hide, and then
+ * contradicts itself at the form. The gym frame — this is training — is the
+ * one that stays.
+ */
+export function FunnelClient({ locale, geoCountry, funnel }: { locale: string; geoCountry?: string | null; funnel: Funnel }) {
+  const { quiz, l, units, benefits, trust, pillars, timeline, without, with: withList, proofPoints, includes } = locale === "fr" ? FR : EN; const [passed, setPassed] = useState(false); const reveal = useRef<HTMLDivElement>(null);
+  /* Passed on a previous visit rather than a moment ago. Answering in front
+     of him is the point of the card — he sees his own commitment land — but
+     showing an unpressed question above a page that is already open asks a
+     man to commit to something he can see he has already been let into. */
+  const [restored, setRestored] = useState(false);
+  /* Remembered, because the man we most need to come back is the one who left
+     to put money on his wallet. Making him answer the question again to find
+     the buy button, on the trip where he actually intends to pay, would be a
+     gate pointed at exactly the wrong person. Read after mount so the server
+     and the first paint agree. */
+  useEffect(() => { try { if (window.localStorage.getItem(PASSED_KEY) === "1") { setPassed(true); setRestored(true); } } catch {} }, []);
+  /* The clock has to be worth something. While it runs he sees the offer
+     price; when it runs out the page shows what the plan was listed at
+     before, and stays there for him. `was` comes from the price book, so the
+     number is one this plan genuinely carried rather than one invented to
+     make the discount look bigger. */
+  const rows = getPrices(geoCountry ?? "default", funnel.tier);
+  const testRow = rows.find((p) => p.plan === ("test" as Plan));
+  const sprint = rows.find((p) => p.plan === ("sprint" as Plan))?.display ?? "15 000 FCFA";
+  /* The clock, from the server. Null until it answers; the countdown and
+     the popup render nothing until then rather than guessing. */
+  const offer = useOffer(funnel.id, locale);
+  const expired = Boolean(offer?.expired);
+  const price = (expired ? testRow?.was : testRow?.display) ?? testRow?.display ?? ""; const direct = getDirect(locale); const marketing = getMarketing(locale);
+  useEffect(() => { try { const p = new URLSearchParams(window.location.search); const campaign = (p.get("c") ?? p.get("utm_campaign") ?? "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40); if (campaign) update((s) => s.campaign ? s : { ...s, campaign }, locale); } catch {}
+    enterFunnel(funnel.id, locale);
+    track("start_view", funnel.id, locale, { funnel: funnel.id });
+    track("page_view", funnel.id, locale, { funnel: funnel.id }); }, [locale, funnel.id]);
+  const complete = useCallback(() => { setPassed(true); try { window.localStorage.setItem(PASSED_KEY, "1"); } catch {} track("quiz_complete", funnel.id, locale, { cta: "gate_yes" }); window.setTimeout(() => reveal.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }, [locale, funnel.id]);
+  /* ?go=1 opens the Fapshi checkout on arrival rather than showing him a page
+     with a button on it. Everything the offer screen used to say was already
+     said here, so all it was adding was somewhere to change his mind. */
+  /* Every button that takes money says what it costs.
+     It did not, and the checkout it leads to now opens Fapshi on arrival with
+     no page in between — so a man who pressed the sticky bar without ever
+     scrolling met "FCFA 2500" for the first time on a payment form. Fifteen
+     of them reached that screen and not one pushed a payment through it.
+     `price` is the same value the rest of the page quotes and it follows the
+     seven-hour clock, so the button cannot promise 2 500 after the offer has
+     run out. The two narrow bars take a shorter verb to make room; the price
+     is the half that has to survive, not the sentence. */
+  const Go = ({ where, className = "", compact = false }: { where: string; className?: string; compact?: boolean }) => <Link href={`/${locale}/offer?go=1`} onClick={() => tapped(`buy_${where}`, locale, funnel.id)} className={`btn-lime c-cta ${className}`}><span className="c-cta-label">{compact ? l.ctaShort : l.cta}</span><span className="c-cta-price">{price}</span></Link>;
+  const Heading = ({ kicker, a, b, c }: { kicker?: string; a: string; b: string; c?: string }) => <>{kicker && <p className="c-kicker">{kicker}</p>}<h2 className="c-heading">{a}<br /><span>{b}</span>{c && <><br />{c}</>}</h2></>;
+  /* One rail per position. `slot` decides what appears, so the page never
+     names a testimonial and cannot drift out of step with the data file —
+     add a row there with slots: ["partner"] and it turns up under the bonus.
+     Renders nothing at all when a slot is empty. */
+  const Rail = ({ slot, head }: { slot: "journey" | "mindset" | "partner" | "proof" | "progression"; head: string }) => <Testimonials items={getTestimonials(locale, slot)} heading={head} planLabels={{ "10": l.plan10, "30": l.plan30 }} prevLabel={l.railPrev} nextLabel={l.railNext} locale={locale} playLabel={l.playLabel} closeLabel={l.closeLabel} />;
+  const Trust = () => <div className="c-trust">{trust.map(([icon, title, body]) => <div key={title} className="c-trust-item"><Icon name={icon as IconName} /><p><strong>{title}</strong><small>{body}</small></p></div>)}</div>;
+  return <><style>{`body{background:#030303;color:#fff}body::before{display:none}`}</style><MetaPixel event="ViewContent" /><div className="c-page f-gold"><header className="c-bar"><div className="c-bar-inner"><span className="c-brand"><Logo size="sm" /><small>{l.tagline}</small></span>{passed ? <><div className="c-bar-timer">{offer && <Clock until={offer.expiresAt} label={l.timer} expiredLabel={l.expired} units={units} compact />}</div><Go where="bar" compact /></> : <Link href={`/${locale}/login`} className="c-bar-login">{l.login}</Link>}</div></header><main className="c-shell">
+    <section className="c-hero c-photo"><Image src="/c/hero.jpg" fill priority sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-hero-copy"><span className="f-badge">{l.planKicker}</span><h1 className="c-heading"><em>{l.heroA}</em>{l.heroB}<br /><span className="f-sub">{l.heroC}</span></h1><i className="c-rule" />{l.heroSub && <p className="c-lede">{l.heroSub}</p>}<div className="c-benefits">{benefits.map(([icon, title, sub]) => <div key={title}><b><Icon name={icon as IconName} /></b><strong>{title}</strong><small>{sub}</small></div>)}</div><p className="c-script">{l.script}</p></div></section>
+    {!restored && <section className="c-quiz"><Quiz3 quals={quiz} ofLabel={l.question} kicker={l.askKicker} onDone={complete} footer={<div className="f-strip"><span><Icon name="check" /><b>{l.stripSecure}</b></span><span><Icon name="chart" /><b>{price}</b></span><span><Icon name="bolt" /><b>{l.stripAccess}</b></span></div>} /></section>}
+      {/* The one piece of filmed proof, at the size it is worth, on the screen
+          everybody sees. It sat in a rail two-thirds down the page, which is
+          the same as not having it. */}
+      <VideoSpot card={getVideos(locale)[0]} locale={locale} heading={l.videoHead} playLabel={l.playLabel} closeLabel={l.closeLabel} planLabels={{ "10": l.plan10, "30": l.plan30 }} className="f-spot" />
+      <div className="f-trust">{trust.map(([icon, title, body]) => <div key={title}><Icon name={icon as IconName} /><p><strong>{title}</strong><small>{body}</small></p></div>)}</div>
+    <div ref={reveal} className={passed ? "c-reveal" : "hidden"} aria-hidden={!passed}>
+      {/* Said out loud, not silently swapped. A price that changes with no
+          explanation reads as a bug or a trick; this tells him his offer ran
+          out and what he is looking at now is the ordinary price. */}
+      {expired && (
+        <p className="c-expired">
+          {l.expiredNotice
+            .replace("{offer}", testRow?.display ?? "")
+            .replace("{full}", testRow?.was ?? "")}
+        </p>
+      )}
+      <section className="c-good c-photo"><Image src="/c/fit-clean.jpg" fill sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-panel-copy"><Heading kicker={l.goodKicker} a={l.goodA} b={l.goodB} /><p className="c-lede">{l.goodSub}</p><div className="c-gym"><h3>{l.gymA}<br /><span>{l.gymB}</span></h3><p>{l.gymBody}</p></div><Go where="good-fit" /></div></section>
+      <section className="c-section c-training"><div className="c-section-copy"><Heading kicker={l.trainingKicker} a={l.trainingA} b={l.trainingB} /><p className="c-lede">{l.trainingSub}</p></div><Image src="/c/training-clean.jpg" width={419} height={420} alt="" className="c-section-photo" /><div className="c-pillar-grid">{pillars.map(([n, title, body]) => <article key={n} className="c-pillar"><b>{n}</b><h3>{title}</h3><p>{body}</p></article>)}</div><div className="c-bonus"><b>{l.bonusDay}<br /><span>{l.bonusWord}</span></b><p><strong>{l.bonusH}</strong><small>{l.bonusBody}</small></p></div><Go where="training" className="c-center" /></section>
+      <Rail slot="partner" head={l.railPartner} />
+      <section className="c-plan c-photo"><Image src="/c/training-clean.jpg" fill sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-panel-copy"><Heading kicker={l.planKicker} a={l.planA} b={l.planB} /><p className="c-lede">{l.planSub}</p><div className="c-timeline">{timeline.map(([day, body], i) => <div key={day}><b>{day}</b><i>{i < 2 ? "↓" : "✓"}</i><p>{body}</p></div>)}</div></div></section>
+      <Rail slot="journey" head={l.railJourney} />
+      <section className="c-section c-difference"><Heading kicker={l.diffKicker} a={l.diffA} b={l.diffB} /><p className="c-lede">{l.diffSub}</p><div className="c-compare"><article className="c-without"><h3>{l.withoutH}</h3>{without.map((x) => <p key={x}><Icon name="cross" />{x}</p>)}</article><article className="c-with"><h3>{l.withH}</h3>{withList.map((x) => <p key={x}><Icon name="check" />{x}</p>)}</article></div><Trust /><Go where="difference" className="c-center" /></section>
+      <Rail slot="mindset" head={l.railMindset} />
+      <section className="c-proof c-photo"><Image src="/c/proof-clean.jpg" fill sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-panel-copy"><Heading kicker={l.proofKicker} a={l.proofA} b={l.proofB} /><p className="c-lede">{l.proofSub}</p><div className="c-proof-points">{proofPoints.map(([icon, text]) => <span key={text}><Icon name={icon as IconName} />{text}</span>)}</div></div></section>
+      {(direct.testimonials.length > 0 || direct.shots.length > 0) && <section className="c-section c-reviews"><h2 className="c-review-title">{l.reviewA} <span>{l.reviewB}</span></h2><Image src="/c/review-cutout.png" width={1200} height={583} alt="" className="c-review-cutout" priority={false} />{direct.testimonials.length > 0 && <div className="c-review-grid">{direct.testimonials.map((t) => <figure key={t.quote}><blockquote>“{t.quote}”</blockquote><figcaption>{t.who}</figcaption></figure>)}</div>}{direct.shots.length > 0 && <div className="c-shot-grid">{direct.shots.map((s) => <figure key={s.src}><Image src={s.src} width={700} height={900} alt={s.alt} /><figcaption>{s.caption}</figcaption></figure>)}</div>}</section>}
+      <Rail slot="proof" head={l.railProof} />
+      <section className="c-cost c-photo"><Image src="/c/cost-clean.jpg" fill sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-panel-copy"><Heading kicker={l.costKicker} a={l.costA} b={l.costB} /><p className="c-lede">{l.costSub}</p><p className="c-cost-copy">{l.costBody1} <strong>{l.costBold}</strong> {l.costBody2.replace("{price}", price)}</p><Go where="cost" /></div></section>
+      <section className="c-get c-photo"><Image src="/c/final-clean.jpg" fill sizes="(max-width: 768px) 100vw, 1100px" alt="" className="c-photo-image" /><div className="c-photo-shade" /><div className="c-panel-copy"><Heading a={l.getA} b={l.getB} c={l.getC} /><div className="c-includes">{includes.map(([icon, text]) => <span key={text}><Icon name={icon as IconName} />{text}</span>)}</div></div></section>
+      {/* ── WHAT COMES AFTER ──────────────────────────────────────────
+          The 30-day programme, placed last and deliberately not for sale
+          here. Two prices on one page splits the decision and loses both;
+          and a man who has not measured anything yet has no reason to
+          believe the bigger one. He is told it exists, told what it adds,
+          and told to earn it with ten days first. */}
+      <Rail slot="progression" head={l.railProgression} />
+      <section className="c-section c-next">
+        <p className="c-kicker">{l.nextKicker}</p>
+        <h2 className="c-heading">{l.nextA}<br /><span>{l.nextB}</span></h2>
+        <div className="c-next-price"><b>{sprint}</b><small>{l.nextPriceNote}</small></div>
+        <p className="c-lede">{l.nextSub}</p>
+        <div className="c-next-grid">
+          {[l.next1, l.next2, l.next3, l.next4].map((x) => (
+            <p key={x}><Icon name="check" />{x}</p>
+          ))}
+        </div>
+        <p className="c-next-note">{l.nextNote.replace("{price}", price)}</p>
+      </section>
+      <MoreTestimonials items={getTestimonials(locale, "more")} label={l.moreLabel} planLabels={{ "10": l.plan10, "30": l.plan30 }} />
+      <section className="c-close"><div><Heading a={l.closeA} b={l.closeB} /><p className="c-lede">{(expired ? l.closeSubExpired : l.closeSub).replace("{price}", price)}</p><p className="c-close-note">{l.closeNote}</p></div>{offer && <Clock until={offer.expiresAt} label={l.timer} expiredLabel={l.expired} units={units} />}<Go where="close" className="c-full" /><Trust /></section><footer className="c-footer">{marketing.disclaimer}</footer>
+    </div></main>{passed && <div className="c-mobile-buy">{offer && <Clock until={offer.expiresAt} label={l.timer} expiredLabel={l.expired} units={units} compact />}<Go where="mobile" compact /></div>}<LastChance offer={offer} locale={locale} /></div></>;
+}

@@ -161,11 +161,17 @@ export function PayPanel({
   onUnavailable,
   autoStart = false,
   phone: givenPhone = "",
+  funnel,
+  lc = false,
 }: {
   locale: string;
   plan: Plan;
   country: string;
   prices: Price[];
+  /** which of the four funnels he came through — the payment route prices from its row */
+  funnel?: string;
+  /** he arrived through the last-chance link; the route honours the offer price if the window is open */
+  lc?: boolean;
   /** Open the Mobile Money checkout on mount — the delivery step has been passed. */
   autoStart?: boolean;
   /** The number he gave on the delivery step. Real, so direct-pay may use it. */
@@ -249,6 +255,8 @@ export function PayPanel({
           onUnavailable={onUnavailable}
           autoStart={autoStart}
           givenPhone={givenPhone}
+          funnel={funnel}
+          lc={lc}
         />
       ) : cardPrice ? (
         <CardPanel
@@ -262,7 +270,6 @@ export function PayPanel({
         <p className="rounded-2xl card p-5 text-[0.95rem] text-mute">{t.unavailable}</p>
       )}
 
-      <p className="mt-4 text-center text-[0.85rem] text-faint">{t.secure}</p>
     </div>
   );
 }
@@ -279,6 +286,8 @@ function MomoPanel({
   onUnavailable,
   autoStart = false,
   givenPhone = "",
+  funnel,
+  lc = false,
 }: {
   locale: string;
   plan: Plan;
@@ -289,6 +298,8 @@ function MomoPanel({
   onUnavailable?: (dead: boolean) => void;
   autoStart?: boolean;
   givenPhone?: string;
+  funnel?: string;
+  lc?: boolean;
 }) {
   const [phone, setPhone] = useState(givenPhone ?? "");
   const [name, setName] = useState("");
@@ -424,6 +435,8 @@ function MomoPanel({
              placeholder only rides along to satisfy Fapshi's format check. */
           phone: digits || PLACEHOLDER_PHONE,
           hasRealPhone: Boolean(digits),
+          funnel,
+          lc,
           locale,
           name: name.trim(),
           email: email.trim(),

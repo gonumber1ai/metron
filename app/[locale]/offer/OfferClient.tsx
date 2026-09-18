@@ -14,6 +14,8 @@ import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
 import { DeliveryStep, DELIVERY_KEY, type Delivery } from "@/components/DeliveryStep";
+import { useOffer } from "@/components/f/useOffer";
+import { FUNNELS, isFunnelId } from "@/lib/funnels";
 
 type Status = "idle" | "working" | "fallback" | "sent";
 
@@ -118,9 +120,23 @@ export function OfferClient({
   /* Same seven-hour clock as the challenge page, read from the same key. Once
      it has run the 10-day is shown — and charged, see the routes — at what
      everyone pays. The page and the server can no longer disagree. */
-  const expired = useOfferExpired();
-  const prices = getPrices(country).map((p) => (expired ? atFullPrice(p) : p));
-  const offerWas = getPrices(country).find((p) => p.plan === "test")?.display ?? "";
+  /* The server's offer row decides, when there is one. A man from one of the
+     four funnels has a row: its clock, its tier, and — if he came through the
+     last-chance link inside the window — the offer price honoured again. A
+     man from the old /c page has no row and keeps the local clock. */
+  const lc = params.get("lc") === "1";
+  const srv = useOffer(null, locale);
+  const legacyExpired = useOfferExpired();
+  const [funnelId, setFunnelId] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const f = load(locale).funnel;
+    if (isFunnelId(f)) setFunnelId(f);
+    if (lc) track("recovery_clicked", f ?? "", locale, { cta: "lc_checkout" });
+  }, [locale, lc]);
+  const tier = srv?.funnel && isFunnelId(srv.funnel) ? FUNNELS[srv.funnel].tier : isFunnelId(funnelId) ? FUNNELS[funnelId].tier : null;
+  const expired = srv && !srv.local ? srv.expired && !(lc && srv.lastChance) : legacyExpired;
+  const prices = getPrices(country, tier).map((p) => (expired ? atFullPrice(p) : p));
+  const offerWas = getPrices(country, tier).find((p) => p.plan === "test")?.display ?? "";
   const forPlan = prices.filter((p) => p.plan === plan);
   const priceOf = (p: Plan) => prices.find((x) => x.plan === p)?.display ?? "";
   /* Only ever a price this plan was genuinely listed at — see Price.was. */
@@ -259,6 +275,8 @@ export function OfferClient({
                 onUnavailable={(dead) => setStatus(dead ? "fallback" : "idle")}
                 autoStart={stage === "pay"}
                 phone={given?.phone ?? ""}
+                funnel={srv?.funnel ?? funnelId}
+                lc={lc}
               />
             )}
           </section>
