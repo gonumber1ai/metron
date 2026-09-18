@@ -1,3 +1,4 @@
+import { fold, type Contact, type FunnelStats } from "@/lib/crm";
 import { cookies } from "next/headers";
 import { verifyAdmin, adminCookie, isConfigured } from "@/lib/admin";
 import { db, allConversations } from "@/lib/supabase/server";
@@ -43,11 +44,14 @@ export default async function AdminPage() {
     d2Daily: [],
     learnDays: [],
     learnSignups: [],
+    crmContacts: [] as Contact[],
+    crmFunnels: [] as FunnelStats[],
+    crmReady: false,
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily, learnDays, learnSignups] =
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily, learnDays, learnSignups, crmEvents, crmIntake, crmLeads, crmPayments, crmOffers, crmRecovery] =
       await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
@@ -82,7 +86,35 @@ export default async function AdminPage() {
         .eq("plan", "learn")
         .order("created_at", { ascending: false })
         .limit(500),
+      /* ── the CRM: five raw tables, folded in lib/crm ─────────────────
+         The events query names the 015 columns, so it FAILS before that
+         migration runs — which is exactly the signal the tab uses to say
+         so instead of showing an empty CRM as if nobody had visited. */
+      client
+        .from("events")
+        .select("ref, name, detail, campaign, locale, created_at, session, funnel, page, cta")
+        .order("created_at", { ascending: false })
+        .limit(30000),
+      client.from("intake").select("ref, name, contact, whatsapp, phone, stage, updated_at").limit(5000),
+      client.from("leads").select("ref, contact, name, phone, plan, created_at").limit(5000),
+      client.from("payments").select("ref, amount_minor, currency, plan, status, funnel, created_at").limit(5000),
+      client.from("offers").select("ref, funnel, started_at, expires_at, recovery_until, status").limit(20000),
+      client.from("recovery").select("ref, funnel, channel, status, created_at").limit(20000),
     ]);
+
+    if (!crmEvents.error && !crmOffers.error) {
+      const r = fold({
+        events: (crmEvents.data ?? []) as Parameters<typeof fold>[0]["events"],
+        intake: (crmIntake.data ?? []) as Parameters<typeof fold>[0]["intake"],
+        leads: (crmLeads.data ?? []) as Parameters<typeof fold>[0]["leads"],
+        payments: (crmPayments.data ?? []) as Parameters<typeof fold>[0]["payments"],
+        offers: (crmOffers.data ?? []) as Parameters<typeof fold>[0]["offers"],
+        recovery: (crmRecovery.data ?? []) as Parameters<typeof fold>[0]["recovery"],
+      });
+      snap.crmContacts = r.contacts;
+      snap.crmFunnels = r.funnels;
+      snap.crmReady = true;
+    }
 
     snap.funnel = funnel.data ?? [];
     snap.dropoff = dropoff.data ?? [];

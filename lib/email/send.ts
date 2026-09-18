@@ -330,6 +330,15 @@ export async function sendBroadcast(opts: {
  * the access code because the single most common support request will be a man
  * who cannot get back in, and the answer is already in this email.
  */
+/** One plain message, wrapped only enough to not look like spam. */
+export async function sendPlain(input: { to: string; subject: string; text: string }): Promise<boolean> {
+  const html = `<div style="font:16px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#111;max-width:560px;">${input.text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/(https?:\/\/\S+)/g, '<a href="$1">$1</a>')}</div>`;
+  return send({ to: input.to, subject: input.subject, html, text: input.text });
+}
+
 export async function sendAdminAlert(input: {
   subject: string;
   lines: string[];

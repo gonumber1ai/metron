@@ -9,7 +9,7 @@ import { PayPanel } from "@/components/PayPanel";
 import { getMarketing } from "@/lib/content/marketing";
 import { getPrices, atFullPrice, type Plan } from "@/lib/payments";
 import { useOfferExpired } from "@/components/c/Countdown";
-import { load } from "@/lib/store";
+import { load, update } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
@@ -129,10 +129,15 @@ export function OfferClient({
   const legacyExpired = useOfferExpired();
   const [funnelId, setFunnelId] = useState<string | undefined>(undefined);
   useEffect(() => {
+    /* A recovery link carries his ref, so opening it on another phone still
+       finds HIS clock and honours HIS last chance. The link went to a contact
+       he gave us; adopting the ref it carries is not a leap. */
+    const carried = (params.get("ref") ?? "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 64);
+    if (carried && carried !== load(locale).ref) update((s) => ({ ...s, ref: carried }), locale);
     const f = load(locale).funnel;
     if (isFunnelId(f)) setFunnelId(f);
     if (lc) track("recovery_clicked", f ?? "", locale, { cta: "lc_checkout" });
-  }, [locale, lc]);
+  }, [locale, lc, params]);
   const tier = srv?.funnel && isFunnelId(srv.funnel) ? FUNNELS[srv.funnel].tier : isFunnelId(funnelId) ? FUNNELS[funnelId].tier : null;
   const expired = srv && !srv.local ? srv.expired && !(lc && srv.lastChance) : legacyExpired;
   const prices = getPrices(country, tier).map((p) => (expired ? atFullPrice(p) : p));
