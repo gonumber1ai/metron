@@ -138,7 +138,7 @@ export function OfferClient({
     if (isFunnelId(f)) setFunnelId(f);
     if (lc) track("recovery_clicked", f ?? "", locale, { cta: "lc_checkout" });
   }, [locale, lc, params]);
-  const tier = srv?.funnel && isFunnelId(srv.funnel) ? FUNNELS[srv.funnel].tier : isFunnelId(funnelId) ? FUNNELS[funnelId].tier : null;
+  const tier = srv && !srv.local && isFunnelId(srv.funnel) ? FUNNELS[srv.funnel].tier : isFunnelId(funnelId) ? FUNNELS[funnelId].tier : null;
   const expired = srv && !srv.local ? srv.expired && !(lc && srv.lastChance) : legacyExpired;
   const prices = getPrices(country, tier).map((p) => (expired ? atFullPrice(p) : p));
   const offerWas = getPrices(country, tier).find((p) => p.plan === "test")?.display ?? "";
@@ -280,7 +280,7 @@ export function OfferClient({
                 onUnavailable={(dead) => setStatus(dead ? "fallback" : "idle")}
                 autoStart={stage === "pay"}
                 phone={given?.phone ?? ""}
-                funnel={srv?.funnel ?? funnelId}
+                funnel={srv && !srv.local && srv.funnel ? srv.funnel : funnelId}
                 lc={lc}
               />
             )}

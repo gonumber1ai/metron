@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsx --test --tsconfig tsconfig.json tests/crm.test.ts",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
