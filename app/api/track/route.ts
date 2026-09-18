@@ -37,6 +37,8 @@ const ALLOWED = new Set([
   "start_cta",
   /* Bootcamp signup form submitted and saved. */
   "learn_signup",
+  /* He chose how to receive the programme and gave a number. detail = choice. */
+  "delivery_pick",
   "pay_attempt",
   /* He pressed Pay with something missing. Separates "nobody wanted to buy"
      from "nobody could" — the distinction the disabled button was hiding. */

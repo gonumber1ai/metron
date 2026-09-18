@@ -159,11 +159,17 @@ export function PayPanel({
   country,
   prices,
   onUnavailable,
+  autoStart = false,
+  phone: givenPhone = "",
 }: {
   locale: string;
   plan: Plan;
   country: string;
   prices: Price[];
+  /** Open the Mobile Money checkout on mount — the delivery step has been passed. */
+  autoStart?: boolean;
+  /** The number he gave on the delivery step. Real, so direct-pay may use it. */
+  phone?: string;
   /**
    * Reports whether the RAIL HE IS LOOKING AT can take money, so the caller can
    * offer lead capture. Scoped to the active tab on purpose: the card rail
@@ -241,6 +247,8 @@ export function PayPanel({
           t={t}
           onPaid={() => router.push(`/${locale}/app`)}
           onUnavailable={onUnavailable}
+          autoStart={autoStart}
+          givenPhone={givenPhone}
         />
       ) : cardPrice ? (
         <CardPanel
@@ -269,6 +277,8 @@ function MomoPanel({
   t,
   onPaid,
   onUnavailable,
+  autoStart = false,
+  givenPhone = "",
 }: {
   locale: string;
   plan: Plan;
@@ -277,8 +287,10 @@ function MomoPanel({
   t: (typeof T)["en"];
   onPaid: () => void;
   onUnavailable?: (dead: boolean) => void;
+  autoStart?: boolean;
+  givenPhone?: string;
 }) {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(givenPhone ?? "");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [wa, setWa] = useState("");
@@ -336,12 +348,7 @@ function MomoPanel({
      Ref'd so a re-render cannot fire it twice. */
   const autoStarted = useRef(false);
   useEffect(() => {
-    if (autoStarted.current) return;
-    try {
-      if (new URLSearchParams(window.location.search).get("go") !== "1") return;
-    } catch {
-      return;
-    }
+    if (autoStarted.current || !autoStart) return;
     autoStarted.current = true;
     void pay();
     // Once, on mount. pay() reads current state itself.
@@ -420,7 +427,7 @@ function MomoPanel({
           locale,
           name: name.trim(),
           email: email.trim(),
-          whatsapp: waDigits,
+          whatsapp: waDigits || digits,
           // So the admin view shows who this man is, not just that someone paid.
           quiz: load(locale).quiz,
         }),

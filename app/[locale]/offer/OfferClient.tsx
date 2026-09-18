@@ -13,6 +13,7 @@ import { load } from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
+import { DeliveryStep, DELIVERY_KEY, type Delivery } from "@/components/DeliveryStep";
 
 type Status = "idle" | "working" | "fallback" | "sent";
 
@@ -59,6 +60,28 @@ export function OfferClient({
 
   const [country, setCountry] = useState(geoCountry ?? "default");
   const [status, setStatus] = useState<Status>("idle");
+  /* The screen between the buy button and the money.
+     ?go=1 used to open Fapshi on arrival. It now opens the delivery step,
+     and the delivery step opens Fapshi — same number of taps to the form for
+     a man who reads nothing, one number captured on the way for everyone.
+     A man who already gave his number on this phone goes straight through;
+     asking twice would be a gate pointed at the one who came back to pay. */
+  const [stage, setStage] = useState<"landing" | "deliver" | "pay">("landing");
+  const [given, setGiven] = useState<{ choice: Delivery; phone: string } | null>(null);
+  useEffect(() => {
+    let go = false;
+    try { go = new URLSearchParams(window.location.search).get("go") === "1"; } catch {}
+    if (!go) return;
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(DELIVERY_KEY) ?? "null");
+      if (saved && /^6\d{8}$/.test(saved.phone)) {
+        setGiven(saved);
+        setStage("pay");
+        return;
+      }
+    } catch {}
+    setStage("deliver");
+  }, []);
   const [contact, setContact] = useState("");
   const [ref, setRef] = useState("");
 
@@ -214,13 +237,30 @@ export function OfferClient({
               embarrassed by. MoMo pushes a USSD prompt to his handset;
               cards render inline. */}
           <section className="mt-6">
-            <PayPanel
-              locale={locale}
-              plan={plan}
-              country={country}
-              prices={forPlan}
-              onUnavailable={(dead) => setStatus(dead ? "fallback" : "idle")}
-            />
+            {stage === "deliver" ? (
+              <DeliveryStep
+                locale={locale}
+                plan={plan}
+                price={priceOf(plan)}
+                onContinue={(choice, phone) => {
+                  const v = { choice, phone, at: Date.now() };
+                  try { window.localStorage.setItem(DELIVERY_KEY, JSON.stringify(v)); } catch {}
+                  track("delivery_pick", choice, locale);
+                  setGiven(v);
+                  setStage("pay");
+                }}
+              />
+            ) : (
+              <PayPanel
+                locale={locale}
+                plan={plan}
+                country={country}
+                prices={forPlan}
+                onUnavailable={(dead) => setStatus(dead ? "fallback" : "idle")}
+                autoStart={stage === "pay"}
+                phone={given?.phone ?? ""}
+              />
+            )}
           </section>
 
           {/* ── AFTER PAYMENT ────────────────────────────────────────────
