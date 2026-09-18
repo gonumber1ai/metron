@@ -278,14 +278,27 @@ export async function GET(req: Request) {
     }
   }
 
+  /* A status code an uptime monitor can act on.
+     The body always said whether Fapshi answered; the status was always 200,
+     so nothing polling this URL could tell a working checkout from a dead
+     one. Now a Fapshi rail that is unreachable or refusing our credentials
+     is a 503 — point UptimeRobot or any five-minute pinger at this address
+     and it mails the moment the money stops being able to move. Whop and
+     Supabase stay in the body only: neither is what a man in Douala pays
+     through, and a card-rail hiccup must not page anyone at 3am. */
+  const fapshiDown =
+    typeof checks.fapshi === "string" &&
+    !checks.fapshi.startsWith("OK") &&
+    !checks.fapshi.startsWith("SKIPPED");
+
   return NextResponse.json(
     {
-      ok: warnings.length === 0,
+      ok: warnings.length === 0 && !fapshiDown,
       warnings,
       checks,
       env,
       note: "Values are never returned — only whether each is set and how long it is.",
     },
-    { headers: { "Cache-Control": "no-store" } },
+    { status: fapshiDown ? 503 : 200, headers: { "Cache-Control": "no-store" } },
   );
 }
