@@ -43,6 +43,27 @@ const ALLOWED = new Set([
   /* He pressed Pay with something missing. Separates "nobody wanted to buy"
      from "nobody could" — the distinction the disabled button was hiding. */
   "pay_blocked",
+  /* ── the CRM set ───────────────────────────────────────────────────────
+     session_started    first event of a tab-session; detail = session count
+     visitor_returned   a new session on a device that has had one before
+     page_view          a funnel page rendered
+     cta_clicked        a control pressed; `cta` carries its stable id
+     timer_started      the offer clock was created for this visitor
+     timer_expired      the clock ran — written by the server, once
+     last_chance_*      the recovery popup: shown, clicked, dismissed
+     recovery_sent      a recovery message went out; detail = channel
+     recovery_clicked   he arrived through a recovery link */
+  "session_started",
+  "visitor_returned",
+  "page_view",
+  "cta_clicked",
+  "timer_started",
+  "timer_expired",
+  "last_chance_shown",
+  "last_chance_clicked",
+  "last_chance_dismissed",
+  "recovery_sent",
+  "recovery_clicked",
 ]);
 
 export async function POST(req: Request) {
@@ -53,6 +74,11 @@ export async function POST(req: Request) {
     locale?: string;
     country?: string;
     campaign?: string;
+    session?: string;
+    funnel?: string;
+    page?: string;
+    cta?: string;
+    eid?: string;
   };
   try {
     body = await req.json();
@@ -67,18 +93,40 @@ export async function POST(req: Request) {
   const client = db();
   if (!client) return NextResponse.json({ ok: true });
 
+  const clean = (v: unknown, re: RegExp, n: number) =>
+    (v ?? "").toString().replace(re, "").slice(0, n) || null;
+
+  const legacy = {
+    ref,
+    name,
+    detail: (body.detail ?? "").toString().slice(0, 40) || null,
+    // Free text from a URL, so it is filtered to what an ad tag can
+    // legitimately contain and capped. It ends up in a GROUP BY.
+    campaign: clean(body.campaign, /[^a-zA-Z0-9_-]/g, 40),
+    locale: body.locale === "fr" ? "fr" : "en",
+    country: (body.country ?? "").slice(0, 8) || null,
+  };
+  const full = {
+    ...legacy,
+    session: clean(body.session, /[^a-zA-Z0-9-]/g, 64),
+    funnel: clean(body.funnel, /[^a-z0-9-]/g, 16),
+    page: clean(body.page, /[^a-zA-Z0-9\/_-]/g, 80),
+    cta: clean(body.cta, /[^a-zA-Z0-9_.-]/g, 40),
+    eid: clean(body.eid, /[^a-zA-Z0-9-]/g, 64),
+  };
+
   try {
-    await client.from("events").insert({
-      ref,
-      name,
-      detail: (body.detail ?? "").toString().slice(0, 40) || null,
-      // Free text from a URL, so it is filtered to what an ad tag can
-      // legitimately contain and capped. It ends up in a GROUP BY.
-      campaign:
-        (body.campaign ?? "").toString().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40) || null,
-      locale: body.locale === "fr" ? "fr" : "en",
-      country: (body.country ?? "").slice(0, 8) || null,
-    });
+    /* eid is unique, so a retry, a refresh or a double render that fires
+       the same event twice lands once — the second is ignored, not errored. */
+    const r = await client.from("events").upsert(full, { onConflict: "eid", ignoreDuplicates: true });
+    if (r.error) {
+      /* Migration 015 not run yet: the new columns do not exist. Write the
+         old shape rather than lose the event — the live funnel must keep
+         counting in the gap. */
+      if (/column|schema cache|does not exist|eid/i.test(r.error.message)) {
+        await client.from("events").insert(legacy);
+      }
+    }
   } catch {
     /* measurement must never break the funnel it is measuring */
   }

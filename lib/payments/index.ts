@@ -13,6 +13,8 @@
  * PaymentProvider plus rows in the price book. Nothing else changes.
  */
 
+import { TIERS, type Tier } from "@/lib/funnels";
+
 /** non-breaking space, so "7 500 FCFA" can never wrap into "7" / "500 FCFA" */
 const NBSP = " ";
 
@@ -101,8 +103,8 @@ export const priceBook: Record<string, Price[]> = {
   ],
 };
 
-export function getPrice(plan: Plan, country = "default"): Price {
-  const rows = priceBook[country] ?? priceBook.default;
+export function getPrice(plan: Plan, country = "default", tier?: Tier | null): Price {
+  const rows = getPrices(country, tier);
   return rows.find((r) => r.plan === plan) ?? priceBook.default.find((r) => r.plan === plan)!;
 }
 
@@ -127,8 +129,19 @@ export function getPriceFor(plan: Plan, provider: ProviderId, country = "default
  * concatenated onto it. Concatenating is what used to put a dollar Card row
  * underneath a franc Mobile Money row on the same page.
  */
-export function getPrices(country = "default"): Price[] {
-  return priceBook[country] ?? priceBook.default;
+export function getPrices(country = "default", tier?: Tier | null): Price[] {
+  const base = priceBook[country] ?? priceBook.default;
+  if (!tier) return base;
+  /* A funnel tier replaces the two franc rows and keeps the card rows. The
+     struck-through "was" on the 10-day is the post-expiry price — a number
+     this tier genuinely charges once the clock has run, not an invented
+     anchor. */
+  const t = TIERS[tier];
+  return [
+    { plan: "test", currency: "XAF", amountMinor: t.offer, provider: "fapshi", display: FCFA(t.offer), was: FCFA(t.full), wasMinor: t.full },
+    { plan: "sprint", currency: "XAF", amountMinor: t.sprint, provider: "fapshi", display: FCFA(t.sprint) },
+    ...base.filter((r) => r.currency !== "XAF"),
+  ];
 }
 
 /* ------------------------------------------------------------------ */

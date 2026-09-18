@@ -68,6 +68,12 @@ export type State = {
   country: string;
   /** the ad he first arrived on. First touch only — never overwritten. */
   campaign?: string;
+  /** the funnel he is in now — the last landing page he hit. Prices come from this. */
+  funnel?: string;
+  /** the funnel he FIRST landed on. Never overwritten; attribution comes from this. */
+  firstFunnel?: string;
+  /** ISO — when this device first saw the site. What "returned" is measured against. */
+  firstSeen?: string;
   startedAt?: string;
   /** the day the user is currently on */
   day: number;
@@ -95,6 +101,7 @@ function makeRef(): string {
 export function emptyState(locale = "en"): State {
   return {
     ref: makeRef(),
+    firstSeen: new Date().toISOString(),
     locale,
     country: "default",
     day: 0,
