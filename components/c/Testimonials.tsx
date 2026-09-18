@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flagOf } from "@/lib/content/testimonials";
 import { track as trackEvent } from "@/lib/track";
+import { InlinePlayer } from "@/components/f/InlinePlayer";
 
 /**
  * The testimonial rail.
@@ -32,7 +33,7 @@ export type Card = {
   name: string;
   plan: "10" | "30";
   quote: string;
-  video?: { youtube: string };
+  video?: { youtube: string; aspect?: "16:9" | "9:16" };
 };
 
 const ROTATE_MS = 4500;
@@ -114,87 +115,58 @@ function VideoModal({
 }
 
 /**
- * The same video, but the size the only piece of filmed proof deserves.
+ * The filmed proof on the second screen — up to two videos, side by side,
+ * already loaded when he arrives.
  *
- * It sits directly under the one question, on the first screen, because a
- * card two-thirds down a page is not proof anybody sees — and a face saying
- * it is the strongest asset this funnel has. Still click-to-play: prominence
- * is not the same argument as autoplay, and the reasons against starting a
- * video by itself on this page have not changed.
- *
- * The poster tries maxresdefault first — it is 1280x720 and does not exist
- * for every upload — and falls back to hqdefault, which always does.
+ * The two Shorts lead: they are the men the audience is. Each is an inline
+ * player that fetched itself on landing and starts, with sound, on the tap.
+ * A card without a transcript renders without one rather than with words
+ * nobody said; a card without a country renders without a flag.
  */
 export function VideoSpot({
-  card,
+  cards,
   locale,
   heading,
   playLabel,
-  closeLabel,
   planLabels,
   className = "",
 }: {
-  card?: Card;
+  cards: Card[];
   locale: string;
   heading?: string;
   playLabel: string;
-  closeLabel: string;
   planLabels: { "10": string; "30": string };
-  /** extra classes on the section — the funnels pass f-spot for the side-by-side layout */
+  /** extra classes on the section — the funnels pass f-spot */
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  if (!card?.video) return null;
-  const id = card.video.youtube;
+  const vids = cards.filter((c) => c.video).slice(0, 2);
+  if (vids.length === 0) return null;
 
   return (
     <section className={`c-spot ${className}`}>
-      <button
-        type="button"
-        className="c-rail-play c-spot-play"
-        onClick={() => {
-          /* One per press, with which video. YouTube counts views on its
-             side; this is the count that lines up with the rest of the
-             funnel — the same man, the same session, on his timeline. */
-          trackEvent("video_play", card.id, locale, { cta: "video_spot" });
-          setOpen(true);
-        }}
-        aria-label={playLabel}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
-          alt=""
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (!img.dataset.fallback) {
-              img.dataset.fallback = "1";
-              img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-            }
-          }}
-        />
-        <span aria-hidden className="c-rail-play-mark">▶</span>
-        <small>{playLabel}</small>
-      </button>
-
-      <div className="c-spot-text">
-        {heading && <p className="c-kicker c-rail-head">{heading}</p>}
-        <blockquote className="c-spot-quote">“{card.quote}”</blockquote>
-        <p className="c-spot-by">
-          {flagOf(card.country) && <span aria-hidden>{flagOf(card.country)}</span>}
-          <strong>{card.name}</strong>
-          <small>{planLabels[card.plan]}</small>
-        </p>
+      {heading && <p className="c-kicker c-rail-head c-spot-head">{heading}</p>}
+      <div className={`c-spot-grid ${vids.length === 2 ? "c-spot-two" : ""}`}>
+        {vids.map((card, n) => (
+          <figure key={card.id} className="c-spot-item">
+            <InlinePlayer
+              youtube={card.video!.youtube}
+              aspect={card.video!.aspect ?? "16:9"}
+              id={card.id}
+              locale={locale}
+              playLabel={playLabel}
+              where={`video_spot_${n + 1}`}
+            />
+            <figcaption className="c-spot-text">
+              {card.quote && <blockquote className="c-spot-quote">“{card.quote}”</blockquote>}
+              <p className="c-spot-by">
+                {flagOf(card.country) && <span aria-hidden>{flagOf(card.country)}</span>}
+                <strong>{card.name}</strong>
+                <small>{planLabels[card.plan]}</small>
+              </p>
+            </figcaption>
+          </figure>
+        ))}
       </div>
-
-      {open && (
-        <VideoModal
-          card={card}
-          locale={locale}
-          closeLabel={closeLabel}
-          onClose={() => setOpen(false)}
-        />
-      )}
     </section>
   );
 }

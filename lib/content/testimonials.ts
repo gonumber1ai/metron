@@ -47,8 +47,10 @@ export type Testimonial = {
      what a man reads before deciding whether to spend data on the video, and
      it is the whole testimonial for anyone who never taps. */
   video?: {
-    /** YouTube id. Nothing is requested from Google until he presses play. */
+    /** YouTube id. */
     youtube: string;
+    /** Shorts are 9:16; the first one was a 16:9 upload. The frame follows. */
+    aspect?: "16:9" | "9:16";
   };
   slots: Slot[];
 };
@@ -179,17 +181,41 @@ export const TESTIMONIALS: Testimonial[] = [
      Under the screenshots, and mixed on purpose: two measurements, a
      sceptic, a woman who enrolled her partner, two men who wanted to be left
      alone with it. */
-  /* The first filmed one, and it leads the proof rail — a face outranks
-     anything typed. Ten seconds, and he never says what Metron is, which is
-     the most persuasive thing about it: it is a man being careful in public
-     about the same thing every man on this page is being careful about. */
+  /* ── filmed ──────────────────────────────────────────────────────────
+     The two Shorts lead the page — they are the men the audience is, and
+     that outranks everything else a card can carry. They sit in the spot
+     on the second screen and nowhere else. The American moves to the proof
+     rail. Order here is order on the page.
+
+     No transcript yet for the two Shorts: `quote` is empty and the card
+     renders without one rather than with words nobody said. No country
+     either — none was given, so no flag. Both are one-line edits when
+     known. */
+  {
+    id: "video-short-1",
+    country: "",
+    name: "Metron client",
+    plan: "10",
+    slots: [],
+    video: { youtube: "wwJYKoBm1L8", aspect: "9:16" },
+    quote: { en: "", fr: "" },
+  },
+  {
+    id: "video-short-2",
+    country: "",
+    name: "Metron client",
+    plan: "10",
+    slots: [],
+    video: { youtube: "IzENkjlMj0Y", aspect: "9:16" },
+    quote: { en: "", fr: "" },
+  },
   {
     id: "us-video-1",
     country: "US",
     name: "Metron client",
     plan: "10",
     slots: ["proof"],
-    video: { youtube: "PkIAuwF3Vt4" },
+    video: { youtube: "PkIAuwF3Vt4", aspect: "16:9" },
     quote: {
       en: "Now I won't say what METRON is, but if you are a man and you hear about METRON? You should try it out. It might help you like it helped me.",
       fr: "Je ne vais pas dire ce qu'est METRON, mais si vous êtes un homme et que vous entendez parler de METRON ? Essayez. Ça peut vous aider comme ça m'a aidé.",

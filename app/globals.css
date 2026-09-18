@@ -609,3 +609,24 @@ a[role="button"],
 .f-gold .c-heading > em { text-shadow: none; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 10px rgb(0 0 0 / .7)); }
 /* The mark follows the page. It is jade elsewhere; here it is gold. */
 .f-gold .c-brand .text-jade { color: var(--color-lime); }
+
+/* ── INLINE, PRELOADED PLAYERS ─────────────────────────────────────────────
+   The spot holds up to two. Two Shorts sit side by side as two phones; a
+   single 16:9 fills the width. Our play button sits over YouTube's poster
+   until the first play, so the first press is ours to count. */
+.c-spot-head { margin-bottom: 14px; }
+.c-spot-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+.c-spot-two { grid-template-columns: 1fr 1fr; gap: 12px; }
+.c-spot-item { margin: 0; min-width: 0; }
+.c-spot-item .c-spot-text { margin-top: 10px; }
+.c-spot-item .c-spot-quote { font-size: .9rem; margin: 0; text-align: left; }
+.c-spot-item .c-spot-by { justify-content: flex-start; margin-top: 6px; }
+.c-inline { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px; border: 1px solid rgb(212 175 55 / .35); background: #000; }
+.c-inline-tall { aspect-ratio: 9 / 16; }
+.c-inline iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.c-inline-play { position: absolute; inset: 0; display: grid; place-items: center; padding: 0; border: 0; background: rgb(0 0 0 / .18); cursor: pointer; }
+.c-inline-play small { position: absolute; right: 8px; bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgb(0 0 0 / .72); color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; }
+@media (min-width: 720px) {
+  .f-spot { display: block; }
+  .c-spot-two { grid-template-columns: 1fr 1fr; gap: 22px; max-width: 760px; margin: 0 auto; }
+}
