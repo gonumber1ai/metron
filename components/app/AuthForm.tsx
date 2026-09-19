@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { load } from "@/lib/store";
 import { Spinner, useAction } from "@/components/Pending";
 import { track } from "@/lib/track";
@@ -34,6 +34,55 @@ const T = {
     errNet: "Ça n'est pas passé. Vérifiez votre connexion et réessayez.",
   },
 } as const;
+
+/**
+ * The language pill: preset from the link he came in on (a French ad lands
+ * on /fr, an English one on /en), one tap to swap. The other language is
+ * the same page under the other locale, so nothing typed is lost — there
+ * is nothing typed yet when a man notices the wrong language.
+ */
+function Flag({ of }: { of: "fr" | "gb" }) {
+  // Inline, not emoji: Windows draws flag emoji as two letters.
+  if (of === "fr") {
+    return (
+      <svg viewBox="0 0 3 2" className="h-3.5 w-5 rounded-[2px]" aria-hidden>
+        <rect width="1" height="2" fill="#0055A4" /><rect x="1" width="1" height="2" fill="#fff" /><rect x="2" width="1" height="2" fill="#EF4135" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 60 30" className="h-3.5 w-5 rounded-[2px]" aria-hidden>
+      <clipPath id="ukc"><rect width="60" height="30" /></clipPath>
+      <g clipPath="url(#ukc)">
+        <rect width="60" height="30" fill="#012169" />
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="2" />
+        <path d="M30,0 V30 M0,15 H60" stroke="#fff" strokeWidth="10" />
+        <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6" />
+      </g>
+    </svg>
+  );
+}
+
+function LangSwitch({ locale }: { locale: string }) {
+  const path = usePathname() ?? "";
+  const fr = locale === "fr";
+  const other = fr ? "en" : "fr";
+  const href = path.replace(/^\/(en|fr)(?=\/|$)/, `/${other}`);
+  return (
+    <Link
+      href={href}
+      hrefLang={other}
+      aria-label={fr ? "Switch to English" : "Passer en français"}
+      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 text-[13px] font-semibold text-bone hover:border-jade"
+    >
+      <Flag of={fr ? "fr" : "gb"} />
+      {fr ? "Français" : "English"}
+      <span className="text-white/40">·</span>
+      <span className="inline-flex items-center gap-1.5 text-white/55"><Flag of={fr ? "gb" : "fr"} />{fr ? "English" : "Français"}</span>
+    </Link>
+  );
+}
 
 export function AuthForm({ locale, mode }: { locale: string; mode: "signup" | "login" }) {
   const t = T[locale === "fr" ? "fr" : "en"];
@@ -74,8 +123,11 @@ export function AuthForm({ locale, mode }: { locale: string; mode: "signup" | "l
   const label = "mb-1.5 block text-[12px] font-bold uppercase tracking-wide text-white/55";
 
   return (
-    <div className="mx-auto max-w-sm px-5 pt-12">
-      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">METRON</p>
+    <div className="mx-auto max-w-sm px-5 pt-8">
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">METRON</p>
+        <LangSwitch locale={locale} />
+      </div>
       <h1 className="mt-2 text-[1.6rem] font-bold leading-tight text-bone">{m.h}</h1>
       {m.p && <p className="mt-2 text-[0.95rem] text-white/65">{m.p}</p>}
 
