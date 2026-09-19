@@ -110,35 +110,15 @@ const GROUPS: Record<Locale, [number, number, string][]> = {
    pattern exists yet; the structural edits apply to both. ────────────── */
 const EDITS: [RegExp, string][] = [
   // 6.3 soften
-  [/Most men cannot feel the difference between 6 and 10\. That is why the end arrives with no warning\./, "If you've never felt 6, the end arrives with no warning."],
-  [/for most men it is already slower/g, "for a lot of men it's already slower. Check yours"],
-  [/For most men it is already slower\./g, "For a lot of men it's already slower. Check yours."],
-  [/often within the first week, well before the clock does/g, "often before the clock does"],
   [/It works in seconds and requires nothing\./g, "It works fast and costs nothing."],
   [/Why pills make it worse/g, "Pills, sprays and 'herbal' products"],
   // 6.2 message us → Help & Support
   [/stop and message us/g, "stop and use Help & Support in the menu"],
   [/message us\b/g, "use Help & Support in the menu"],
-  // 6.2 population stats
-  [/Most men do this alone\. That is fine and that is what we expect\. /, ""],
-  [/Most men do this on their own\. That is normal and that is what we expect — you do not need a partner and you do not need anyone holding a stopwatch\. /, "You do not need a partner and you do not need anyone holding a stopwatch. "],
-  [/Most men have never noticed 6 in their lives\. /, ""],
-  [/Most men cannot do the full 20 first time\. /, ""],
-  [/Entry is the single highest-arousal moment for most men who finish fast, and/, "Entry is usually the highest-arousal moment, and"],
-  [/Going in is where most men lose it\./, "Going in is where it is easiest to lose it."],
-  [/Most men find the first 10 seconds hard and the next 20 surprisingly easy\./, "The first 10 seconds are the hard part; the next 20 are often easier than expected."],
-  [/Most men find the first ten seconds hard and the next twenty surprisingly easy/, "The first ten seconds are the hard part; the next twenty are often easier than expected"],
-  [/Most men try to run the partner phase in secret\./, "Running the partner phase in secret is the common mistake."],
-  [/Entry is where most men in your position lose it\./, "Entry is where it is easiest to lose it."],
-  [/it is the one most men use backwards/, "it is the one that is easy to use backwards"],
-  [/That is the reverse of what most men do, which is/, "That is the reverse of the instinct, which is"],
-  [/and most men have some combination of all three/, "and it is usually some combination of all three"],
-  [/most men hold their breath/, "it is easy to hold your breath"],
-  [/that most men have never been told/, "that is rarely said"],
-  [/The instruction men most need to hear at this point:/, "The instruction that matters at this point:"],
-  // 6.2 the stomach claim
-  [/This is the part of the programme men find strangest, and for a meaningful minority it turns out to be the whole bottleneck\./, "This is the part of the programme men find strangest."],
-  [/that is not a separate problem sitting next to this one\. It is upstream of it\. /, "that matters more than it looks. "],
+  /* Population claims ("most men…", "often within the first week", the
+     stomach-as-bottleneck line) STAY. The owner has the numbers behind
+     them, so 6.2's "no user-population statistics" does not apply here —
+     that rule was written for claims nobody could back. */
   // 6.2 the 48h rule as a gate, and abstinence
   [/2 days since you last came\. This is the one men get wrong most\. Three days of build-up before Day 12 against two hours before Day 1 will give you a shorter Day 12 and a false conclusion\. Same gap both times\./, "Note how long since you last finished. The measure screen asks; answer the same way on Day 12 as on Day 1 so the two numbers compare fairly."],
   [/ If you have a partner, sex replaces a session rather than being added to one\./, ""],

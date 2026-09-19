@@ -23,20 +23,18 @@ const T = {
   en: {
     h: "Unlock Days 2–10",
     p: "Continue your journey and get access to the full 10-day challenge.",
-    bullets: ["Daily guided training sessions", "Expert lessons (text-based)", "Progress tracking", "Private and secure", "One-time payment"],
+    bullets: ["Daily guided training sessions", "Expert lessons (text-based)", "Progress tracking", "Works on any phone", "One-time payment"],
     cta: "Unlock Now →",
     later: "Maybe later",
-    keep: "Your Day 1 number stays yours either way.",
     already: "You already have access.",
     today: "Go to Today →",
   },
   fr: {
     h: "Débloquer les jours 2–10",
     p: "Continuez et accédez au défi 10 jours complet.",
-    bullets: ["Séances d'entraînement guidées chaque jour", "Leçons d'expert (en texte)", "Suivi de la progression", "Privé et sécurisé", "Paiement unique"],
+    bullets: ["Séances d'entraînement guidées chaque jour", "Leçons d'expert (en texte)", "Suivi de la progression", "Marche sur n'importe quel téléphone", "Paiement unique"],
     cta: "Débloquer →",
     later: "Plus tard",
-    keep: "Votre chiffre du jour 1 reste le vôtre quoi qu'il arrive.",
     already: "Vous avez déjà l'accès.",
     today: "Aller à Aujourd'hui →",
   },
@@ -88,7 +86,6 @@ export function UnlockClient({ locale }: { locale: string }) {
       <Link href={base} onClick={() => tapped("unlock_later", locale, "p10")} className="mt-4 block text-center text-[14px] text-white/50">
         {t.later}
       </Link>
-      <p className="mt-2 text-center text-[13px] text-white/45">{t.keep}</p>
     </div>
   );
 }

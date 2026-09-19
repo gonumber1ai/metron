@@ -58,7 +58,6 @@ const COPY = {
     phoneHelp: "Where each day's session will arrive. 9 digits, starts with 6.",
     badPhone: "That doesn't look right — 9 digits, starting with 6.",
     cta: (price: string) => `Continue to payment · ${price}`,
-    secure: "Your statement shows METRON. Nothing else.",
   },
   fr: {
     kicker: "COMMENT VOULEZ-VOUS LE RECEVOIR ?",
@@ -85,7 +84,6 @@ const COPY = {
     phoneHelp: "C'est là qu'arrivera votre séance chaque jour. 9 chiffres, commence par 6.",
     badPhone: "Ce numéro ne semble pas correct — 9 chiffres, commençant par 6.",
     cta: (price: string) => `Continuer vers le paiement · ${price}`,
-    secure: "Votre relevé affiche METRON. Rien d'autre.",
   },
 } as const;
 

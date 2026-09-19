@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verify, cookieName } from "@/lib/entitlement";
-import { saveProgress } from "@/lib/supabase/server";
+import { saveProgress, db } from "@/lib/supabase/server";
+import { verifySession, sessionCookie } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -16,7 +17,11 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const jar = await cookies();
   const ent = verify(jar.get(cookieName)?.value);
-  if (!ent) return NextResponse.json({ ok: false }, { status: 401 });
+  const ses = verifySession(jar.get(sessionCookie)?.value);
+  /* A paid entitlement or a signed-in account — either authorises the
+     mirror. Free men with accounts have a baseline worth keeping. */
+  const ref = ent?.ref ?? ses?.uid;
+  if (!ref) return NextResponse.json({ ok: false }, { status: 401 });
 
   let body: {
     day?: number;
@@ -33,8 +38,8 @@ export async function POST(req: Request) {
 
   const day = Number(body.day);
   await saveProgress({
-    ref: ent.ref,
-    plan: ent.plan,
+    ref,
+    plan: ent?.plan,
     day: Number.isFinite(day) ? Math.min(30, Math.max(0, Math.round(day))) : 0,
     startedAt: body.startedAt,
     measurements: body.measurements,
@@ -43,4 +48,18 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ ok: true });
+}
+
+/** His mirrored history, for a device that has just logged in. */
+export async function GET() {
+  const jar = await cookies();
+  const ses = verifySession(jar.get(sessionCookie)?.value);
+  if (!ses) return NextResponse.json({ ok: false }, { status: 401 });
+  const client = db();
+  if (!client) return NextResponse.json({ ok: false }, { status: 503 });
+  const { data } = await client.from("progress").select("plan, day, started_at, measurements, sessions, markers").eq("ref", ses.uid).maybeSingle();
+  const { data: paid } = await client.from("payments").select("plan").eq("ref", ses.uid).eq("status", "paid").limit(5);
+  const plans = (paid ?? []).map((p) => (p as { plan: string }).plan);
+  const plan = plans.includes("sprint") ? "sprint" : plans.includes("test") ? "test" : data?.plan ?? null;
+  return NextResponse.json({ ok: true, uid: ses.uid, plan, progress: data ?? null }, { headers: { "Cache-Control": "no-store" } });
 }

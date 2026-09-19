@@ -1,3 +1,4 @@
+import type { UserView } from "./Users";
 import { fold, type Contact, type FunnelStats } from "@/lib/crm";
 import { cookies } from "next/headers";
 import { verifyAdmin, adminCookie, isConfigured } from "@/lib/admin";
@@ -47,11 +48,13 @@ export default async function AdminPage() {
     crmContacts: [] as Contact[],
     crmFunnels: [] as FunnelStats[],
     crmReady: false,
+    users: [] as UserView[],
+    usersReady: false,
     conversations: [],
   };
 
   if (client) {
-    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily, learnDays, learnSignups, crmEvents, crmIntake, crmLeads, crmPayments, crmOffers, crmRecovery] =
+    const [funnel, dropoff, recent, payments, activity, campaigns, startRows, ctaRows, d2Rows, d2Daily, learnDays, learnSignups, crmEvents, crmIntake, crmLeads, crmPayments, crmOffers, crmRecovery, uRows, uProgress, uPayments] =
       await Promise.all([
       client.from("funnel").select("*"),
       client.from("quiz_dropoff").select("*"),
@@ -100,7 +103,36 @@ export default async function AdminPage() {
       client.from("payments").select("ref, amount_minor, currency, plan, status, funnel, created_at").limit(5000),
       client.from("offers").select("ref, funnel, started_at, expires_at, recovery_until, status").limit(20000),
       client.from("recovery").select("ref, funnel, channel, status, created_at").limit(20000),
+      /* ── accounts (017): the user, his mirrored progress, his payments ── */
+      client.from("users").select("id, phone, lang, created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(2000),
+      client.from("progress").select("ref, plan, day, measurements, markers").limit(5000),
+      client.from("payments").select("ref, plan, amount_minor, status").eq("status", "paid").limit(5000),
     ]);
+
+    if (!uRows.error) {
+      type U = { id: string; phone: string; lang: string; created_at: string };
+      type P = { ref: string; plan: string | null; day: number; measurements: { day: number; seconds: number; at: string }[]; markers: { at: string; markers: Record<string, number> }[] };
+      type Pay = { ref: string; plan: string; amount_minor: number };
+      const prog = new Map<string, P>();
+      for (const r of (uProgress.data ?? []) as P[]) prog.set(r.ref, r);
+      const paid = new Map<string, Pay[]>();
+      for (const r of (uPayments.data ?? []) as Pay[]) paid.set(r.ref, [...(paid.get(r.ref) ?? []), r]);
+      snap.users = ((uRows.data ?? []) as U[]).map((u) => {
+        const p = prog.get(u.id);
+        const pays = paid.get(u.id) ?? [];
+        const plans = pays.map((x) => x.plan);
+        const plan: UserView["plan"] = plans.includes("sprint") ? "p30" : plans.includes("test") ? "p10" : "free";
+        const m = (d: number) => p?.measurements?.find((x) => x.day === d)?.seconds ?? null;
+        const marks = (p?.markers ?? []).map((x) => ({ at: x.at, ...(x.markers as { erection: number; energy: number; sleep: number; control: number; libido?: number; stress?: number; stomach?: number }) }));
+        return {
+          id: u.id, phone: u.phone, lang: u.lang, createdAt: u.created_at, plan,
+          paidMinor: pays.reduce((a, x) => a + Number(x.amount_minor ?? 0), 0),
+          day: p?.day ?? 1, baseline: m(1), day12: m(12), day30: m(30),
+          markersCount: marks.length, lastMarkers: marks.at(-1)?.at ?? null, markers: marks, daysDone: [],
+        };
+      });
+      snap.usersReady = true;
+    }
 
     if (!crmEvents.error && !crmOffers.error) {
       const r = fold({

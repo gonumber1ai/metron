@@ -32,9 +32,13 @@ export type TierPrices = {
   sprint: number;
 };
 
+/* One price. The 1K/5K split and the seven-hour clock are retired: the
+   10-day is 4 900 everywhere, the 30-day 15 000, and nothing counts down.
+   The tier ids remain so the four funnel links keep working and keep
+   reporting separately. */
 export const TIERS: Record<Tier, TierPrices> = {
-  "1k": { offer: 1000, full: 3500, sprint: 5000 },
-  "5k": { offer: 5000, full: 7500, sprint: 15000 },
+  "1k": { offer: 4900, full: 4900, sprint: 15000 },
+  "5k": { offer: 4900, full: 4900, sprint: 15000 },
 };
 
 export type Funnel = {

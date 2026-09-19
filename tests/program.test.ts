@@ -48,18 +48,17 @@ test("6.2 — nothing removed survives", () => {
   for (const bad of [
     "48-hour", "48 clear hours", "2 days since you last came", "do not come tonight",
     "No ejaculation", "no ejaculation", "no coming", "No extra masturbation", "sex REPLACES", "sex replaces",
-    "message us", "refund is judged", "the refund", "whole bottleneck", "upstream of",
-    "No alcohol for the 12 days", "Most men start between",
+    "message us", "refund is judged", "the refund",
+    "No alcohol for the 12 days",
   ]) assert.ok(!all.includes(bad), `residue: ${bad}`);
 });
 
-test("6.3 — softened, not deleted", () => {
-  assert.ok(all.includes("If you've never felt 6, the end arrives with no warning."));
-  assert.ok(all.includes("For a lot of men it's already slower. Check yours."));
-  assert.ok(all.includes("often before the clock does"));
+test("6.3 — softened where the claim had no data; population claims stay", () => {
   assert.ok(all.includes("It works fast and costs nothing."));
-  assert.ok(!all.includes("Most men cannot feel the difference"));
   assert.ok(!all.includes("works in seconds"));
+  // the owner has the numbers: these stand
+  assert.ok(all.includes("Most men cannot feel the difference between 6 and 10"));
+  assert.ok(all.includes("For most men it is already slower"));
 });
 
 test("5.12 — exactly three essentials; foundations keep food and drop the bans", () => {

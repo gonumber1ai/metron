@@ -39,36 +39,33 @@ test("four funnels, two tiers, and nothing else", () => {
   assert.equal(funnelFor("1k", "fr")?.name, "Funnel 1K — FR");
   assert.equal(funnelFor("5k", "en")?.name, "Funnel 5K — EN");
   assert.equal(funnelFor("9k", "fr"), null);
-  assert.equal(TIERS["1k"].offer, 1000);
-  assert.equal(TIERS["1k"].full, 3500);
-  assert.equal(TIERS["1k"].sprint, 5000);
-  assert.equal(TIERS["5k"].offer, 5000);
-  assert.equal(TIERS["5k"].full, 7500);
-  assert.equal(TIERS["5k"].sprint, 15000);
+  // one price now: 4 900 flat, no offer/full split, 30-day 15 000
+  for (const t of ["1k", "5k"] as const) {
+    assert.equal(TIERS[t].offer, 4900);
+    assert.equal(TIERS[t].full, 4900);
+    assert.equal(TIERS[t].sprint, 15000);
+  }
   assert.equal(lastChanceUrl(FUNNELS["5k-en"]), "/en/offer?go=1&lc=1");
 });
 
 test("the price book swaps the franc rows by tier and keeps the card rows", () => {
   const rows = getPrices("CM", "1k");
   const test10 = rows.find((r) => r.plan === "test" && r.currency === "XAF")!;
-  assert.equal(test10.amountMinor, 1000);
-  assert.equal(test10.wasMinor, 3500);
-  assert.equal(atFullPrice(test10).amountMinor, 3500);
-  assert.equal(rows.find((r) => r.plan === "sprint" && r.currency === "XAF")!.amountMinor, 5000);
+  assert.equal(test10.amountMinor, 4900);
+  assert.equal(test10.wasMinor, undefined, "nothing struck through without a clock");
+  assert.equal(atFullPrice(test10).amountMinor, 4900);
+  assert.equal(rows.find((r) => r.plan === "sprint" && r.currency === "XAF")!.amountMinor, 15000);
   assert.ok(rows.some((r) => r.currency === "USD"), "card rows survive");
-  // no tier: the legacy book, untouched
-  assert.equal(getPrices("CM").find((r) => r.plan === "test")!.amountMinor, 2500);
+  assert.equal(getPrices("CM").find((r) => r.plan === "test")!.amountMinor, 4900);
 });
 
 test("what he pays: live, expired, last chance, and after the window", () => {
-  assert.deepEqual(priceFor(offer(), false), { amount: 1000, reason: "offer" });
-  assert.deepEqual(priceFor(offer({ expired: true }), false), { amount: 3500, reason: "full" });
-  // expired, inside the window, WITH the link
-  assert.deepEqual(priceFor(offer({ expired: true, lastChance: true }), true), { amount: 1000, reason: "lastchance" });
-  // expired, inside the window, WITHOUT the link — the link is the thing
-  assert.deepEqual(priceFor(offer({ expired: true, lastChance: true }), false), { amount: 3500, reason: "full" });
-  // expired, window closed, link or not
-  assert.deepEqual(priceFor(offer({ expired: true, lastChance: false }), true), { amount: 3500, reason: "full" });
+  // the clock is retired: every branch prices the same. The reasons still
+  // label what happened, so the CRM can say it.
+  assert.deepEqual(priceFor(offer(), false), { amount: 4900, reason: "offer" });
+  assert.deepEqual(priceFor(offer({ expired: true }), false), { amount: 4900, reason: "full" });
+  assert.deepEqual(priceFor(offer({ expired: true, lastChance: true }), true), { amount: 4900, reason: "lastchance" });
+  assert.deepEqual(priceFor(offer({ expired: true, lastChance: true }), false), { amount: 4900, reason: "full" });
   // no row at all: legacy /c traffic keeps its price
   assert.equal(priceFor(null, false).amount, TIERS["5k"].offer);
 });
@@ -156,9 +153,8 @@ test("the recovery message is in his language with his tier and his link", () =>
   const c = fold({ events: [ev("z", "start_view", Date.now(), { funnel: "5k-en", locale: "en" })], intake: [], leads: [], payments: [], offers: [], recovery: [] }).contacts[0];
   const m = recoveryMessage(c, "https://metron.life")!;
   assert.match(m.text, /Welcome back/);
-  assert.match(m.text, /5 000 FCFA/);
-  assert.match(m.text, /7 500 FCFA/);
+  assert.match(m.text, /4 900 FCFA/);
   assert.equal(m.url, "https://metron.life/en/offer?go=1&lc=1&ref=z");
   const fr = fold({ events: [ev("y", "start_view", Date.now(), { funnel: "1k-fr" })], intake: [], leads: [], payments: [], offers: [], recovery: [] }).contacts[0];
-  assert.match(recoveryMessage(fr, "https://metron.life")!.text, /Vous êtes revenu.*1 000 FCFA.*3 500 FCFA/);
+  assert.match(recoveryMessage(fr, "https://metron.life")!.text, /Vous êtes revenu.*4 900 FCFA/);
 });

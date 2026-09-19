@@ -80,7 +80,7 @@ export type Price = {
  * trial — two products, two prices, no arithmetic to explain at the moment he
  * is deciding.
  */
-const TEST_XAF = 2500;
+const TEST_XAF = 4900;
 const SPRINT_XAF = 15000;
 
 /* What each plan was listed at until 30 August 2026. Both were live prices on
@@ -96,8 +96,10 @@ const FCFA = (n: number) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NB)}${
 
 export const priceBook: Record<string, Price[]> = {
   default: [
-    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF), was: FCFA(TEST_XAF_WAS), wasMinor: TEST_XAF_WAS },
-    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF), was: FCFA(SPRINT_XAF_WAS) },
+    // No struck-through "was": there is no offer clock any more, so there is
+    // nothing honest to strike. TEST_XAF_WAS / SPRINT_XAF_WAS stay as history.
+    { plan: "test", currency: "XAF", amountMinor: TEST_XAF, provider: "fapshi", display: FCFA(TEST_XAF) },
+    { plan: "sprint", currency: "XAF", amountMinor: SPRINT_XAF, provider: "fapshi", display: FCFA(SPRINT_XAF) },
     { plan: "test", currency: "USD", amountMinor: TEST_USD, provider: "whop", display: "$15" },
     { plan: "sprint", currency: "USD", amountMinor: SPRINT_USD, provider: "whop", display: "$125" },
   ],
@@ -138,7 +140,7 @@ export function getPrices(country = "default", tier?: Tier | null): Price[] {
      anchor. */
   const t = TIERS[tier];
   return [
-    { plan: "test", currency: "XAF", amountMinor: t.offer, provider: "fapshi", display: FCFA(t.offer), was: FCFA(t.full), wasMinor: t.full },
+    { plan: "test", currency: "XAF", amountMinor: t.offer, provider: "fapshi", display: FCFA(t.offer) },
     { plan: "sprint", currency: "XAF", amountMinor: t.sprint, provider: "fapshi", display: FCFA(t.sprint) },
     ...base.filter((r) => r.currency !== "XAF"),
   ];
