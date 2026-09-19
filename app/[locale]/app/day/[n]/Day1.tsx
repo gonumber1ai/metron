@@ -48,9 +48,9 @@ const T = {
     remindP: "Your first session takes about 5 minutes.",
     remindSet: "Set reminder →",
     timerP: "Do it normally. Don't hold back. Don't use any technique.",
-    timerInfo: "This is not a test. It's your starting point. An honest number helps you see real progress.",
-    numberH: "Your number today",
-    thats: "That's your number today.",
+    timerInfo: "This is not a test. It's where you start. An honest time is what makes Day 12 mean something.",
+    numberH: "Tonight",
+    thats: "That's how long you lasted tonight.",
     notJudge: "It's not a judgment. It's the thing you're going to change.",
     method: "Method", last: "Last time",
     nextMeans: (n: string) => `Why it's ${n} →`,
@@ -92,9 +92,9 @@ const T = {
     remindP: "Votre première séance prend environ 5 minutes.",
     remindSet: "Programmer le rappel →",
     timerP: "Faites-le normalement. Ne vous retenez pas. N'utilisez aucune technique.",
-    timerInfo: "Ce n'est pas un test. C'est votre point de départ. Un chiffre honnête vous permet de voir de vrais progrès.",
-    numberH: "Votre chiffre aujourd'hui",
-    thats: "C'est votre chiffre aujourd'hui.",
+    timerInfo: "Ce n'est pas un test. C'est votre point de départ. Un temps honnête, c'est ce qui donne un sens au jour 12.",
+    numberH: "Ce soir",
+    thats: "C'est le temps que vous avez tenu ce soir.",
     notJudge: "Ce n'est pas un jugement. C'est la chose que vous allez changer.",
     method: "Méthode", last: "Dernière fois",
     nextMeans: (n: string) => `Pourquoi c'est ${n} →`,
@@ -306,7 +306,7 @@ export function Day1({ locale, Breath, Scale }: {
         ) : (
           <>
             <p className="mt-6 text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.numberH}</p>
-            <p className="metric mt-1 text-[3.2rem] font-bold leading-none text-bone">{mmss(result.seconds)}</p>
+            <p className="metric mt-1 text-[3.2rem] font-bold leading-none text-bone">{mmss(result.seconds)}.</p>
             <p className="mt-3 text-[1.05rem] font-bold text-bone">{t.thats}</p>
             <p className="mt-1 text-[0.95rem] text-white/70">{t.notJudge}</p>
             <dl className="mt-5 grid grid-cols-2 gap-3 text-[0.9rem]">

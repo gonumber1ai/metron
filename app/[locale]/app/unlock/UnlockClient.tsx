@@ -23,7 +23,7 @@ import { track, tapped } from "@/lib/track";
 
 const T = {
   en: {
-    yourNumber: "Your number:",
+    yourNumber: (n: string) => `You last ${n}.`,
     yourGuess: "Your guess:",
     stay: (n: string) => `Every day it stays ${n}, you're training it to stay there.`,
     stayGuess: "Every day it stays there, you're training it to stay there.",
@@ -41,11 +41,11 @@ const T = {
     later: "Not tonight",
     already: "Day 2 is already open.",
     today: "Go to Today →",
-    noNumber: "Measure Day 1 first — the number is the point.",
+    noNumber: "Time how long you last on Day 1 first — that is the point.",
     day1: "Start Day 1 →",
   },
   fr: {
-    yourNumber: "Votre chiffre :",
+    yourNumber: (n: string) => `Vous tenez ${n}.`,
     yourGuess: "Votre estimation :",
     stay: (n: string) => `Chaque jour où il reste à ${n}, vous l'entraînez à y rester.`,
     stayGuess: "Chaque jour où il reste là, vous l'entraînez à y rester.",
@@ -63,7 +63,7 @@ const T = {
     later: "Pas ce soir",
     already: "Le jour 2 est déjà ouvert.",
     today: "Aller à Aujourd'hui →",
-    noNumber: "Mesurez d'abord le jour 1 — le chiffre est le point de départ.",
+    noNumber: "Chronométrez d'abord combien de temps vous tenez au jour 1 — c'est le point de départ.",
     day1: "Commencer le jour 1 →",
   },
 } as const;
@@ -105,8 +105,12 @@ export function UnlockClient({ locale }: { locale: string }) {
 
   return (
     <div className="px-5 pt-8">
-      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{guess ? t.yourGuess : t.yourNumber}</p>
-      <p className={`metric mt-1 font-bold leading-none text-bone ${guess ? "text-[1.9rem]" : "text-[3rem]"}`}>{n}</p>
+      {guess ? (<>
+        <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.yourGuess}</p>
+        <p className="metric mt-1 text-[1.9rem] font-bold leading-none text-bone">{n}</p>
+      </>) : (
+        <p className="metric text-[2.4rem] font-bold leading-tight text-bone">{t.yourNumber(n)}</p>
+      )}
 
       <p className="mt-6 text-[1.05rem] font-semibold leading-snug text-bone">{guess ? t.stayGuess : t.stay(n)}</p>
       <p className="mt-1 text-[1.05rem] font-semibold leading-snug text-jade">{guess ? t.oppositeGuess : t.opposite}</p>
