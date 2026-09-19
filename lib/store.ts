@@ -18,12 +18,16 @@ const KEY = "metron.v1";
 export type Mode = "solo" | "partner";
 export type Plan = "test" | "sprint";
 
+export type Gap = "today" | "yesterday" | "2plus";
+
 export type Measurement = {
   /** 1 = baseline, 12 = retest, 30 = final */
   day: number;
   /** total seconds */
   seconds: number;
   mode: Mode;
+  /** how long since he last finished — the second setup question */
+  gap?: Gap;
   at: string;
 };
 
@@ -301,4 +305,29 @@ export function formatDuration(seconds: number, locale = "en"): string {
   const sec = seconds % 60;
   if (m === 0) return locale === "fr" ? `${sec} s` : `${sec}s`;
   return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Bridge to lib/gating — the brief's plan and progress shapes        */
+/* ------------------------------------------------------------------ */
+
+import type { Plan as GPlan, Progress } from "./gating";
+
+/** free until he has paid; "test" is the 10-day, "sprint" the 30-day. */
+export function planOf(s: State): GPlan {
+  return s.plan === "sprint" ? "p30" : s.plan === "test" ? "p10" : "free";
+}
+
+export function toProgress(s: State): Progress {
+  const completed: Record<number, string> = {};
+  for (const [k, v] of Object.entries(s.dayCompletedAt)) completed[Number(k)] = v;
+  const last = [...s.markerLogs].sort((a, b) => (a.at < b.at ? 1 : -1))[0];
+  return {
+    completed,
+    lastMarkers: last?.at,
+    baselineAt: baseline(s)?.at,
+    day12At: retest(s)?.at,
+    day30At: finalTest(s)?.at,
+  };
 }

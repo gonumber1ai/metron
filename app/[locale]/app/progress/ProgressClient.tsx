@@ -1,183 +1,136 @@
 "use client";
 
-import { getDict } from "@/lib/i18n";
+import { useState } from "react";
+import Image from "next/image";
 import { useMetron } from "@/components/useMetron";
-import { baseline, formatDuration, latest, type Markers } from "@/lib/store";
+import { baseline, retest, finalTest, formatDuration, streak, planOf, toProgress, type Markers } from "@/lib/store";
+import { currentDay } from "@/lib/gating";
 
-const MARKER_KEYS: (keyof Markers)[] = [
-  "control",
-  "erection",
-  "energy",
-  "sleep",
-  "libido",
-  "stomach",
-  "stress",
-];
+/**
+ * Progress — Section 5.10.
+ *
+ * Overview: the number card. Day 1; Day 12 locked until the challenge is
+ * done. No four zeros on Day 1, no streak before Day 3. Markers: four daily
+ * trend lines, the three weekly ones in their own section.
+ */
+
+const T = {
+  en: {
+    overview: "Overview", markers: "Daily markers",
+    card: "Your measurement", d1: "Day 1", d12: "Day 12", d30: "Day 30",
+    locked12: "Complete the 10-day challenge to see your comparison.",
+    saved: "Your number is saved. Keep going.",
+    none: "Record your baseline to start.",
+    under: "Your markers usually move before the clock does.",
+    streak: (n: number) => `${n}-day streak`,
+    daily: { erection: "Erection quality", energy: "Energy", sleep: "Sleep", control: "Control over arousal" },
+    weekly: { libido: "Libido", stress: "Stress", stomach: "Stomach comfort" },
+    weeklyH: "Weekly", last7: "Last 7 days", all: "All days",
+  },
+  fr: {
+    overview: "Aperçu", markers: "Marqueurs du jour",
+    card: "Votre mesure", d1: "Jour 1", d12: "Jour 12", d30: "Jour 30",
+    locked12: "Terminez le défi 10 jours pour voir votre comparaison.",
+    saved: "Votre chiffre est enregistré. Continuez.",
+    none: "Enregistrez votre mesure de départ pour commencer.",
+    under: "Vos marqueurs bougent généralement avant le chrono.",
+    streak: (n: number) => `${n} jours d'affilée`,
+    daily: { erection: "Qualité de l'érection", energy: "Énergie", sleep: "Sommeil", control: "Contrôle de l'excitation" },
+    weekly: { libido: "Libido", stress: "Stress", stomach: "Confort digestif" },
+    weeklyH: "Hebdomadaire", last7: "7 derniers jours", all: "Tous les jours",
+  },
+} as const;
+
+function Trend({ values }: { values: number[] }) {
+  if (values.length === 0) return <span className="text-[12px] text-white/30">—</span>;
+  const w = 120, h = 28;
+  const pts = values.map((v, i) => `${values.length === 1 ? w / 2 : (i / (values.length - 1)) * w},${h - ((v - 1) / 4) * (h - 4) - 2}`).join(" ");
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-7 w-[120px]">
+      <polyline points={pts} fill="none" stroke="var(--color-jade)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function ProgressClient({ locale }: { locale: string }) {
-  const t = getDict(locale);
+  const t = T[locale === "fr" ? "fr" : "en"];
+  const [tab, setTab] = useState<"overview" | "markers">("overview");
+  const [range, setRange] = useState<"7" | "all">("7");
   const { state, ready } = useMetron(locale);
+  if (!ready) return null;
 
-  if (!ready) {
-    return (
-      <div className="grid min-h-[60vh] place-items-center">
-        <p className="text-mute">{t.common.loading}</p>
-      </div>
-    );
-  }
-
-  const b = baseline(state);
-  const l = latest(state);
-  const points = [...state.measurements].sort((a, b2) => a.day - b2.day);
-  const logs = [...state.markerLogs].sort((a, b2) => a.day - b2.day);
-
-  const delta = b && l && l.day !== b.day ? l.seconds - b.seconds : null;
-  const pctChange = b && delta !== null ? Math.round((delta / b.seconds) * 100) : null;
-
-  // Chart geometry
-  const W = 320;
-  const H = 140;
-  const PAD = 8;
-  const maxSec = Math.max(...points.map((p) => p.seconds), 60);
-  const maxDay = 30;
-
-  function x(day: number) {
-    return PAD + (day / maxDay) * (W - PAD * 2);
-  }
-  function y(sec: number) {
-    return H - PAD - (sec / maxSec) * (H - PAD * 2);
-  }
+  const b = baseline(state), r = retest(state), f = finalTest(state);
+  const day = currentDay(planOf(state), toProgress(state));
+  const logs = [...state.markerLogs].sort((x, y) => (x.at < y.at ? -1 : 1));
+  const shown = range === "7" ? logs.slice(-7) : logs;
+  const series = (k: keyof Markers) => shown.map((l) => l.markers[k]);
+  const s = streak(state);
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
-      <h1 className="text-[1.7rem] font-semibold tracking-tight">{t.progress.title}</h1>
+    <div className="relative px-5 pt-6">
+      <Image src="/app/ring.jpg" alt="" fill sizes="640px" className="pointer-events-none -z-10 object-cover object-top opacity-[.18]" />
+      <div className="grid grid-cols-2 rounded-full border border-white/12 bg-black/40 p-1">
+        {(["overview", "markers"] as const).map((k) => (
+          <button key={k} type="button" onClick={() => setTab(k)} className={`rounded-full py-2 text-[13px] font-bold ${tab === k ? "bg-jade text-black" : "text-white/60"}`}>{t[k]}</button>
+        ))}
+      </div>
 
-      {/* -------------------------------------------------------- the number */}
-      <section className="glow-jade mt-6 rounded-2xl card p-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-          {t.progress.theNumber}
-        </p>
-
-        {l ? (
-          <>
-            <div className="mt-3 flex flex-wrap items-end gap-x-4 gap-y-1">
-              <span className="metric text-[3.8rem] font-bold text-jade md:text-[4.8rem]">
-                {formatDuration(l.seconds, locale)}
-              </span>
-              {delta !== null && (
-                <span
-                  className={`pb-3 text-[1.05rem] font-semibold ${
-                    delta > 0 ? "text-jade-300" : delta < 0 ? "text-amber" : "text-mute"
-                  }`}
-                >
-                  {delta > 0 ? "+" : ""}
-                  {formatDuration(Math.abs(delta), locale)}
-                  {pctChange !== null && ` (${pctChange > 0 ? "+" : ""}${pctChange}%)`}
-                  <span className="ml-1.5 font-normal text-faint">{t.progress.vsBaseline}</span>
-                </span>
-              )}
-            </div>
-
-            {points.length > 1 && (
-              <svg
-                viewBox={`0 0 ${W} ${H}`}
-                className="mt-6 w-full"
-                role="img"
-                aria-label={t.progress.theNumber}
-              >
-                {[0.25, 0.5, 0.75, 1].map((g) => (
-                  <line
-                    key={g}
-                    x1={PAD}
-                    x2={W - PAD}
-                    y1={y(maxSec * g)}
-                    y2={y(maxSec * g)}
-                    stroke="var(--color-ink-600)"
-                    strokeWidth="1"
-                  />
-                ))}
-                <polyline
-                  points={points.map((p) => `${x(p.day)},${y(p.seconds)}`).join(" ")}
-                  fill="none"
-                  stroke="var(--color-jade)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {points.map((p) => (
-                  <g key={p.day}>
-                    <circle cx={x(p.day)} cy={y(p.seconds)} r="4.5" fill="var(--color-jade)" />
-                    <text
-                      x={x(p.day)}
-                      y={H - 1}
-                      textAnchor="middle"
-                      className="fill-[var(--color-faint)]"
-                      style={{ fontSize: 9 }}
-                    >
-                      {t.common.day} {p.day}
-                    </text>
-                  </g>
-                ))}
-              </svg>
-            )}
-          </>
-        ) : (
-          <p className="mt-3 text-[0.95rem] text-mute">{t.progress.noData}</p>
-        )}
-      </section>
-
-      {/* ---------------------------------------------------------- markers */}
-      {logs.length > 0 && (
-        <section className="mt-6 rounded-2xl card p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-            {t.progress.markersTrend}
-          </p>
-
-          <div className="mt-4 space-y-3.5">
-            {MARKER_KEYS.map((k) => {
-              const first = logs[0].markers[k];
-              const lastVal = logs[logs.length - 1].markers[k];
-              const diff = lastVal - first;
-              return (
-                <div key={k}>
-                  <div className="flex items-center justify-between text-[0.9rem]">
-                    <span className="text-mute">{t.measure[k]}</span>
-                    <span className="tabular-nums text-bone">
-                      {first} → {lastVal}
-                      {diff !== 0 && (
-                        <span className={diff > 0 ? "ml-2 text-jade" : "ml-2 text-amber"}>
-                          {diff > 0 ? "+" : ""}
-                          {diff}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 flex gap-1">
-                    {logs.map((log) => (
-                      <div
-                        key={log.day}
-                        title={`${t.common.day} ${log.day}: ${log.markers[k]}`}
-                        className="flex h-6 flex-1 flex-col justify-end rounded-sm bg-ink-700"
-                      >
-                        <div
-                          className="rounded-sm bg-jade transition-all"
-                          style={{ height: `${(log.markers[k] / 5) * 100}%` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
+      {tab === "overview" ? (
+        <>
+          <section className="mt-5 rounded-2xl border border-jade/30 bg-black/50 p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.card}</p>
+            {!b ? (
+              <p className="mt-3 text-[0.95rem] text-white/70">{t.none}</p>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div><p className="text-[12px] text-white/50">{t.d1}</p><p className="metric text-[1.6rem] font-bold text-bone">{formatDuration(b.seconds, locale)}</p></div>
+                <div>
+                  <p className="text-[12px] text-white/50">{f ? t.d30 : t.d12}</p>
+                  {r || f ? <p className="metric text-[1.6rem] font-bold text-jade">{formatDuration((f ?? r)!.seconds, locale)}</p> : <p className="mt-1 text-[0.82rem] text-white/45">🔒 {t.locked12}</p>}
                 </div>
-              );
-            })}
+              </div>
+            )}
+            {b && !r && <p className="mt-3 text-[0.88rem] text-white/60">{t.saved}</p>}
+            <p className="mt-2 text-[0.85rem] italic text-white/45">{t.under}</p>
+            {day >= 3 && s > 0 && <p className="mt-3 text-[12px] font-bold text-jade">{t.streak(s)}</p>}
+          </section>
+          {logs.length > 0 && (
+            <section className="mt-4 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+              {(Object.keys(t.daily) as (keyof typeof t.daily)[]).map((k) => (
+                <div key={k} className="flex items-center justify-between py-1.5">
+                  <span className="text-[0.88rem] text-white/75">{t.daily[k]}</span>
+                  <Trend values={series(k).slice(-7)} />
+                </div>
+              ))}
+            </section>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="mt-5 flex gap-2 text-[12px]">
+            {(["7", "all"] as const).map((k) => (
+              <button key={k} type="button" onClick={() => setRange(k)} className={`rounded-full border px-3 py-1 font-semibold ${range === k ? "border-jade text-jade" : "border-white/15 text-white/55"}`}>{k === "7" ? t.last7 : t.all}</button>
+            ))}
           </div>
-        </section>
+          <section className="mt-4 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+            {(Object.keys(t.daily) as (keyof typeof t.daily)[]).map((k) => (
+              <div key={k} className="flex items-center justify-between py-2">
+                <span className="text-[0.92rem] text-bone">{t.daily[k]}</span>
+                <span className="flex items-center gap-3"><Trend values={series(k)} /><span className="metric w-4 text-right text-[13px] text-jade">{series(k).at(-1) ?? ""}</span></span>
+              </div>
+            ))}
+          </section>
+          <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.weeklyH}</p>
+          <section className="mt-2 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+            {(Object.keys(t.weekly) as (keyof typeof t.weekly)[]).map((k) => (
+              <div key={k} className="flex items-center justify-between py-2">
+                <span className="text-[0.92rem] text-bone">{t.weekly[k]}</span>
+                <span className="flex items-center gap-3"><Trend values={series(k)} /><span className="metric w-4 text-right text-[13px] text-jade">{series(k).at(-1) ?? ""}</span></span>
+              </div>
+            ))}
+          </section>
+        </>
       )}
-
-      {/* ----------------------------------------------------------- share */}
-      <section className="mt-6 rounded-2xl card p-5">
-        <p className="text-[0.98rem] font-semibold text-bone">{t.progress.shareTitle}</p>
-        <p className="mt-1.5 text-[0.9rem] leading-relaxed text-mute">{t.progress.shareBody}</p>
-      </section>
     </div>
   );
 }

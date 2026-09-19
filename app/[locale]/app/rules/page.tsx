@@ -1,51 +1,47 @@
-import { getProtocol } from "@/lib/content/protocol";
-import { getDict } from "@/lib/i18n";
+import Image from "next/image";
+import { getProgram } from "@/lib/content/program";
 
 /**
- * The daily rules, on their own page.
+ * Daily Rules & Foundations — Section 5.12. A menu page, not a daily one.
  *
- * They lived collapsed behind a "+" at the bottom of Today, which is where you
- * put something you do not expect anyone to read. They apply from Day 0 to the
- * end and they are the half of the programme that runs whether or not there is
- * a session that day — so they get a page, and a place in the menu, and a man
- * can check them at lunchtime without hunting.
+ * Essentials: exactly three, what we ask every day. Foundations: the old
+ * daily rules as guidance, read once. Food examples are Cameroon's; a
+ * region switch is the structure for more.
  */
-export default async function RulesPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+const T = {
+  en: { h: "Daily Rules & Foundations", ess: "Essentials — every day", found: "Foundations — read once", regional: "Cameroon" },
+  fr: { h: "Règles & fondations", ess: "L'essentiel — chaque jour", found: "Fondations — à lire une fois", regional: "Cameroun" },
+} as const;
+
+export default async function RulesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = getDict(locale);
-  const protocol = getProtocol(locale);
-
+  const t = T[locale === "fr" ? "fr" : "en"];
+  const p = getProgram(locale);
   return (
-    <div className="mx-auto max-w-2xl px-5 py-7">
-      <h1 className="text-[1.85rem]">{t.app.dailyRules}</h1>
+    <div className="relative px-5 pt-6">
+      <Image src="/app/spheres.jpg" alt="" fill sizes="640px" className="pointer-events-none -z-10 object-cover object-top opacity-[.16]" />
+      <h1 className="text-[1.5rem] font-bold text-bone">{t.h}</h1>
 
-      <div className="mt-4 space-y-3">
-        {protocol.rulesIntro.map((p, i) => (
-          <p key={i} className="text-[0.98rem] leading-relaxed text-mute">
-            {p}
-          </p>
-        ))}
-      </div>
-
-      <ol className="mt-7 space-y-3">
-        {protocol.rules.map((r, i) => (
-          <li key={r.id} className="rounded-2xl card p-5">
-            <div className="flex items-baseline gap-3">
-              <span className="metric text-[13px] font-bold text-jade">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0">
-                <p className="text-[1.02rem] font-bold leading-snug text-bone">{r.label}</p>
-                <p className="mt-1.5 text-[0.93rem] leading-relaxed text-mute">{r.detail}</p>
-              </div>
-            </div>
+      <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.16em] text-jade">{t.ess}</p>
+      <ul className="mt-2 space-y-2">
+        {p.essentials.map((e) => (
+          <li key={e.id} className="rounded-xl border border-jade/30 bg-jade-050/30 px-4 py-3">
+            <p className="text-[0.98rem] font-bold text-bone">{e.label}</p>
+            <p className="mt-1 text-[0.88rem] leading-relaxed text-white/70">{e.detail}</p>
           </li>
         ))}
-      </ol>
+      </ul>
+
+      <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.found}</p>
+      {p.foundationsIntro.map((s, i) => <p key={i} className="mt-2 text-[0.92rem] leading-relaxed text-white/65">{s}</p>)}
+      <ul className="mt-4 space-y-2">
+        {p.foundations.map((f) => (
+          <li key={f.id} className="rounded-xl border border-white/10 bg-white/[.03] px-4 py-3">
+            <p className="text-[0.98rem] font-bold text-bone">{f.label}{f.regional && <span className="ml-2 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold text-white/50">{t.regional}</span>}</p>
+            <p className="mt-1 text-[0.88rem] leading-relaxed text-white/70">{f.detail}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

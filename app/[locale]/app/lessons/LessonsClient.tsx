@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { getDict } from "@/lib/i18n";
-import { getLessons } from "@/lib/content/lessons";
+import { getProgram } from "@/lib/content/program";
+const getLessons = (l: string) => getProgram(l).lessons;
 import { useMetron } from "@/components/useMetron";
 
 export function LessonsClient({ locale }: { locale: string }) {

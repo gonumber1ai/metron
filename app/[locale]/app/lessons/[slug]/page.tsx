@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDict } from "@/lib/i18n";
-import { getLesson, getLessons } from "@/lib/content/lessons";
+import { getProgram } from "@/lib/content/program";
+const getLessons = (l: string) => getProgram(l).lessons;
+const getLesson = (l: string, slug: string) => getLessons(l).find((x) => x.slug === slug);
 import { MarkRead } from "@/components/MarkRead";
 
 export function generateStaticParams() {

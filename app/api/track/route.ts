@@ -66,6 +66,10 @@ const ALLOWED = new Set([
   "recovery_clicked",
   /* He pressed play on a testimonial video; detail = which, cta = where. */
   "video_play",
+  /* ── the rebuild's funnel (brief §9) ──────────────────────────────── */
+  "day1_start", "day1_breathing_done", "day1_measure_setup", "day1_measured", "day1_lesson_done",
+  "paywall_view", "day_open", "session_complete", "markers_logged", "day12_measured",
+  "upsell_view", "help_request", "account_deleted",
 ]);
 
 export async function POST(req: Request) {

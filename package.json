@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test --tsconfig tsconfig.json tests/crm.test.ts tests/program.test.ts",
+    "test": "tsx --test --tsconfig tsconfig.json tests/crm.test.ts tests/program.test.ts tests/gating.test.ts",
     "smoke": "node scripts/smoke.mjs",
     "dump": "tsx --tsconfig tsconfig.json scripts/dump-content.ts"
   },

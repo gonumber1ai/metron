@@ -1,403 +1,167 @@
 "use client";
 
 import Link from "next/link";
-import { getDict } from "@/lib/i18n";
-import { getDay, getProtocol, totalDays } from "@/lib/content/protocol";
+import Image from "next/image";
 import { useMetron } from "@/components/useMetron";
-import { isDone, toggleTask, tasksDone, streak } from "@/lib/store";
-import { Onboarding } from "@/components/Onboarding";
-import { SessionTimer } from "@/components/SessionTimer";
-import { ScaleCard } from "@/components/ScaleCard";
-import { sessionsFor, formatDuration, dayGate, completeDay } from "@/lib/store";
-import { useState } from "react";
+import { planOf, toProgress, isDone, toggleTask, completeDay, baseline } from "@/lib/store";
+import { currentDay, dayState, hoursUntil, canLogMarkers } from "@/lib/gating";
+import { getProgramDay, getProgram } from "@/lib/content/program";
 
-const KIND_LABEL: Record<string, { en: string; fr: string; tone: string }> = {
-  reset: { en: "Reset", fr: "Remise à zéro", tone: "text-mute" },
-  baseline: { en: "Measurement", fr: "Mesure", tone: "text-amber" },
-  training: { en: "Training", fr: "Entraînement", tone: "text-jade" },
-  rest: { en: "Rest", fr: "Repos", tone: "text-mute" },
-  retest: { en: "Measurement", fr: "Mesure", tone: "text-amber" },
-  review: { en: "Review", fr: "Bilan", tone: "text-amber" },
-};
+/**
+ * Today — Section 5.1, 5.4, 5.5.
+ *
+ * One primary action. Three checklist items, never more. The session is
+ * one item however many steps it has inside. Rest days pre-check the first
+ * item. A free man who has finished Day 1 sees the three ticks and the lock
+ * on Day 2 — and still gets sleep and markers, which are his for good.
+ */
 
-/** "4 cycles, 20-second holds" -> 4 */
-function cycleCount(spec: string): number {
-  const m = spec.match(/(\d+)/);
-  return m ? Number(m[1]) : 3;
-}
+const T = {
+  en: {
+    tasks: "Today's tasks",
+    start: "Start today's session →",
+    done: "Completed",
+    first: "You've taken your first step.",
+    locked2: "Day 2 is ready when you are.",
+    locked2p: "Unlock to continue your training and build real progress.",
+    unlock: "Unlock Days 2–10 →",
+    wait: (n: number) => `Tomorrow opens in ${n}h`,
+    waitWhy: "Days are 18 hours apart on purpose. If you rush them, your Day 12 number means nothing.",
+    kegels: "Pelvic floor: 3 sets of 10, twice today",
+    markers: "Log your daily markers →",
+    markersWait: (n: number) => `You already logged today. Next one in ${n}h.`,
+    d1: ["Breathing exercise", "Measurement", "Why you finish when you do"],
+    read: (title: string, min: number) => `Read: ${title} (~${min} min)`,
+    day: "Day",
+  },
+  fr: {
+    tasks: "Les tâches du jour",
+    start: "Commencer la séance du jour →",
+    done: "Terminé",
+    first: "Vous avez fait le premier pas.",
+    locked2: "Le jour 2 vous attend.",
+    locked2p: "Débloquez pour continuer l'entraînement et construire un vrai progrès.",
+    unlock: "Débloquer les jours 2–10 →",
+    wait: (n: number) => `Demain s'ouvre dans ${n}h`,
+    waitWhy: "Les jours sont espacés de 18 heures exprès. Si vous les précipitez, votre chiffre du jour 12 ne veut rien dire.",
+    kegels: "Plancher pelvien : 3 séries de 10, deux fois aujourd'hui",
+    markers: "Noter vos marqueurs du jour →",
+    markersWait: (n: number) => `Vous avez déjà noté aujourd'hui. Prochain dans ${n}h.`,
+    d1: ["Exercice de respiration", "Mesure", "Pourquoi vous finissez quand vous finissez"],
+    read: (title: string, min: number) => `Lire : ${title} (~${min} min)`,
+    day: "Jour",
+  },
+} as const;
 
 export function TodayClient({ locale }: { locale: string }) {
-  const t = getDict(locale);
-  const { state, mutate, ready } = useMetron(locale);
-  // Open for his first three days, collapsed after that. These rules run from
-  // Day 0 to the end and they are the part most men skip, so a new man should
-  // meet them without having to press anything; a man on Day 9 already knows
-  // them and wants his session, not a wall of food advice.
-  //
-  // Derived rather than seeded into useState: state arrives from localStorage
-  // in an effect, so on the first render every man looks like Day 0, and a
-  // useState initialiser would latch that open for all of them. Null means "he
-  // has not touched it, use the default".
-  const [rulesToggled, setRulesToggled] = useState<boolean | null>(null);
-  const rulesOpen = rulesToggled ?? (ready && state.day <= 2);
+  const t = T[locale === "fr" ? "fr" : "en"];
+  const { state, ready, mutate } = useMetron(locale);
+  if (!ready) return <div className="grid min-h-[60vh] place-items-center text-white/40">…</div>;
 
-  const protocol = getProtocol(locale);
-  const day = getDay(locale, state.day) ?? protocol.days[0];
-  const plan = state.plan ?? "test";
-  const last = totalDays(plan);
+  const plan = planOf(state);
+  const prog = toProgress(state);
+  const day = currentDay(plan, prog);
+  const d = getProgramDay(locale, day);
+  if (!d) return null;
+  const st = dayState(day, plan, prog);
+  const base = `/${locale}/app`;
+  const lesson = d.lesson ? getProgram(locale).lessons.find((l) => l.slug === d.lesson) : undefined;
 
-  if (!ready) {
-    return (
-      <div className="grid min-h-[60vh] place-items-center">
-        <p className="text-mute">{t.common.loading}</p>
-      </div>
-    );
+  const ticks = d.tasks.map((task) => Boolean(task.fixed) || isDone(state, day, task.key));
+  const n = ticks.filter(Boolean).length;
+  const day1Done = day === 1 && Boolean(baseline(state)) && Boolean(prog.completed[1]);
+  const nextDay = day === 10 ? 12 : day + 1;
+  const next = day1Done || day >= 30 ? null : dayState(nextDay, plan, prog);
+  const mk = canLogMarkers(prog);
+
+  function tick(key: string) {
+    mutate((s) => {
+      let out = toggleTask(s, day, key);
+      const all = d!.tasks.every((task) => task.fixed || out.done[String(day)]?.includes(task.key));
+      if (all && !out.dayCompletedAt[String(day)]) out = completeDay(out, day, 30);
+      return out;
+    });
   }
-
-  // First run — orient him before dropping him on "Day 0: do nothing".
-  if (!state.startedAt) {
-    return <Onboarding locale={locale} onStart={(patch) => mutate((s) => ({ ...s, ...patch }))} />;
-  }
-
-  const done = tasksDone(state, day.day);
-  const pct = day.tasks.length ? Math.round((done.length / day.tasks.length) * 100) : 0;
-  const kind = KIND_LABEL[day.kind] ?? KIND_LABEL.training;
-  // Medical tasks ("get your blood pressure checked") are advice, not homework,
-  // so they never block progress.
-  const requiredIds = day.tasks.filter((x) => x.kind !== "medical").map((x) => x.id);
-  const gate = dayGate(state, day.day, requiredIds);
-  const allDone = done.length === day.tasks.length && day.tasks.length > 0;
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
-      {/* ------------------------------------------------------- day header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${kind.tone}`}>
-            {locale === "fr" ? kind.fr : kind.en}
-          </p>
-          <h1 className="mt-1.5 flex items-baseline gap-2.5 text-[1.7rem] font-semibold leading-tight tracking-tight md:text-[2.1rem]">
-            <span className="metric text-jade">{t.common.day} {day.day}</span>
-          </h1>
-          <p className="mt-1 text-[1.05rem] leading-snug text-bone">{day.title}</p>
-        </div>
+    <div className="relative min-h-[70vh] px-5 pt-6">
+      <Image src="/app/door.jpg" alt="" fill priority sizes="640px" className="pointer-events-none -z-10 object-cover object-top opacity-[.22]" />
 
-        {/* completion ring */}
-        <div className="relative grid h-16 w-16 shrink-0 place-items-center">
-          <svg viewBox="0 0 36 36" className="absolute h-16 w-16 -rotate-90">
-            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-ink-600)" strokeWidth="3" />
-            <circle
-              cx="18"
-              cy="18"
-              r="15.5"
-              fill="none"
-              stroke="var(--color-jade)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray={`${(pct / 100) * 97.4} 97.4`}
-              className="transition-all duration-500"
-            />
-          </svg>
-          <span className="metric text-[13px] font-semibold text-bone">{pct}%</span>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.day} {day}</p>
+          <h1 className="mt-1 text-[1.5rem] font-bold leading-tight text-bone">{day1Done ? t.done : d.title}</h1>
+          <p className="mt-1.5 text-[0.95rem] text-white/70">{day1Done ? t.first : d.focus}</p>
         </div>
+        <span className="metric text-[13px] text-white/40">{day1Done ? 3 : n}/3</span>
       </div>
 
-      <p className="mt-4 text-[0.98rem] leading-relaxed text-jade-300">{day.focus}</p>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-faint">
-        <span className="rounded-full border border-ink-600 px-2.5 py-1">
-          {t.common.day} {day.day} {t.common.of} {last}
-        </span>
-        {streak(state) > 1 && (
-          <span className="rounded-full border border-ink-600 px-2.5 py-1 text-jade">
-            {t.app.streak.replace("{n}", String(streak(state)))}
-          </span>
-        )}
-        {day.phase && (
-          <span className="rounded-full border border-ink-600 px-2.5 py-1">{day.phase}</span>
-        )}
-      </div>
-
-      {/* ------------------------------------------------------------ brief */}
-      <section className="mt-8 space-y-4">
-        {day.brief.map((p, i) => (
-          <p key={i} className="text-[1rem] leading-[1.75] text-mute">
-            {p}
-          </p>
-        ))}
-      </section>
-
-      {/* ---------------------------------------------------------- session */}
-      {day.session ? (
-        <section className="mt-8 rounded-2xl border border-jade/30 bg-jade-050 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-jade">
-            {t.app.session}
-          </p>
-          <h2 className="mt-2 text-[1.1rem] font-semibold leading-snug">{day.session.title}</h2>
-
-          <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {[
-              [locale === "fr" ? "Durée" : "Duration", day.session.duration],
-              [locale === "fr" ? "Plafond" : "Ceiling", day.session.ceiling],
-              [locale === "fr" ? "Cycles" : "Cycles", day.session.cycles],
-            ].map(([k, v]) => (
-              <div key={k} className="rounded-lg bg-ink-900/50 px-3 py-2.5">
-                <dt className="text-[10.5px] uppercase tracking-wide text-faint">{k}</dt>
-                <dd className="mt-0.5 text-[13px] leading-snug text-bone">{v}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <ol className="mt-5 space-y-3">
-            {day.session.steps.map((s, i) => (
-              <li key={i} className="flex gap-3 text-[0.95rem] leading-relaxed text-mute">
-                <span className="metric mt-0.5 w-5 shrink-0 text-[13px] font-semibold text-jade">
-                  {i + 1}
-                </span>
+      {day1Done && plan === "free" ? (
+        <>
+          <ul className="mt-6 space-y-2">
+            {t.d1.map((s) => (
+              <li key={s} className="flex items-center gap-3 rounded-xl border border-jade/25 bg-jade-050/40 px-4 py-3 text-[0.95rem] text-bone">
+                <span className="text-jade">✓</span>
                 {s}
               </li>
             ))}
-          </ol>
-
-          <p className="mt-5 border-t border-jade/20 pt-4 text-[0.93rem] leading-relaxed text-bone">
-            <span className="font-semibold">{locale === "fr" ? "Fin : " : "Ending: "}</span>
-            {day.session.ending}
-          </p>
-
-          {day.session.guard && (
-            <p className="mt-3 rounded-lg border-l-2 border-amber bg-amber-050 px-3 py-2.5 text-[0.9rem] leading-relaxed text-mute">
-              {day.session.guard}
-            </p>
-          )}
-        </section>
+          </ul>
+          <section className="mt-6 rounded-2xl border border-jade/40 bg-black/50 p-5">
+            <p className="text-[1.05rem] font-bold text-bone">🔒 {t.locked2}</p>
+            <p className="mt-1.5 text-[0.92rem] text-white/70">{t.locked2p}</p>
+            <Link href={`${base}/unlock`} className="btn-go mt-4 flex w-full items-center justify-center rounded-xl px-5 py-3.5 text-[15px] font-bold">
+              {t.unlock}
+            </Link>
+          </section>
+        </>
       ) : (
-        <p className="mt-8 rounded-xl card px-4 py-3.5 text-[0.94rem] text-mute">
-          {t.app.noSession}
-        </p>
-      )}
-
-      {/* ------------------------------------------------------ the timer */}
-      {day.session && (
-        <section className="mt-4 space-y-4">
-          {/* The scale first — he cannot use the timer without it. Full detail
-              for the first three sessions, compact once he knows it. */}
-          <ScaleCard locale={locale} compact={day.day > 4} />
-
-          <SessionTimer
-            locale={locale}
-            day={day.day}
-            targetCycles={cycleCount(day.session.cycles)}
-            onSave={(log) =>
-              mutate((s) => ({
-                ...s,
-                sessions: [...s.sessions, { ...log, id: crypto.randomUUID() }],
-              }))
-            }
-          />
-
-          {/* what he already did today */}
-          {sessionsFor(state, day.day).length > 0 && (
-            <ul className="mt-3 space-y-1.5">
-              {sessionsFor(state, day.day).map((sess, i) => (
-                <li
-                  key={sess.id}
-                  className="flex items-center justify-between rounded-xl card px-4 py-3 text-[0.9rem]"
-                >
-                  <span className="text-mute">
-                    {locale === "fr" ? "Séance" : "Session"} {i + 1} &middot;{" "}
-                    {sess.cycles.length} {locale === "fr" ? "cycles" : "cycles"}
-                  </span>
-                  <span className="metric font-bold text-jade">
-                    {formatDuration(sess.totalSeconds, locale)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
-
-      {/* ------------------------------------------------------------ tasks */}
-      <section className="mt-8">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-            {t.app.todayTasks}
-          </h2>
-          <span className="text-[12px] tabular-nums text-faint">
-            {t.app.completed
-              .replace("{done}", String(done.length))
-              .replace("{total}", String(day.tasks.length))}
-          </span>
-        </div>
-
-        <ul className="mt-3 space-y-2">
-          {day.tasks.map((task) => {
-            const on = isDone(state, day.day, task.id);
-            return (
-              <li key={task.id}>
-                <button
-                  type="button"
-                  onClick={() => mutate((s) => toggleTask(s, day.day, task.id))}
-                  aria-pressed={on}
-                  className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3.5 text-left transition-colors ${
-                    on
-                      ? "border-jade/40 bg-jade-050"
-                      : "border-ink-600 bg-ink-800 hover:border-ink-500"
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-[6px] border transition-colors ${
-                      on ? "border-jade bg-jade" : "border-ink-500"
+        <>
+          <p className="mt-7 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.tasks}</p>
+          <ul className="mt-2 space-y-2">
+            {d.tasks.map((task, i) => {
+              const on = ticks[i];
+              const isSession = i === 0;
+              return (
+                <li key={task.key}>
+                  <button
+                    type="button"
+                    disabled={Boolean(task.fixed) || isSession}
+                    onClick={() => !isSession && tick(task.key)}
+                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3.5 text-left disabled:cursor-default ${
+                      on ? "border-jade/30 bg-jade-050/40" : "border-white/10 bg-white/[.03]"
                     }`}
                   >
-                    {on && (
-                      <svg viewBox="0 0 12 12" className="h-3 w-3 text-ink-900" fill="none">
-                        <path
-                          d="M2.5 6.2 4.8 8.5 9.5 3.8"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="min-w-0">
-                    <span
-                      className={`block text-[0.96rem] leading-snug ${
-                        on ? "text-mute line-through decoration-ink-500" : "text-bone"
-                      }`}
-                    >
-                      {task.label}
+                    <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 text-[11px] ${on ? "border-jade bg-jade text-black" : "border-white/25"}`}>
+                      {on ? "✓" : ""}
                     </span>
-                    {task.detail && (
-                      <span className="mt-1 block text-[0.86rem] leading-relaxed text-faint">
-                        {task.detail}
-                      </span>
-                    )}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      {/* ------------------------------------------------------ quick links */}
-      <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
-        {day.lesson && (
-          <Link
-            href={`/${locale}/app/lessons/${day.lesson}`}
-            className="rounded-xl card px-4 py-3.5 text-[0.95rem] font-medium text-bone hover:border-jade"
-          >
-            {t.cta.readLesson} →
-          </Link>
-        )}
-        {(day.kind === "baseline" || day.kind === "retest") && (
-          <Link
-            href={`/${locale}/app/measure`}
-            className="rounded-xl bg-jade px-4 py-3.5 text-center text-[0.95rem] font-semibold text-ink-900"
-          >
-            {day.day === 1 ? t.measure.recordBaseline : t.measure.recordRetest} →
-          </Link>
-        )}
-        <Link
-          href={`/${locale}/app/measure#markers`}
-          className="rounded-xl card px-4 py-3.5 text-[0.95rem] font-medium text-bone hover:border-jade"
-        >
-          {t.measure.markers} →
-        </Link>
-      </div>
-
-      {/* ------------------------------------------------------ daily rules */}
-      <section className="mt-8 rounded-2xl card">
-        <button
-          type="button"
-          onClick={() => setRulesToggled(!rulesOpen)}
-          aria-expanded={rulesOpen}
-          className="flex w-full items-center justify-between px-5 py-4 text-left"
-        >
-          <span className="text-[0.98rem] font-semibold text-bone">{t.app.dailyRules}</span>
-          <span
-            aria-hidden
-            className={`text-mute transition-transform ${rulesOpen ? "rotate-45" : ""}`}
-          >
-            +
-          </span>
-        </button>
-
-        {rulesOpen && (
-          <div className="border-t border-ink-700 px-5 py-4">
-            <div className="space-y-3">
-              {protocol.rulesIntro.map((p, i) => (
-                <p key={i} className="text-[0.93rem] leading-relaxed text-faint">
-                  {p}
-                </p>
-              ))}
-            </div>
-            <ul className="mt-5 space-y-4">
-              {protocol.rules.map((r) => (
-                <li key={r.id}>
-                  <p className="text-[0.95rem] font-medium text-bone">{r.label}</p>
-                  <p className="mt-1 text-[0.89rem] leading-relaxed text-mute">{r.detail}</p>
+                    <span className="min-w-0">
+                      <span className="block text-[0.98rem] font-semibold text-bone">{task.label}</span>
+                      {task.detail && <span className="block text-[0.85rem] text-white/55">{task.detail}</span>}
+                      {isSession && lesson && !on && <span className="mt-1 block text-[0.82rem] text-jade/80">{t.read(lesson.title, lesson.minutes)}</span>}
+                      {isSession && d.kegels && <span className="mt-1 block text-[0.82rem] text-white/50">{t.kegels}</span>}
+                    </span>
+                  </button>
                 </li>
-              ))}
-            </ul>
-            <Link
-              href={`/${locale}/app/rules`}
-              className="mt-5 inline-flex text-[0.9rem] font-bold text-jade hover:underline"
-            >
-              {t.nav.rules} →
+              );
+            })}
+          </ul>
+
+          {st.state === "open" && !ticks[0] && (
+            <Link href={`${base}/day/${day}`} className="btn-go mt-6 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold">
+              {t.start}
             </Link>
-          </div>
-        )}
-      </section>
-
-      {/* ------------------------------------------------------- day nav */}
-      {/* Advancing is gated twice: today's required work must be ticked, and
-          at least 18 real hours must have passed since the previous day was
-          finished. Otherwise a man taps through the whole programme in one
-          evening, logs a flattering Day 12, and claims the refund. */}
-      <div className="mt-8 border-t border-ink-700 pt-6">
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            disabled={state.day <= 0}
-            onClick={() => mutate((s) => ({ ...s, day: Math.max(0, s.day - 1) }))}
-            className="rounded-full border border-ink-600 px-5 py-2.5 text-[14px] font-medium text-mute disabled:opacity-30"
-          >
-            ← {day.day > 0 ? `${t.common.day} ${day.day - 1}` : t.common.day}
-          </button>
-
-          <button
-            type="button"
-            disabled={state.day >= last || !gate.ok}
-            onClick={() => mutate((s) => completeDay(s, day.day, last))}
-            className={`rounded-full px-5 py-2.5 text-[14px] font-bold disabled:opacity-40 ${
-              gate.ok ? "bg-jade text-ink-900" : "border border-ink-600 text-mute"
-            }`}
-          >
-            {day.day < last
-              ? `${t.app.nextUp}: ${t.common.day} ${day.day + 1}`
-              : t.app.dayComplete.replace("{day}", String(day.day))}{" "}
-            →
-          </button>
-        </div>
-
-        {!gate.ok && (
-          <div className="mt-3 rounded-xl border border-ink-600 bg-ink-850 px-4 py-3">
-            <p className="text-[0.92rem] font-semibold text-bone">
-              {gate.reason === "incomplete"
-                ? t.app.gateIncomplete.replace("{n}", String(gate.missing))
-                : t.app.gateTooSoon.replace("{n}", String(gate.hoursLeft))}
+          )}
+          {next?.state === "locked" && next.reason === "wait" && next.opensAt && (
+            <p className="mt-5 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3 text-[0.88rem] text-white/60">
+              <b className="text-bone">{t.wait(hoursUntil(next.opensAt))}</b> · {t.waitWhy}
             </p>
-            {gate.reason === "too-soon" && (
-              <p className="mt-1.5 text-[0.86rem] leading-snug text-faint">{t.app.gateWhy}</p>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </>
+      )}
+
+      <Link href={`${base}/markers`} className="mt-6 block text-center text-[0.9rem] font-semibold text-jade underline-offset-4 hover:underline">
+        {mk.ok ? t.markers : t.markersWait(hoursUntil(Date.now() + mk.nextIn))}
+      </Link>
     </div>
   );
 }
