@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMetron } from "@/components/useMetron";
-import { planOf, toProgress, toggleTask, completeDay, formatDuration, type Mode, type Gap } from "@/lib/store";
+import { planOf, toProgress, toggleTask, completeDay, baseline, type Mode, type Gap } from "@/lib/store";
 import { dayState } from "@/lib/gating";
-import { getProgramDay, getProgram, DAY1_CLOSE } from "@/lib/content/program";
+import { getProgramDay, getProgram } from "@/lib/content/program";
+import { mmss } from "@/lib/format";
+import { Retest } from "./Retest";
 import { MeasureTimer } from "@/components/MeasureTimer";
 import { track } from "@/lib/track";
 
@@ -39,10 +41,17 @@ const T = {
     cont: "Continue →",
     timerP: "Do it normally. Don't hold back. Don't use any technique.",
     timerInfo: "This is not a test. It's your starting point. An honest number helps you see real progress.",
-    numberH: "Your number is",
+    numberH: "Your number today",
+    thats: "That's your number today.",
+    notJudge: "It's not a judgment. It's the thing you're going to change.",
     method: "Method", last: "Last time",
-    saved: "Your Day 1 number is saved in your progress. You can always see it again.",
-    nextMeans: "Next: What your number means →",
+    nextMeans: (n: string) => `Why it's ${n} →`,
+    close: (n: string) => [
+      `You finish at ${n} because you notice you're close at 9. By then it's already decided.`,
+      "Men who last notice at 6. That's not talent. It's a skill, and it's trained in about 15 minutes a day.",
+      "Day 2 is where you learn to feel 6.",
+    ],
+    openDay2: "Open Day 2 →",
     meansH: "Why you finish when you do",
     scaleStop: "your stop", scaleLate: "too late",
     toPaywall: "Continue →",
@@ -70,10 +79,17 @@ const T = {
     cont: "Continuer →",
     timerP: "Faites-le normalement. Ne vous retenez pas. N'utilisez aucune technique.",
     timerInfo: "Ce n'est pas un test. C'est votre point de départ. Un chiffre honnête vous permet de voir de vrais progrès.",
-    numberH: "Votre chiffre est",
+    numberH: "Votre chiffre aujourd'hui",
+    thats: "C'est votre chiffre aujourd'hui.",
+    notJudge: "Ce n'est pas un jugement. C'est la chose que vous allez changer.",
     method: "Méthode", last: "Dernière fois",
-    saved: "Votre chiffre du jour 1 est enregistré dans vos progrès. Vous pourrez toujours le revoir.",
-    nextMeans: "Suite : Ce que veut dire votre chiffre →",
+    nextMeans: (n: string) => `Pourquoi c'est ${n} →`,
+    close: (n: string) => [
+      `Vous finissez à ${n} parce que vous remarquez que vous êtes proche à 9. À ce moment-là, c'est déjà décidé.`,
+      "Les hommes qui tiennent le remarquent à 6. Ce n'est pas un talent. C'est une compétence, et elle s'entraîne en 15 minutes par jour environ.",
+      "Le jour 2, vous apprenez à sentir 6.",
+    ],
+    openDay2: "Ouvrir le jour 2 →",
     meansH: "Pourquoi vous finissez quand vous finissez",
     scaleStop: "votre arrêt", scaleLate: "trop tard",
     toPaywall: "Continuer →",
@@ -191,6 +207,11 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
     </button>
   );
 
+  /* ═══════════════════════════════════════════ DAY 12 · DAY 30 ═══ */
+  if (day === 12 || day === 30) {
+    return <Retest locale={locale} day={day} Breath={Breath} Bar={Bar} Btn={Btn} />;
+  }
+
   /* ═══════════════════════════════════════════════════════ DAY 1 ═══ */
   if (day === 1) {
     const total = 4;
@@ -259,13 +280,14 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
           <>
             <Bar n={4} total={total} />
             <p className="mt-6 text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.numberH}</p>
-            <p className="metric mt-1 text-[2.4rem] font-bold leading-none text-bone">{formatDuration(seconds, locale)}</p>
+            <p className="metric mt-1 text-[3.2rem] font-bold leading-none text-bone">{mmss(seconds)}</p>
+            <p className="mt-3 text-[1.05rem] font-bold text-bone">{t.thats}</p>
+            <p className="mt-1 text-[0.95rem] text-white/70">{t.notJudge}</p>
             <dl className="mt-5 grid grid-cols-2 gap-3 text-[0.9rem]">
               <div className="rounded-xl border border-white/10 p-3"><dt className="text-white/50">{t.method}</dt><dd className="font-semibold text-bone">{mode === "solo" ? t.solo : t.partner}</dd></div>
               <div className="rounded-xl border border-white/10 p-3"><dt className="text-white/50">{t.last}</dt><dd className="font-semibold text-bone">{gap === "today" ? t.today : gap === "yesterday" ? t.yesterday : t.twoPlus}</dd></div>
             </dl>
-            <p className="mt-4 text-[0.88rem] text-white/60">{t.saved}</p>
-            <Btn label={t.nextMeans} onClick={() => setReadDone(true)} />
+            <Btn label={t.nextMeans(mmss(seconds))} onClick={() => setReadDone(true)} />
           </>
         )}
         {step === 3 && readDone && (
@@ -274,8 +296,8 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
             <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.meansH}</h1>
             <Scale stop={t.scaleStop} late={t.scaleLate} />
             {lesson?.body.slice(0, 4).map((p, i) => <p key={i} className="mt-3 text-[0.98rem] leading-relaxed text-white/80">{p}</p>)}
-            {DAY1_CLOSE[locale === "fr" ? "fr" : "en"].map((p, i) => <p key={`c${i}`} className="mt-3 text-[1rem] font-semibold leading-relaxed text-bone">{p}</p>)}
-            <Btn label={t.toPaywall} onClick={finish} />
+            {t.close(mmss(seconds!)).map((p, i) => <p key={`c${i}`} className="mt-3 text-[1rem] font-semibold leading-relaxed text-bone">{p}</p>)}
+            <Btn label={t.openDay2} onClick={finish} />
           </>
         )}
       </div>

@@ -6,6 +6,7 @@ import { useMetron } from "@/components/useMetron";
 import { planOf, toProgress, isDone, toggleTask, completeDay, baseline } from "@/lib/store";
 import { currentDay, dayState, hoursUntil, canLogMarkers } from "@/lib/gating";
 import { getProgramDay, getProgram } from "@/lib/content/program";
+import { mmss } from "@/lib/format";
 
 /**
  * Today — Section 5.1, 5.4, 5.5.
@@ -20,11 +21,10 @@ const T = {
   en: {
     tasks: "Today's tasks",
     start: "Start today's session →",
-    done: "Completed",
-    first: "You've taken your first step.",
-    locked2: "Day 2 is ready when you are.",
-    locked2p: "Unlock to continue your training and build real progress.",
-    unlock: "Unlock Days 2–10 →",
+    done: "Day 1 — done.",
+    yourNumber: "Your number:",
+    locked2: "Day 2 is ready. It takes 15 minutes.",
+    unlock: "Open Day 2 →",
     wait: (n: number) => `Tomorrow opens in ${n}h`,
     waitWhy: "Days are 18 hours apart on purpose. If you rush them, your Day 12 number means nothing.",
     kegels: "Pelvic floor: 3 sets of 10, twice today",
@@ -37,11 +37,10 @@ const T = {
   fr: {
     tasks: "Les tâches du jour",
     start: "Commencer la séance du jour →",
-    done: "Terminé",
-    first: "Vous avez fait le premier pas.",
-    locked2: "Le jour 2 vous attend.",
-    locked2p: "Débloquez pour continuer l'entraînement et construire un vrai progrès.",
-    unlock: "Débloquer les jours 2–10 →",
+    done: "Jour 1 — fait.",
+    yourNumber: "Votre chiffre :",
+    locked2: "Le jour 2 est prêt. Il prend 15 minutes.",
+    unlock: "Ouvrir le jour 2 →",
     wait: (n: number) => `Demain s'ouvre dans ${n}h`,
     waitWhy: "Les jours sont espacés de 18 heures exprès. Si vous les précipitez, votre chiffre du jour 12 ne veut rien dire.",
     kegels: "Plancher pelvien : 3 séries de 10, deux fois aujourd'hui",
@@ -91,25 +90,21 @@ export function TodayClient({ locale }: { locale: string }) {
         <div>
           <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.day} {day}</p>
           <h1 className="mt-1 text-[1.5rem] font-bold leading-tight text-bone">{day1Done ? t.done : d.title}</h1>
-          <p className="mt-1.5 text-[0.95rem] text-white/70">{day1Done ? t.first : d.focus}</p>
+          {day1Done ? (
+            <p className="mt-2 text-[1.05rem] text-white/80">{t.yourNumber} <span className="metric text-[1.5rem] font-bold text-bone">{mmss(baseline(state)!.seconds)}</span></p>
+          ) : (
+            <p className="mt-1.5 text-[0.95rem] text-white/70">{d.focus}</p>
+          )}
         </div>
         <span className="metric text-[13px] text-white/40">{day1Done ? 3 : n}/3</span>
       </div>
 
       {day1Done && plan === "free" ? (
         <>
-          <ul className="mt-6 space-y-2">
-            {t.d1.map((s) => (
-              <li key={s} className="flex items-center gap-3 rounded-xl border border-jade/25 bg-jade-050/40 px-4 py-3 text-[0.95rem] text-bone">
-                <span className="text-jade">✓</span>
-                {s}
-              </li>
-            ))}
-          </ul>
+          {/* 16.5 — nothing else above the fold. */}
           <section className="mt-6 rounded-2xl border border-jade/40 bg-black/50 p-5">
-            <p className="text-[1.05rem] font-bold text-bone">🔒 {t.locked2}</p>
-            <p className="mt-1.5 text-[0.92rem] text-white/70">{t.locked2p}</p>
-            <Link href={`${base}/unlock`} className="btn-go mt-4 flex w-full items-center justify-center rounded-xl px-5 py-3.5 text-[15px] font-bold">
+            <p className="text-[1.05rem] font-bold text-bone">{t.locked2}</p>
+            <Link href={`${base}/unlock`} className="btn-go mt-4 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold">
               {t.unlock}
             </Link>
           </section>

@@ -3,40 +3,61 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useMetron } from "@/components/useMetron";
-import { planOf } from "@/lib/store";
+import { planOf, baseline } from "@/lib/store";
 import { PRICE_P10 } from "@/lib/content/program";
+import { mmss } from "@/lib/format";
 import { track, tapped } from "@/lib/track";
 
 /**
- * The paywall — Section 5.3. Shown once Day 1 is done.
+ * The paywall — Section 16.4. Shown once, at the end of Day 1, with his
+ * number on screen. It sells the change of HIS number, not a feature list:
+ * the day rows are the real programme and curiosity does the work. The
+ * price anchor is true for this market. "Not tonight" names the delay as a
+ * choice. Nothing under the button.
  *
- * "Unlock Now" opens the existing Mobile Money checkout, which works today
- * on Fapshi's hosted form. The push flow and the manual-transfer fallback
- * from Section 8 replace it when the aggregator is confirmed (14.1); the
- * button's destination is the only thing that changes.
- *
- * "Maybe later" goes back to Today in the completed state. His Day 1 number
- * is his either way, and the page says so.
+ * "Open Day 2" opens the existing Mobile Money checkout. The push flow and
+ * the manual-transfer fallback (Section 8) replace its destination when the
+ * aggregator is confirmed; nothing on this screen changes.
  */
 
 const T = {
   en: {
-    h: "Unlock Days 2–10",
-    p: "Continue your journey and get access to the full 10-day challenge.",
-    bullets: ["Daily guided training sessions", "Expert lessons (text-based)", "Progress tracking", "Works on any phone", "One-time payment"],
-    cta: "Unlock Now →",
-    later: "Maybe later",
-    already: "You already have access.",
+    yourNumber: "Your number:",
+    stay: (n: string) => `Every day it stays ${n}, you're training it to stay there.`,
+    opposite: "Days 2–10 train the opposite.",
+    what: "What changes:",
+    rows: [
+      ["Day 2", "You learn to feel 6 — the last moment you still have a choice"],
+      ["Day 4", "You hold at 7 without gripping"],
+      ["Day 10", "You finish when you decide to"],
+      ["Day 12", "You measure again. Your number, next to this one."],
+    ],
+    price: (p: string) => `${p} — once. Less than one box of the pills that don't work.`,
+    cta: "Open Day 2 →",
+    later: "Not tonight",
+    already: "Day 2 is already open.",
     today: "Go to Today →",
+    noNumber: "Measure Day 1 first — the number is the point.",
+    day1: "Start Day 1 →",
   },
   fr: {
-    h: "Débloquer les jours 2–10",
-    p: "Continuez et accédez au défi 10 jours complet.",
-    bullets: ["Séances d'entraînement guidées chaque jour", "Leçons d'expert (en texte)", "Suivi de la progression", "Marche sur n'importe quel téléphone", "Paiement unique"],
-    cta: "Débloquer →",
-    later: "Plus tard",
-    already: "Vous avez déjà l'accès.",
+    yourNumber: "Votre chiffre :",
+    stay: (n: string) => `Chaque jour où il reste à ${n}, vous l'entraînez à y rester.`,
+    opposite: "Les jours 2 à 10 entraînent l'inverse.",
+    what: "Ce qui change :",
+    rows: [
+      ["Jour 2", "Vous apprenez à sentir 6 — le dernier moment où vous avez encore le choix"],
+      ["Jour 4", "Vous tenez à 7 sans serrer"],
+      ["Jour 10", "Vous finissez quand vous le décidez"],
+      ["Jour 12", "Vous mesurez à nouveau. Votre chiffre, à côté de celui-ci."],
+    ],
+    price: (p: string) => `${p} — une fois. Moins qu'une boîte des pilules qui ne marchent pas.`,
+    cta: "Ouvrir le jour 2 →",
+    later: "Pas ce soir",
+    already: "Le jour 2 est déjà ouvert.",
     today: "Aller à Aujourd'hui →",
+    noNumber: "Mesurez d'abord le jour 1 — le chiffre est le point de départ.",
+    day1: "Commencer le jour 1 →",
   },
 } as const;
 
@@ -51,6 +72,7 @@ export function UnlockClient({ locale }: { locale: string }) {
   }, [ready, locale]);
   if (!ready) return null;
 
+  const b = baseline(state);
   if (planOf(state) !== "free") {
     return (
       <div className="px-5 pt-10 text-center">
@@ -59,31 +81,47 @@ export function UnlockClient({ locale }: { locale: string }) {
       </div>
     );
   }
+  if (!b) {
+    // The paywall without a number is a feature list. He is sent to get one.
+    return (
+      <div className="px-5 pt-10 text-center">
+        <p className="text-white/70">{t.noNumber}</p>
+        <Link href={`${base}/day/1`} className="btn-go mt-5 inline-flex rounded-xl px-6 py-3.5 text-[15px] font-bold">{t.day1}</Link>
+      </div>
+    );
+  }
+  const n = mmss(b.seconds);
 
   return (
     <div className="px-5 pt-8">
-      <p className="text-center text-4xl" aria-hidden>🔒</p>
-      <h1 className="mt-4 text-center text-[1.6rem] font-bold leading-tight text-bone">{t.h}</h1>
-      <p className="mt-2 text-center text-[0.95rem] text-white/70">{t.p}</p>
+      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.yourNumber}</p>
+      <p className="metric mt-1 text-[3rem] font-bold leading-none text-bone">{n}</p>
 
-      <ul className="mx-auto mt-6 max-w-xs space-y-2">
-        {t.bullets.map((b) => (
-          <li key={b} className="flex gap-3 text-[0.95rem] text-white/85"><span className="text-jade">•</span>{b}</li>
+      <p className="mt-6 text-[1.05rem] font-semibold leading-snug text-bone">{t.stay(n)}</p>
+      <p className="mt-1 text-[1.05rem] font-semibold leading-snug text-jade">{t.opposite}</p>
+
+      <p className="mt-7 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.what}</p>
+      <ul className="mt-2 space-y-2">
+        {t.rows.map(([d, s]) => (
+          <li key={d} className="flex gap-3 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3">
+            <span className="metric w-14 shrink-0 text-[12px] font-bold uppercase tracking-wide text-jade">{d}</span>
+            <span className="text-[0.95rem] leading-snug text-bone">{s}</span>
+          </li>
         ))}
       </ul>
 
-      <div className="mx-auto mt-7 max-w-sm rounded-2xl border border-jade/50 bg-black/50 p-5 text-center">
-        <p className="metric text-[1.8rem] font-bold text-bone">{xaf(PRICE_P10)}</p>
+      <div className="mt-7 rounded-2xl border border-jade/50 bg-black/50 p-5">
+        <p className="text-[0.98rem] leading-snug text-bone">{t.price(xaf(PRICE_P10))}</p>
         <Link
           href={`/${locale}/offer?go=1`}
           onClick={() => tapped("unlock_now", locale, "p10")}
-          className="btn-go mt-3 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold"
+          className="btn-go mt-4 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold"
         >
           {t.cta}
         </Link>
       </div>
 
-      <Link href={base} onClick={() => tapped("unlock_later", locale, "p10")} className="mt-4 block text-center text-[14px] text-white/50">
+      <Link href={base} onClick={() => tapped("unlock_later", locale, "p10")} className="mt-5 block text-center text-[14px] text-white/50">
         {t.later}
       </Link>
     </div>

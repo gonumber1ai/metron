@@ -630,3 +630,9 @@ a[role="button"],
   .f-spot { display: block; }
   .c-spot-two { grid-template-columns: 1fr 1fr; gap: 22px; max-width: 760px; margin: 0 auto; }
 }
+
+/* 16.9 — the free step, sold as a dare. */
+.c-dare { margin: 18px auto 0; max-width: 800px; padding: 24px 22px; border: 1px solid rgb(212 175 55 / .35); border-radius: 22px; background: linear-gradient(135deg, #14110a, #030303 70%); text-align: center; }
+.c-dare-a { margin: 0; font-size: 1.55rem; font-weight: 900; line-height: 1.1; text-transform: uppercase; color: #fff; }
+.c-dare-b { margin: 8px 0 0; font-size: 1rem; line-height: 1.5; color: rgb(255 255 255 / .8); }
+.c-dare .c-cta { margin-top: 18px; }
