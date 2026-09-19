@@ -636,3 +636,6 @@ a[role="button"],
 .c-dare-a { margin: 0; font-size: 1.55rem; font-weight: 900; line-height: 1.1; text-transform: uppercase; color: #fff; }
 .c-dare-b { margin: 8px 0 0; font-size: 1rem; line-height: 1.5; color: rgb(255 255 255 / .8); }
 .c-dare .c-cta { margin-top: 18px; }
+
+/* homepage only — one line for the woman who found it for him */
+.c-partner-note { margin: 28px auto 0; max-width: 800px; padding: 0 22px; text-align: center; font-size: .95rem; color: rgb(255 255 255 / .6); }
