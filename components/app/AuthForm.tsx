@@ -114,7 +114,7 @@ export function AuthForm({ locale, mode }: { locale: string; mode: "signup" | "l
     if (!res.ok) {
       return setErr(j.error === "exists" ? t.errExists : j.error === "wrong" ? t.errWrong : j.error === "phone" ? t.errPhone : j.error === "password" ? t.errPw : t.errNet);
     }
-    await adoptAccount(j.uid, locale);
+    await adoptAccount(j.uid, locale, digits);
     // Brief 2, 2.4: nothing between signup and the setup screen.
     router.push(mode === "signup" ? `/${locale}/app/day/1` : `/${locale}/app`);
   });

@@ -11,7 +11,20 @@ import { load, save, emptyState, type State } from "@/lib/store";
  * baseline, his days and his markers back — and merge it over the local
  * state, preferring the server copy where both exist.
  */
-export async function adoptAccount(uid: string, locale: string): Promise<State> {
+/** The device remembers it is his: the id and the WhatsApp number he gave. */
+export const ACCOUNT_KEY = "metron.account";
+export type Account = { uid: string; phone: string };
+export function readAccount(): Account | null {
+  try {
+    const a = JSON.parse(window.localStorage.getItem(ACCOUNT_KEY) ?? "null");
+    return a && typeof a.uid === "string" ? a : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function adoptAccount(uid: string, locale: string, phone = ""): Promise<State> {
+  try { window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ uid, phone })); } catch {}
   const local = load(locale);
   let next: State = { ...local, ref: uid };
   try {
@@ -39,5 +52,6 @@ export async function adoptAccount(uid: string, locale: string): Promise<State> 
 }
 
 export function forgetAccount(locale: string) {
+  try { window.localStorage.removeItem(ACCOUNT_KEY); } catch {}
   save(emptyState(locale));
 }

@@ -14,6 +14,7 @@ import { Logo } from "@/components/Logo";
 import { MetaPixel } from "@/components/MetaPixel";
 import { Spinner, useAction } from "@/components/Pending";
 import { DeliveryStep, DELIVERY_KEY, type Delivery } from "@/components/DeliveryStep";
+import { readAccount } from "@/components/app/useAccount";
 import { useOffer } from "@/components/f/useOffer";
 import { FUNNELS, isFunnelId } from "@/lib/funnels";
 
@@ -74,6 +75,15 @@ export function OfferClient({
     let go = false;
     try { go = new URLSearchParams(window.location.search).get("go") === "1"; } catch {}
     if (!go) return;
+    /* He is already in the app and we have his WhatsApp number: there is
+       nothing to choose. Straight to the money, his number pre-filled. */
+    const acct = readAccount();
+    if (acct) {
+      setGiven({ choice: "app", phone: acct.phone });
+      track("delivery_pick", "account", locale);
+      setStage("pay");
+      return;
+    }
     try {
       const saved = JSON.parse(window.localStorage.getItem(DELIVERY_KEY) ?? "null");
       if (saved && saved.choice && (saved.choice !== "whatsapp" || /^6\d{8}$/.test(saved.phone))) {
@@ -83,7 +93,7 @@ export function OfferClient({
       }
     } catch {}
     setStage("deliver");
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [contact, setContact] = useState("");
   const [ref, setRef] = useState("");
 
