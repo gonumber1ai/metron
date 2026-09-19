@@ -20,16 +20,29 @@ export type Plan = "test" | "sprint";
 
 export type Gap = "today" | "yesterday" | "2plus";
 
+export type EstimateBucket = "u1" | "1_2" | "2_3" | "3_5" | "o5";
+
 export type Measurement = {
   /** 1 = baseline, 12 = retest, 30 = final */
   day: number;
-  /** total seconds */
+  /** total seconds — for an estimate, the midpoint of the bucket */
   seconds: number;
-  mode: Mode;
+  /** absent on an estimate (Brief 2, 1.1) */
+  mode?: Mode;
   /** how long since he last finished — the second setup question */
   gap?: Gap;
+  /**
+   * Brief 2: a man who cannot measure right now picks a bucket instead.
+   * An estimate is never a baseline and is never compared on Day 12 — every
+   * selector below that hands out "Day 1" skips it.
+   */
+  kind?: "estimate";
+  bucket?: EstimateBucket;
   at: string;
 };
+
+/** Brief 2, 2.2 — "Remind me tonight". Fired by WhatsApp once the API is on. */
+export type Reminder = { at: string; setAt: string };
 
 export type Markers = {
   erection: number;
@@ -85,6 +98,7 @@ export type State = {
   pinEnabled: boolean;
   quiz?: QuizResult;
   measurements: Measurement[];
+  reminder?: Reminder;
   markerLogs: MarkerLog[];
   sessions: SessionLog[];
   /** when each day was marked finished — the anti-rush clock, keyed by day */
@@ -159,7 +173,17 @@ export function clearAll(): void {
 /* ------------------------------------------------------------ selectors */
 
 export function baseline(s: State): Measurement | undefined {
-  return s.measurements.find((m) => m.day === 1);
+  return s.measurements.find((m) => m.day === 1 && m.kind !== "estimate");
+}
+
+/** The Day 1 estimate, if he took that path. Never a baseline. */
+export function estimate(s: State): Measurement | undefined {
+  return s.measurements.find((m) => m.day === 1 && m.kind === "estimate");
+}
+
+/** Which Day 1 path he is on right now. "real" wins once he has measured. */
+export function day1Path(s: State): "none" | "estimate" | "real" {
+  return baseline(s) ? "real" : estimate(s) ? "estimate" : "none";
 }
 
 export function retest(s: State): Measurement | undefined {
@@ -171,7 +195,7 @@ export function finalTest(s: State): Measurement | undefined {
 }
 
 export function latest(s: State): Measurement | undefined {
-  return [...s.measurements].sort((a, b) => b.day - a.day)[0];
+  return [...s.measurements].filter((m) => m.kind !== "estimate").sort((a, b) => b.day - a.day)[0];
 }
 
 export function sessionsFor(s: State, day: number): SessionLog[] {

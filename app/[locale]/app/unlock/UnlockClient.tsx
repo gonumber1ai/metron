@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useMetron } from "@/components/useMetron";
-import { planOf, baseline } from "@/lib/store";
+import { planOf, baseline, estimate } from "@/lib/store";
+import { aboutLabel } from "@/lib/estimate";
 import { PRICE_P10 } from "@/lib/content/program";
 import { mmss } from "@/lib/format";
 import { track, tapped } from "@/lib/track";
@@ -23,8 +24,11 @@ import { track, tapped } from "@/lib/track";
 const T = {
   en: {
     yourNumber: "Your number:",
+    yourGuess: "Your guess:",
     stay: (n: string) => `Every day it stays ${n}, you're training it to stay there.`,
+    stayGuess: "Every day it stays there, you're training it to stay there.",
     opposite: "Days 2–10 train the opposite.",
+    oppositeGuess: "Days 2–10 train the opposite. Day 1 tells you where you really start.",
     what: "What changes:",
     rows: [
       ["Day 2", "You learn to feel 6 — the last moment you still have a choice"],
@@ -42,8 +46,11 @@ const T = {
   },
   fr: {
     yourNumber: "Votre chiffre :",
+    yourGuess: "Votre estimation :",
     stay: (n: string) => `Chaque jour où il reste à ${n}, vous l'entraînez à y rester.`,
+    stayGuess: "Chaque jour où il reste là, vous l'entraînez à y rester.",
     opposite: "Les jours 2 à 10 entraînent l'inverse.",
+    oppositeGuess: "Les jours 2 à 10 entraînent l'inverse. Le jour 1 vous dit où vous partez vraiment.",
     what: "Ce qui change :",
     rows: [
       ["Jour 2", "Vous apprenez à sentir 6 — le dernier moment où vous avez encore le choix"],
@@ -68,11 +75,12 @@ export function UnlockClient({ locale }: { locale: string }) {
   const { state, ready } = useMetron(locale);
   const base = `/${locale}/app`;
   useEffect(() => {
-    if (ready) track("paywall_view", undefined, locale);
-  }, [ready, locale]);
+    if (ready) track("paywall_view", baseline(state) ? "real" : "estimate", locale);
+  }, [ready, locale]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!ready) return null;
 
   const b = baseline(state);
+  const e = estimate(state);
   if (planOf(state) !== "free") {
     return (
       <div className="px-5 pt-10 text-center">
@@ -81,7 +89,7 @@ export function UnlockClient({ locale }: { locale: string }) {
       </div>
     );
   }
-  if (!b) {
+  if (!b && !e) {
     // The paywall without a number is a feature list. He is sent to get one.
     return (
       <div className="px-5 pt-10 text-center">
@@ -90,15 +98,18 @@ export function UnlockClient({ locale }: { locale: string }) {
       </div>
     );
   }
-  const n = mmss(b.seconds);
+  // Brief 2, 1.4: on the estimate path the guess stands in for the number,
+  // and one extra clause sends him back for the real one.
+  const guess = !b && e;
+  const n = b ? mmss(b.seconds) : aboutLabel(e?.bucket, locale);
 
   return (
     <div className="px-5 pt-8">
-      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.yourNumber}</p>
-      <p className="metric mt-1 text-[3rem] font-bold leading-none text-bone">{n}</p>
+      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{guess ? t.yourGuess : t.yourNumber}</p>
+      <p className={`metric mt-1 font-bold leading-none text-bone ${guess ? "text-[1.9rem]" : "text-[3rem]"}`}>{n}</p>
 
-      <p className="mt-6 text-[1.05rem] font-semibold leading-snug text-bone">{t.stay(n)}</p>
-      <p className="mt-1 text-[1.05rem] font-semibold leading-snug text-jade">{t.opposite}</p>
+      <p className="mt-6 text-[1.05rem] font-semibold leading-snug text-bone">{guess ? t.stayGuess : t.stay(n)}</p>
+      <p className="mt-1 text-[1.05rem] font-semibold leading-snug text-jade">{guess ? t.oppositeGuess : t.opposite}</p>
 
       <p className="mt-7 text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">{t.what}</p>
       <ul className="mt-2 space-y-2">

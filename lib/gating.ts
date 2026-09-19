@@ -36,7 +36,7 @@ export type Progress = {
 export type DayState =
   | { state: "open" }
   | { state: "done"; at: string }
-  | { state: "locked"; reason: "pay" | "finish_today" | "wait"; opensAt?: number; needsDay?: number };
+  | { state: "locked"; reason: "pay" | "measure" | "finish_today" | "wait"; opensAt?: number; needsDay?: number };
 
 export function lastDayFor(plan: Plan): number {
   return plan === "p30" ? SPRINT_LAST_DAY : TEST_LAST_DAY;
@@ -72,7 +72,12 @@ export function opensAt(d: number, p: Progress): number | null {
     return at ? Date.parse(at) : null; // immediately, once bought
   }
   const at = p.completed[prevRow(d)];
-  return at ? Date.parse(at) + GAP_H * H : null;
+  if (!at) return null;
+  // Brief 2, 1.2: a man who estimated on Day 1 and measured later gets Day 2
+  // the moment he measures. The 18 hours only count from a Day 1 that
+  // included the measurement.
+  if (d === 2 && p.baselineAt && Date.parse(p.baselineAt) > Date.parse(at)) return Date.parse(p.baselineAt);
+  return Date.parse(at) + GAP_H * H;
 }
 
 export function dayState(d: number, plan: Plan, p: Progress, now = Date.now()): DayState {
@@ -80,6 +85,8 @@ export function dayState(d: number, plan: Plan, p: Progress, now = Date.now()): 
   if (d === 11) return { state: "locked", reason: "wait" };
   if (d >= 2 && plan === "free") return { state: "locked", reason: "pay" };
   if (d >= 13 && plan !== "p30") return { state: "locked", reason: "pay" };
+  // Brief 2, 1.2: paid on an estimate — Day 2 waits for the real number.
+  if (d >= 2 && !p.baselineAt) return { state: "locked", reason: "measure" };
   const t = opensAt(d, p);
   if (t === null) return { state: "locked", reason: "finish_today", needsDay: prevRow(d) };
   if (t > now) return { state: "locked", reason: "wait", opensAt: t };

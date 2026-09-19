@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useMetron } from "@/components/useMetron";
-import { planOf, toProgress, isDone, toggleTask, completeDay, baseline } from "@/lib/store";
+import { planOf, toProgress, isDone, toggleTask, completeDay, baseline, estimate } from "@/lib/store";
+import { aboutLabel } from "@/lib/estimate";
 import { currentDay, dayState, hoursUntil, canLogMarkers } from "@/lib/gating";
 import { getProgramDay, getProgram } from "@/lib/content/program";
 import { mmss } from "@/lib/format";
@@ -23,6 +24,11 @@ const T = {
     start: "Start today's session →",
     done: "Day 1 — done.",
     yourNumber: "Your number:",
+    yourGuess: "Your guess:",
+    reminder: (hhmm: string) => `Your measurement is set for ${hhmm} tonight.`,
+    doNow: "Do it now instead →",
+    measureToOpen: "Take your Day 1 measurement to open Day 2. About 5 minutes.",
+    measureNow: "Measure now →",
     locked2: "Day 2 is ready. It takes 15 minutes.",
     unlock: "Open Day 2 →",
     wait: (n: number) => `Tomorrow opens in ${n}h`,
@@ -39,6 +45,11 @@ const T = {
     start: "Commencer la séance du jour →",
     done: "Jour 1 — fait.",
     yourNumber: "Votre chiffre :",
+    yourGuess: "Votre estimation :",
+    reminder: (hhmm: string) => `Votre mesure est prévue à ${hhmm} ce soir.`,
+    doNow: "La faire maintenant →",
+    measureToOpen: "Faites votre mesure du jour 1 pour ouvrir le jour 2. Environ 5 minutes.",
+    measureNow: "Mesurer maintenant →",
     locked2: "Le jour 2 est prêt. Il prend 15 minutes.",
     unlock: "Ouvrir le jour 2 →",
     wait: (n: number) => `Demain s'ouvre dans ${n}h`,
@@ -68,7 +79,14 @@ export function TodayClient({ locale }: { locale: string }) {
 
   const ticks = d.tasks.map((task) => Boolean(task.fixed) || isDone(state, day, task.key));
   const n = ticks.filter(Boolean).length;
-  const day1Done = day === 1 && Boolean(baseline(state)) && Boolean(prog.completed[1]);
+  const b = baseline(state);
+  const e = estimate(state);
+  const day1Done = day === 1 && Boolean(b || e) && Boolean(prog.completed[1]);
+  // Brief 2, 1.2: paid on an estimate — one screen, no timer.
+  const needsMeasure = day1Done && plan !== "free" && !b;
+  // Brief 2, 2.2: he set a reminder and has not measured yet.
+  const rem = !b && !e && state.reminder && Date.parse(state.reminder.at) > Date.now() - 6 * 3_600_000 ? state.reminder : null;
+  const hhmm = rem ? new Date(rem.at).toLocaleTimeString(locale === "fr" ? "fr-FR" : "en-GB", { hour: "2-digit", minute: "2-digit" }) : "";
   const nextDay = day === 10 ? 12 : day + 1;
   const next = day1Done || day >= 30 ? null : dayState(nextDay, plan, prog);
   const mk = canLogMarkers(prog);
@@ -90,8 +108,12 @@ export function TodayClient({ locale }: { locale: string }) {
         <div>
           <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.day} {day}</p>
           <h1 className="mt-1 text-[1.5rem] font-bold leading-tight text-bone">{day1Done ? t.done : d.title}</h1>
-          {day1Done ? (
-            <p className="mt-2 text-[1.05rem] text-white/80">{t.yourNumber} <span className="metric text-[1.5rem] font-bold text-bone">{mmss(baseline(state)!.seconds)}</span></p>
+          {day1Done && b ? (
+            <p className="mt-2 text-[1.05rem] text-white/80">{t.yourNumber} <span className="metric text-[1.5rem] font-bold text-bone">{mmss(b.seconds)}</span></p>
+          ) : day1Done && e ? (
+            <p className="mt-2 text-[1.05rem] text-white/80">{t.yourGuess} <span className="metric text-[1.2rem] font-bold text-bone">{aboutLabel(e.bucket, locale)}</span></p>
+          ) : rem ? (
+            <p className="mt-2 text-[1.05rem] text-white/80">{t.reminder(hhmm)}</p>
           ) : (
             <p className="mt-1.5 text-[0.95rem] text-white/70">{d.focus}</p>
           )}
@@ -99,7 +121,18 @@ export function TodayClient({ locale }: { locale: string }) {
         <span className="metric text-[13px] text-white/40">{day1Done ? 3 : n}/3</span>
       </div>
 
-      {day1Done && plan === "free" ? (
+      {needsMeasure ? (
+        <section className="mt-6 rounded-2xl border border-jade/40 bg-black/50 p-5">
+          <p className="text-[1.05rem] font-bold text-bone">{t.measureToOpen}</p>
+          <Link href={`${base}/day/1`} className="btn-go mt-4 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold">
+            {t.measureNow}
+          </Link>
+        </section>
+      ) : rem ? (
+        <Link href={`${base}/day/1`} className="btn-go mt-6 flex w-full items-center justify-center rounded-xl px-5 py-4 text-[16px] font-bold">
+          {t.doNow}
+        </Link>
+      ) : day1Done && plan === "free" ? (
         <>
           {/* 16.5 — nothing else above the fold. */}
           <section className="mt-6 rounded-2xl border border-jade/40 bg-black/50 p-5">

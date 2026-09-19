@@ -66,7 +66,8 @@ export function AuthForm({ locale, mode }: { locale: string; mode: "signup" | "l
       return setErr(j.error === "exists" ? t.errExists : j.error === "wrong" ? t.errWrong : j.error === "phone" ? t.errPhone : j.error === "password" ? t.errPw : t.errNet);
     }
     await adoptAccount(j.uid, locale);
-    router.push(`/${locale}/app`);
+    // Brief 2, 2.4: nothing between signup and the setup screen.
+    router.push(mode === "signup" ? `/${locale}/app/day/1` : `/${locale}/app`);
   });
 
   const input = "w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-[17px] text-bone placeholder:text-white/35 focus:border-jade focus:outline-none";

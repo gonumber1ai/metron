@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const jar = await cookies();
   if (!verifyAdmin(jar.get(adminCookie)?.value)) return new NextResponse("Not found", { status: 404 });
 
-  let body: { ref?: string; channel?: "email" | "whatsapp"; email?: string; funnel?: string };
+  let body: { ref?: string; channel?: "email" | "whatsapp"; email?: string; funnel?: string; locale?: string };
   try {
     body = await req.json();
   } catch {
@@ -47,21 +47,45 @@ export async function POST(req: Request) {
 
   const offer = await getOffer(ref);
   const funnelId = offer?.funnel.id ?? (isFunnelId(body.funnel) ? body.funnel : null);
-  if (!funnelId) return NextResponse.json({ ok: false, error: "no funnel for this contact" }, { status: 400 });
+  const lang: "en" | "fr" = funnelId ? FUNNELS[funnelId].lang : body.locale === "fr" ? "fr" : "en";
 
   const log = async (status: string, detail?: string) => {
-    await client.from("recovery").insert({ ref, funnel: funnelId, channel, status, detail: detail ?? null });
+    await client.from("recovery").insert({ ref, funnel: funnelId ?? "none", channel, status, detail: detail ?? null });
   };
 
-  // Paid: stop.
-  const { data: paid } = await client.from("payments").select("id").eq("ref", ref).eq("status", "paid").limit(1);
-  if (paid && paid.length > 0) {
+  // Brief 2: his Day 1 story decides the message. Measured: nothing, ever.
+  const { data: d1 } = await client
+    .from("events")
+    .select("name, created_at")
+    .eq("ref", ref)
+    .in("name", ["signup", "day1_estimate", "day1_measured"])
+    .order("created_at", { ascending: true })
+    .limit(50);
+  const first = (n: string) => (d1 ?? []).find((e: { name: string; created_at: string }) => e.name === n)?.created_at ?? null;
+  const signedUpAt = first("signup"), estimatedAt = first("day1_estimate"), measuredAt = first("day1_measured");
+  if (measuredAt && signedUpAt) {
+    await log("suppressed", "already measured");
+    return NextResponse.json({ ok: false, error: "he has measured — nothing to recover" });
+  }
+
+  // Paid: stop — unless he paid on an estimate and still owes Day 1 its number.
+  const { data: paid } = await client.from("payments").select("created_at").eq("ref", ref).eq("status", "paid").order("created_at", { ascending: true }).limit(1);
+  const paidAt = paid?.[0]?.created_at ?? null;
+  const paidUnmeasured = Boolean(paidAt && estimatedAt && !measuredAt);
+  if (paidAt && !paidUnmeasured) {
     await log("suppressed", "already paid");
     return NextResponse.json({ ok: false, error: "already paid — no message sent" });
   }
-  if (offer && (offer.status === "paid" || offer.status === "recovered")) {
+  if (!paidUnmeasured && offer && (offer.status === "paid" || offer.status === "recovered")) {
     await log("suppressed", "offer closed");
     return NextResponse.json({ ok: false, error: "already paid — no message sent" });
+  }
+
+  // Brief 2, Section 3: two per branch, then silence.
+  const { count: sentSoFar } = await client.from("recovery").select("id", { count: "exact", head: true }).eq("ref", ref).eq("status", "sent");
+  if (signedUpAt && (sentSoFar ?? 0) >= 2) {
+    await log("suppressed", "two already sent");
+    return NextResponse.json({ ok: false, error: "two messages already went out — no third" });
   }
 
   // Frequency cap: one per channel per 24h.
@@ -80,15 +104,15 @@ export async function POST(req: Request) {
   }
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
-  const f = FUNNELS[funnelId];
   const stub: Contact = {
-    ref, name: null, phone: null, email: body.email ?? null, locale: f.lang,
+    ref, name: null, phone: null, email: body.email ?? null, locale: lang,
     funnel: funnelId, firstFunnel: funnelId, campaign: null, firstSeen: "", lastSeen: "",
     sessions: 0, returned: 0, status: "recovery_eligible", paidMinor: 0, offer: null,
-    recovery: { email: 0, whatsapp: 0, popup: 0 }, lastRecoveryAt: null, events: [],
+    recovery: { email: 0, whatsapp: sentSoFar ?? 0, popup: 0 }, lastRecoveryAt: null, events: [],
+    signedUpAt, estimatedAt, measuredAt, paidAt, day1: measuredAt ? "real" : estimatedAt ? "estimate" : "none",
   };
   const msg = recoveryMessage(stub, origin);
-  if (!msg) return NextResponse.json({ ok: false, error: "could not build message" }, { status: 500 });
+  if (!msg) return NextResponse.json({ ok: false, error: funnelId ? "could not build message" : "no funnel for this contact" }, { status: 400 });
 
   if (channel === "email") {
     const to = (body.email ?? "").trim();
@@ -105,7 +129,7 @@ export async function POST(req: Request) {
 
   await log("sent", channel === "whatsapp" ? "by hand" : undefined);
   await client.from("events").insert({
-    ref, name: "recovery_sent", detail: channel, funnel: funnelId, locale: f.lang, eid: `rec-${ref}-${channel}-${Date.now()}`,
+    ref, name: "recovery_sent", detail: channel, funnel: funnelId, locale: lang, eid: `rec-${ref}-${channel}-${Date.now()}`,
   });
   return NextResponse.json({ ok: true, url: msg.url });
 }

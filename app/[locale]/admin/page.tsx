@@ -111,7 +111,7 @@ export default async function AdminPage() {
 
     if (!uRows.error) {
       type U = { id: string; phone: string; lang: string; created_at: string };
-      type P = { ref: string; plan: string | null; day: number; measurements: { day: number; seconds: number; at: string }[]; markers: { at: string; markers: Record<string, number> }[] };
+      type P = { ref: string; plan: string | null; day: number; measurements: { day: number; seconds: number; at: string; kind?: string }[]; markers: { at: string; markers: Record<string, number> }[] };
       type Pay = { ref: string; plan: string; amount_minor: number };
       const prog = new Map<string, P>();
       for (const r of (uProgress.data ?? []) as P[]) prog.set(r.ref, r);
@@ -122,7 +122,7 @@ export default async function AdminPage() {
         const pays = paid.get(u.id) ?? [];
         const plans = pays.map((x) => x.plan);
         const plan: UserView["plan"] = plans.includes("sprint") ? "p30" : plans.includes("test") ? "p10" : "free";
-        const m = (d: number) => p?.measurements?.find((x) => x.day === d)?.seconds ?? null;
+        const m = (d: number) => p?.measurements?.find((x) => x.day === d && x.kind !== "estimate")?.seconds ?? null;
         const marks = (p?.markers ?? []).map((x) => ({ at: x.at, ...(x.markers as { erection: number; energy: number; sleep: number; control: number; libido?: number; stress?: number; stomach?: number }) }));
         return {
           id: u.id, phone: u.phone, lang: u.lang, createdAt: u.created_at, plan,

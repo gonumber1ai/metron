@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Contact, FunnelStats, Status } from "@/lib/crm";
-import { FUNNELS, TIERS, isFunnelId } from "@/lib/funnels";
+import { recoveryMessage, type Contact, type FunnelStats, type Status } from "@/lib/crm";
+import { FUNNELS, isFunnelId } from "@/lib/funnels";
 
 /**
  * The CRM tab: the four funnels side by side, then every contact, then any
@@ -17,6 +17,7 @@ const STATUS_LABEL: Record<Status, string> = {
   new: "New",
   engaged: "Engaged",
   lead: "Lead",
+  signed_up: "Signed up, no Day 1",
   checkout_started: "Checkout started",
   payment_pending: "USSD sent",
   recovery_eligible: "Recovery window",
@@ -27,6 +28,7 @@ const STATUS_TONE: Record<Status, string> = {
   new: "text-faint",
   engaged: "text-mute",
   lead: "text-bone",
+  signed_up: "text-amber",
   checkout_started: "text-bone",
   payment_pending: "text-amber",
   recovery_eligible: "text-alert",
@@ -72,7 +74,7 @@ export function Crm({
       const res = await fetch("/api/admin/recovery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: c.ref, channel, email: c.email, funnel: c.funnel ?? c.firstFunnel }),
+        body: JSON.stringify({ ref: c.ref, channel, email: c.email, funnel: c.funnel ?? c.firstFunnel, locale: c.locale }),
       });
       const j = await res.json();
       setNote(j.ok ? `${channel === "email" ? "Email sent" : "Marked sent"} — ${c.ref.slice(0, 8)}` : `Not sent: ${j.error}`);
@@ -84,16 +86,10 @@ export function Crm({
   }
 
   function waLink(c: Contact): string | null {
-    const id = c.funnel ?? c.firstFunnel;
-    if (!c.phone || !id) return null;
-    const f = FUNNELS[id];
-    const t = TIERS[f.tier];
-    const url = `${typeof location !== "undefined" ? location.origin : ""}/${f.lang}/offer?go=1&lc=1&ref=${c.ref}`;
-    const text =
-      f.lang === "fr"
-        ? `Vous êtes revenu ! Votre offre METRON est encore ouverte : le Défi 10 jours à ${fcfa(t.offer)} au lieu de ${fcfa(t.full)}, une dernière fois. Retrouvez votre programme ici : ${url}`
-        : `Welcome back! Your METRON offer is still open: the 10-Day Challenge at ${fcfa(t.offer)} instead of ${fcfa(t.full)}, one last time. Continue here: ${url}`;
-    return `https://wa.me/237${c.phone}?text=${encodeURIComponent(text)}`;
+    if (!c.phone) return null;
+    const msg = recoveryMessage(c, typeof location !== "undefined" ? location.origin : "");
+    if (!msg) return null;
+    return `https://wa.me/237${c.phone}?text=${encodeURIComponent(msg.text)}`;
   }
 
   if (!ready) {
@@ -166,6 +162,52 @@ export function Crm({
         </div>
       </section>
 
+      {/* ---------------------------------------- Brief 2: signed up, didn't measure */}
+      <section className="rounded-2xl card p-5">
+        <h2 className="text-[0.95rem] font-bold text-bone">Day 1 — signed up, didn't measure</h2>
+        <p className="mt-0.5 mb-4 text-[12px] text-faint">
+          Accounts, by the funnel they first landed on. Measured is the real number only. Paywall and Paid split by the
+          path he was on at that moment. If most men never reach the paywall by either path, fix the first screen after
+          signup, not the paywall.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[980px] text-left text-[0.86rem]">
+            <thead>
+              <tr className="text-[11px] uppercase tracking-wide text-faint">
+                {["Funnel", "Signups", "Measured", "Estimated", "Reminders", "Paywall · real", "Paywall · est.", "Paid · real", "Paid · est.", "Measured after pay"].map((h) => (
+                  <th key={h} className="pb-2 pr-3 font-bold">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {funnels.map((f) => {
+                const all = f.id === "all";
+                const cell = (v: number, d?: number, tone = "text-bone") => (
+                  <td className="metric py-2.5 pr-3">
+                    <span className={tone}>{v}</span>
+                    {d !== undefined && <span className="ml-1 text-[11px] text-faint">{pct(v, d)}</span>}
+                  </td>
+                );
+                return (
+                  <tr key={`d1-${f.id}`} className={`border-t border-ink-700 ${all ? "border-t-2 border-ink-600 font-bold" : ""}`}>
+                    <td className="py-2.5 pr-3 text-bone">{f.name}</td>
+                    {cell(f.signups)}
+                    {cell(f.day1Measured, f.signups, "text-jade")}
+                    {cell(f.day1Estimated, f.signups)}
+                    {cell(f.reminders, f.signups)}
+                    {cell(f.paywallReal, f.signups)}
+                    {cell(f.paywallEstimate, f.signups)}
+                    {cell(f.paidReal, f.paywallReal, "text-jade font-bold")}
+                    {cell(f.paidEstimate, f.paywallEstimate, "text-jade font-bold")}
+                    {cell(f.measuredAfterPay, f.paidEstimate)}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       {/* ------------------------------------------------------ contacts */}
       <section className="rounded-2xl card p-5">
         <div className="flex flex-wrap items-end gap-3">
@@ -230,7 +272,7 @@ export function Crm({
                       </td>
                       <td className="metric py-2.5 pr-3 text-jade">{c.paidMinor ? fcfa(c.paidMinor) : "—"}</td>
                       <td className="py-2.5 pr-3 text-[12px]" onClick={(e) => e.stopPropagation()}>
-                        {c.paidMinor > 0 ? (
+                        {c.paidMinor > 0 && c.day1 !== "estimate" ? (
                           <span className="text-faint">paid</span>
                         ) : (
                           <span className="flex flex-wrap items-center gap-2">

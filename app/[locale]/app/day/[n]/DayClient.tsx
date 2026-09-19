@@ -3,25 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMetron } from "@/components/useMetron";
-import { planOf, toProgress, toggleTask, completeDay, baseline, type Mode, type Gap } from "@/lib/store";
+import { planOf, toProgress, toggleTask } from "@/lib/store";
 import { dayState } from "@/lib/gating";
 import { getProgramDay, getProgram } from "@/lib/content/program";
-import { mmss } from "@/lib/format";
 import { Retest } from "./Retest";
-import { MeasureTimer } from "@/components/MeasureTimer";
+import { Day1 } from "./Day1";
 import { track } from "@/lib/track";
 
 /**
  * A day, run. Two shapes:
  *
- *   Day 1 — Section 5.2. Four steps, one flow, "n/4": breathe, set up the
- *   measurement, take it, read what the number means. Ends at the paywall,
- *   not at Today. No 18-hour lock for a free man.
+ *   Day 1 — Section 5.2 as amended by Brief 2, in ./Day1.tsx. Ends at the
+ *   paywall, not at Today. No 18-hour lock for a free man.
  *
  *   Days 2+ — Section 5.6. Lesson if there is one, two minutes of breathing,
  *   the session block from the source with an elapsed timer, then Complete.
  *
- * The number is mandatory. Day 1 does not end without a saved baseline.
+ * Days 12 and 30 are the retest, in ./Retest.tsx.
  */
 
 const T = {
@@ -29,32 +27,9 @@ const T = {
     of: (n: number, total: number) => `${n}/${total}`,
     skip: "Skip",
     breatheH: "Breathe. Relax. Get ready.",
-    breatheP: "A short breathing exercise to help you relax and be more aware of your body before your measurement.",
     breathe2P: "Two minutes. In through the nose for four, out through the mouth for six.",
     inhale: "Inhale", hold: "Hold", exhale: "Exhale",
-    nextMeasure: "Next: Measurement →",
-    setupH: "Your measurement",
-    setupP: "Answer these two quick questions before you start. This helps you compare fairly on Day 12.",
-    how: "How did you do it?", solo: "On my own (solo)", partner: "With a partner",
-    since: "How long since you last finished?", today: "Today", yesterday: "Yesterday", twoPlus: "2+ days",
-    setupInfo: "For the most accurate comparison on Day 12, use the same conditions.",
     cont: "Continue →",
-    timerP: "Do it normally. Don't hold back. Don't use any technique.",
-    timerInfo: "This is not a test. It's your starting point. An honest number helps you see real progress.",
-    numberH: "Your number today",
-    thats: "That's your number today.",
-    notJudge: "It's not a judgment. It's the thing you're going to change.",
-    method: "Method", last: "Last time",
-    nextMeans: (n: string) => `Why it's ${n} →`,
-    close: (n: string) => [
-      `You finish at ${n} because you notice you're close at 9. By then it's already decided.`,
-      "Men who last notice at 6. That's not talent. It's a skill, and it's trained in about 15 minutes a day.",
-      "Day 2 is where you learn to feel 6.",
-    ],
-    openDay2: "Open Day 2 →",
-    meansH: "Why you finish when you do",
-    scaleStop: "your stop", scaleLate: "too late",
-    toPaywall: "Continue →",
     lessonRead: "Mark as read →",
     sessionH: "The session",
     duration: "Duration", ceiling: "Ceiling", cycles: "Cycles", ending: "Ending", guard: "If it goes wrong",
@@ -67,32 +42,9 @@ const T = {
     of: (n: number, total: number) => `${n}/${total}`,
     skip: "Passer",
     breatheH: "Respirez. Détendez-vous. Préparez-vous.",
-    breatheP: "Un court exercice de respiration pour vous détendre et être plus à l'écoute de votre corps avant la mesure.",
     breathe2P: "Deux minutes. Inspirez par le nez sur quatre, expirez par la bouche sur six.",
     inhale: "Inspirez", hold: "Retenez", exhale: "Expirez",
-    nextMeasure: "Suite : Mesure →",
-    setupH: "Votre mesure",
-    setupP: "Répondez à ces deux questions rapides avant de commencer. Elles servent à comparer honnêtement au jour 12.",
-    how: "Comment l'avez-vous fait ?", solo: "Seul", partner: "Avec une partenaire",
-    since: "Depuis combien de temps avez-vous fini pour la dernière fois ?", today: "Aujourd'hui", yesterday: "Hier", twoPlus: "2 jours ou plus",
-    setupInfo: "Pour la comparaison la plus juste au jour 12, gardez les mêmes conditions.",
     cont: "Continuer →",
-    timerP: "Faites-le normalement. Ne vous retenez pas. N'utilisez aucune technique.",
-    timerInfo: "Ce n'est pas un test. C'est votre point de départ. Un chiffre honnête vous permet de voir de vrais progrès.",
-    numberH: "Votre chiffre aujourd'hui",
-    thats: "C'est votre chiffre aujourd'hui.",
-    notJudge: "Ce n'est pas un jugement. C'est la chose que vous allez changer.",
-    method: "Méthode", last: "Dernière fois",
-    nextMeans: (n: string) => `Pourquoi c'est ${n} →`,
-    close: (n: string) => [
-      `Vous finissez à ${n} parce que vous remarquez que vous êtes proche à 9. À ce moment-là, c'est déjà décidé.`,
-      "Les hommes qui tiennent le remarquent à 6. Ce n'est pas un talent. C'est une compétence, et elle s'entraîne en 15 minutes par jour environ.",
-      "Le jour 2, vous apprenez à sentir 6.",
-    ],
-    openDay2: "Ouvrir le jour 2 →",
-    meansH: "Pourquoi vous finissez quand vous finissez",
-    scaleStop: "votre arrêt", scaleLate: "trop tard",
-    toPaywall: "Continuer →",
     lessonRead: "Marquer comme lu →",
     sessionH: "La séance",
     duration: "Durée", ceiling: "Plafond", cycles: "Cycles", ending: "Fin", guard: "Si ça dérape",
@@ -162,11 +114,7 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
   const router = useRouter();
   const { state, ready, mutate } = useMetron(locale);
   const [step, setStep] = useState(0);
-  const [mode, setMode] = useState<Mode | null>(null);
-  const [gap, setGap] = useState<Gap | null>(null);
-  const [seconds, setSeconds] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState<number | null>(null);
-  const [readDone, setReadDone] = useState(false);
 
   const d = getProgramDay(locale, day);
   const lesson = d?.lesson ? getProgram(locale).lessons.find((l) => l.slug === d.lesson) : undefined;
@@ -213,96 +161,7 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
   }
 
   /* ═══════════════════════════════════════════════════════ DAY 1 ═══ */
-  if (day === 1) {
-    const total = 4;
-    const finish = () => {
-      // Section 5.2: the free flow ends at the paywall, not at Today.
-      mutate((s) => {
-        let out = s;
-        for (const k of ["session", "sleep", "markers"]) if (!out.done["1"]?.includes(k) && k === "session") out = toggleTask(out, 1, k);
-        if (!out.dayCompletedAt["1"]) out = completeDay(out, 1, 30);
-        return out;
-      });
-      track("day1_lesson_done", undefined, locale);
-      router.push(`${base}/unlock`);
-    };
-    return (
-      <div className="px-5 pt-5">
-        {step === 0 && (
-          <>
-            <Bar n={1} total={total} />
-            <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.breatheH}</h1>
-            <p className="mt-2 text-[0.95rem] text-white/70">{t.breatheP}</p>
-            <Breath seconds={180} labels={{ inhale: t.inhale, hold: t.hold, exhale: t.exhale }} onDone={() => track("day1_breathing_done", undefined, locale)} />
-            <Btn label={t.nextMeasure} onClick={() => setStep(1)} />
-            <Btn label={t.skip} ghost onClick={() => setStep(1)} />
-          </>
-        )}
-        {step === 1 && (
-          <>
-            <Bar n={2} total={total} />
-            <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.setupH}</h1>
-            <p className="mt-2 text-[0.95rem] text-white/70">{t.setupP}</p>
-            <p className="mt-6 text-[12px] font-bold uppercase tracking-wide text-white/50">{t.how}</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {(["solo", "partner"] as Mode[]).map((m) => (
-                <button key={m} type="button" onClick={() => setMode(m)} className={`rounded-xl border px-3 py-3 text-[0.95rem] font-semibold ${mode === m ? "border-jade bg-jade-050 text-bone" : "border-white/12 text-white/75"}`}>{m === "solo" ? t.solo : t.partner}</button>
-              ))}
-            </div>
-            <p className="mt-5 text-[12px] font-bold uppercase tracking-wide text-white/50">{t.since}</p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {(["today", "yesterday", "2plus"] as Gap[]).map((g) => (
-                <button key={g} type="button" onClick={() => setGap(g)} className={`rounded-xl border px-2 py-3 text-[0.9rem] font-semibold ${gap === g ? "border-jade bg-jade-050 text-bone" : "border-white/12 text-white/75"}`}>{g === "today" ? t.today : g === "yesterday" ? t.yesterday : t.twoPlus}</button>
-              ))}
-            </div>
-            <p className="mt-4 text-[0.85rem] text-white/50">{t.setupInfo}</p>
-            {mode && gap && <Btn label={t.cont} onClick={() => { track("day1_measure_setup", `${mode}/${gap}`, locale); setStep(2); }} />}
-          </>
-        )}
-        {step === 2 && (
-          <>
-            <Bar n={3} total={total} />
-            <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.setupH}</h1>
-            <p className="mt-2 text-[0.95rem] text-white/70">{t.timerP}</p>
-            <MeasureTimer
-              locale={locale}
-              onDone={(secs) => {
-                setSeconds(secs);
-                mutate((s) => ({ ...s, measurements: [...s.measurements.filter((m) => m.day !== 1), { day: 1, seconds: secs, mode: mode!, gap: gap!, at: new Date().toISOString() }] }));
-                track("day1_measured", String(secs), locale);
-                setStep(3);
-              }}
-            />
-            <p className="mt-4 text-[0.85rem] text-white/50">{t.timerInfo}</p>
-          </>
-        )}
-        {step === 3 && seconds !== null && !readDone && (
-          <>
-            <Bar n={4} total={total} />
-            <p className="mt-6 text-[12px] font-bold uppercase tracking-[0.18em] text-jade">{t.numberH}</p>
-            <p className="metric mt-1 text-[3.2rem] font-bold leading-none text-bone">{mmss(seconds)}</p>
-            <p className="mt-3 text-[1.05rem] font-bold text-bone">{t.thats}</p>
-            <p className="mt-1 text-[0.95rem] text-white/70">{t.notJudge}</p>
-            <dl className="mt-5 grid grid-cols-2 gap-3 text-[0.9rem]">
-              <div className="rounded-xl border border-white/10 p-3"><dt className="text-white/50">{t.method}</dt><dd className="font-semibold text-bone">{mode === "solo" ? t.solo : t.partner}</dd></div>
-              <div className="rounded-xl border border-white/10 p-3"><dt className="text-white/50">{t.last}</dt><dd className="font-semibold text-bone">{gap === "today" ? t.today : gap === "yesterday" ? t.yesterday : t.twoPlus}</dd></div>
-            </dl>
-            <Btn label={t.nextMeans(mmss(seconds))} onClick={() => setReadDone(true)} />
-          </>
-        )}
-        {step === 3 && readDone && (
-          <>
-            <Bar n={4} total={total} />
-            <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.meansH}</h1>
-            <Scale stop={t.scaleStop} late={t.scaleLate} />
-            {lesson?.body.slice(0, 4).map((p, i) => <p key={i} className="mt-3 text-[0.98rem] leading-relaxed text-white/80">{p}</p>)}
-            {t.close(mmss(seconds!)).map((p, i) => <p key={`c${i}`} className="mt-3 text-[1rem] font-semibold leading-relaxed text-bone">{p}</p>)}
-            <Btn label={t.openDay2} onClick={finish} />
-          </>
-        )}
-      </div>
-    );
-  }
+  if (day === 1) return <Day1 locale={locale} Breath={Breath} Scale={Scale} />;
 
   /* ═════════════════════════════════════════════════ DAYS 2+ ═══ */
   const steps = [lesson ? "lesson" : null, "breathe", d.session ? "session" : null].filter(Boolean) as string[];
