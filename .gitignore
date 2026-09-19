@@ -48,3 +48,4 @@ dev.log
 
 # agent scratch
 *.tsbuildinfo
+content-dump.*.md
