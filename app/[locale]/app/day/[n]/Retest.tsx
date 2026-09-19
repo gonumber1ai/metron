@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMetron } from "@/components/useMetron";
-import { baseline, retest, toggleTask, completeDay, type Mode, type Gap, type Measurement } from "@/lib/store";
+import { baseline, retest, toggleTask, completeDay, type Measurement } from "@/lib/store";
 import { PRICE_P30 } from "@/lib/content/program";
 import { mmss } from "@/lib/format";
 import { MeasureTimer } from "@/components/MeasureTimer";
@@ -13,10 +13,10 @@ import { track, tapped } from "@/lib/track";
 /**
  * Day 12 and Day 30 — Section 5.8 and 16.8.
  *
- * The same four steps as Day 1 minus the scale lesson. Then the two numbers
- * side by side with their conditions; one calm line if the conditions
- * differ, and no blocking. Then the one yes/no, the result lesson, and — on
- * Day 12 — the 30-day sale with both numbers on screen.
+ * START → STOP, then the two times side by side. One question after the
+ * measurement — "Same conditions as Day 1?" — and one calm line if not,
+ * never a block. Then the yes/no on extra sessions, the result lesson, and
+ * on Day 12 the 30-day sale with both numbers on screen.
  *
  * ── THE SALE FOLLOWS THE NUMBER ───────────────────────────────────────────
  * Number moved: the standard copy. Number did not move but the markers did:
@@ -27,15 +27,11 @@ import { track, tapped } from "@/lib/track";
 
 const T = {
   en: {
-    breatheH: "Breathe. Relax. Get ready.", breatheP: "Same as Day 1. Three minutes.", inhale: "Inhale", hold: "Hold", exhale: "Exhale",
-    next: "Next: Measurement →", skip: "Skip",
-    setupH: "Your measurement", setupP: "Same two questions as Day 1. Answer them the same way if you can.",
-    how: "How did you do it?", solo: "On my own (solo)", partner: "With a partner",
-    since: "How long since you last finished?", today: "Today", yesterday: "Yesterday", twoPlus: "2+ days",
-    cont: "Continue →",
+    measureH: "Time how long you last",
     timerP: "Do it normally. Don't hold back. Don't use any technique — you are measuring what your body does by itself now.",
-    d1: "Day 1", d12: "Day 12", d30: "Day 30", method: "Method", last: "Last time",
-    loose: "Your conditions were different from Day 1, so read this comparison loosely.",
+    d1: "Day 1", d12: "Day 12", d30: "Day 30", solo: "Alone", partner: "With a partner",
+    same: "Same conditions as Day 1?", sameYes: "Yes", sameNo: "Not really",
+    loose: "Different conditions, so read this comparison loosely.",
     extra: "Did you do sessions outside the plan?", yes: "Yes", no: "No",
     readResult: "Read: How to read your result →",
     // 16.8
@@ -49,15 +45,11 @@ const T = {
     toToday: "Go to Today →",
   },
   fr: {
-    breatheH: "Respirez. Détendez-vous. Préparez-vous.", breatheP: "Comme le jour 1. Trois minutes.", inhale: "Inspirez", hold: "Retenez", exhale: "Expirez",
-    next: "Suite : Mesure →", skip: "Passer",
-    setupH: "Votre mesure", setupP: "Les deux mêmes questions que le jour 1. Répondez de la même façon si vous le pouvez.",
-    how: "Comment l'avez-vous fait ?", solo: "Seul", partner: "Avec une partenaire",
-    since: "Depuis combien de temps avez-vous fini pour la dernière fois ?", today: "Aujourd'hui", yesterday: "Hier", twoPlus: "2 jours ou plus",
-    cont: "Continuer →",
+    measureH: "Chronométrez combien de temps vous tenez",
     timerP: "Faites-le normalement. Ne vous retenez pas. N'utilisez aucune technique — vous mesurez ce que votre corps fait tout seul maintenant.",
-    d1: "Jour 1", d12: "Jour 12", d30: "Jour 30", method: "Méthode", last: "Dernière fois",
-    loose: "Vos conditions étaient différentes du jour 1, donc lisez cette comparaison avec prudence.",
+    d1: "Jour 1", d12: "Jour 12", d30: "Jour 30", solo: "Seul", partner: "Avec une partenaire",
+    same: "Mêmes conditions que le jour 1 ?", sameYes: "Oui", sameNo: "Pas vraiment",
+    loose: "Conditions différentes, donc lisez cette comparaison avec prudence.",
     extra: "Avez-vous fait des séances en dehors du plan ?", yes: "Oui", no: "Non",
     readResult: "Lire : Comment lire votre résultat →",
     didThis: "Voilà ce que 10 jours ont fait, seul.",
@@ -81,19 +73,17 @@ function markersMoved(logs: { markers: { erection: number; energy: number; sleep
   return avg(logs.slice(-k)) - avg(logs.slice(0, k)) >= 0.5;
 }
 
-export function Retest({ locale, day, Breath, Bar, Btn }: {
+export function Retest({ locale, day, Bar, Btn }: {
   locale: string;
   day: 12 | 30;
-  Breath: React.ComponentType<{ seconds: number; labels: { inhale: string; hold: string; exhale: string }; onDone: () => void }>;
   Bar: React.ComponentType<{ n: number; total: number }>;
   Btn: React.ComponentType<{ label: string; onClick: () => void; ghost?: boolean }>;
 }) {
   const t = T[locale === "fr" ? "fr" : "en"];
   const router = useRouter();
   const { state, mutate } = useMetron(locale);
-  const [step, setStep] = useState(0);
-  const [mode, setMode] = useState<Mode | null>(null);
-  const [gap, setGap] = useState<Gap | null>(null);
+  const [step, setStep] = useState<0 | 3>(0);
+  const [same, setSame] = useState<boolean | null>(null);
   const [now, setNow] = useState<Measurement | null>(null);
   const [extra, setExtra] = useState<boolean | null>(null);
   const base = `/${locale}/app`;
@@ -105,7 +95,7 @@ export function Retest({ locale, day, Breath, Bar, Btn }: {
   }, [step, day, locale]);
 
   const save = (secs: number) => {
-    const m: Measurement = { day, seconds: secs, mode: mode!, gap: gap!, at: new Date().toISOString() };
+    const m: Measurement = { day, seconds: secs, mode: prior?.mode, at: new Date().toISOString() };
     setNow(m);
     mutate((s) => {
       let out = { ...s, measurements: [...s.measurements.filter((x) => x.day !== day), m] };
@@ -127,53 +117,34 @@ export function Retest({ locale, day, Breath, Bar, Btn }: {
     router.push(base);
   };
 
-  const label = (g: Gap | undefined) => (g === "today" ? t.today : g === "yesterday" ? t.yesterday : t.twoPlus);
-  const differ = now && prior && (now.mode !== prior.mode || (now.gap && prior.gap && now.gap !== prior.gap));
+  const differ = same === false;
   const moved = now && prior ? now.seconds > prior.seconds : false;
   const mk = markersMoved(state.markerLogs);
 
   return (
     <div className="px-5 pt-5">
       {step === 0 && (<>
-        <Bar n={1} total={3} />
-        <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.breatheH}</h1>
-        <p className="mt-2 text-[0.95rem] text-white/70">{t.breatheP}</p>
-        <Breath seconds={180} labels={{ inhale: t.inhale, hold: t.hold, exhale: t.exhale }} onDone={() => {}} />
-        <Btn label={t.next} onClick={() => setStep(1)} />
-        <Btn label={t.skip} ghost onClick={() => setStep(1)} />
-      </>)}
-      {step === 1 && (<>
-        <Bar n={2} total={3} />
-        <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.setupH}</h1>
-        <p className="mt-2 text-[0.95rem] text-white/70">{t.setupP}</p>
-        <p className="mt-6 text-[12px] font-bold uppercase tracking-wide text-white/50">{t.how}</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {(["solo", "partner"] as Mode[]).map((m) => (
-            <button key={m} type="button" onClick={() => setMode(m)} className={`rounded-xl border px-3 py-3 text-[0.95rem] font-semibold ${mode === m ? "border-jade bg-jade-050 text-bone" : "border-white/12 text-white/75"}`}>{m === "solo" ? t.solo : t.partner}</button>
-          ))}
-        </div>
-        <p className="mt-5 text-[12px] font-bold uppercase tracking-wide text-white/50">{t.since}</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {(["today", "yesterday", "2plus"] as Gap[]).map((g) => (
-            <button key={g} type="button" onClick={() => setGap(g)} className={`rounded-xl border px-2 py-3 text-[0.9rem] font-semibold ${gap === g ? "border-jade bg-jade-050 text-bone" : "border-white/12 text-white/75"}`}>{label(g)}</button>
-          ))}
-        </div>
-        {mode && gap && <Btn label={t.cont} onClick={() => setStep(2)} />}
-      </>)}
-      {step === 2 && (<>
-        <Bar n={3} total={3} />
-        <h1 className="mt-5 text-[1.5rem] font-bold text-bone">{t.setupH}</h1>
+        <Bar n={1} total={2} />
+        <h1 className="mt-5 text-[1.5rem] font-bold leading-tight text-bone">{t.measureH}</h1>
         <p className="mt-2 text-[0.95rem] text-white/70">{t.timerP}</p>
         <MeasureTimer locale={locale} onDone={save} />
       </>)}
       {step === 3 && now && (<>
+        <Bar n={2} total={2} />
         <div className="mt-2 grid grid-cols-2 gap-3">
           {[[t.d1, prior], [day === 12 ? t.d12 : t.d30, now]].map(([lab, m]) => (
             <div key={String(lab)} className="rounded-2xl border border-white/10 bg-black/40 p-4">
               <p className="text-[11px] font-bold uppercase tracking-wide text-white/45">{String(lab)}</p>
               <p className={`metric mt-1 text-[2.2rem] font-bold leading-none ${m === now ? "text-jade" : "text-bone"}`}>{m ? mmss((m as Measurement).seconds) : "—"}</p>
-              {m && <p className="mt-2 text-[11px] text-white/50">{(m as Measurement).mode === "solo" ? t.solo : t.partner} · {label((m as Measurement).gap)}</p>}
+              {m && (m as Measurement).mode && <p className="mt-2 text-[11px] text-white/50">{(m as Measurement).mode === "solo" ? t.solo : t.partner}</p>}
             </div>
+          ))}
+        </div>
+        {/* the one fairness question, after the measurement, never a block */}
+        <p className="mt-6 text-[0.95rem] font-semibold text-bone">{t.same}</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {[true, false].map((v) => (
+            <button key={String(v)} type="button" onClick={() => { setSame(v); track("retest_same", `${day}:${v}`, locale); }} className={`rounded-xl border py-3 text-[0.95rem] font-semibold ${same === v ? "border-jade bg-jade-050 text-bone" : "border-white/12 text-white/75"}`}>{v ? t.sameYes : t.sameNo}</button>
           ))}
         </div>
         {differ && <p className="mt-3 text-[0.88rem] text-white/60">{t.loose}</p>}

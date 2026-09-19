@@ -157,7 +157,7 @@ export function DayClient({ locale, day }: { locale: string; day: number }) {
 
   /* ═══════════════════════════════════════════ DAY 12 · DAY 30 ═══ */
   if (day === 12 || day === 30) {
-    return <Retest locale={locale} day={day} Breath={Breath} Bar={Bar} Btn={Btn} />;
+    return <Retest locale={locale} day={day} Bar={Bar} Btn={Btn} />;
   }
 
   /* ═══════════════════════════════════════════════════════ DAY 1 ═══ */
